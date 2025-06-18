@@ -1,40 +1,16 @@
 
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, LogIn, Chrome } from 'lucide-react';
+import { Calendar, Chrome } from 'lucide-react';
 import { authService } from '@/services/authService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
-
-  const loginMutation = useMutation({
-    mutationFn: authService.login,
-    onSuccess: (data) => {
-      login(data.user, data.token);
-      navigate('/home');
-      toast({
-        title: "เข้าสู่ระบบสำเร็จ",
-        description: "ยินดีต้อนรับสู่ระบบลางาน Funch.tech",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "เข้าสู่ระบบไม่สำเร็จ",
-        description: error.message || "กรุณาตรวจสอบอีเมลและรหัสผ่าน",
-        variant: "destructive",
-      });
-    }
-  });
 
   const googleLoginMutation = useMutation({
     mutationFn: authService.googleLogin,
@@ -44,6 +20,10 @@ const Login = () => {
       } else {
         login(data.user, data.token);
         navigate('/home');
+        toast({
+          title: "เข้าสู่ระบบสำเร็จ",
+          description: "ยินดีต้อนรับสู่ระบบลางาน Funch.tech",
+        });
       }
     },
     onError: (error: any) => {
@@ -54,11 +34,6 @@ const Login = () => {
       });
     }
   });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    loginMutation.mutate({ email, password });
-  };
 
   const handleGoogleLogin = () => {
     googleLoginMutation.mutate();
@@ -84,60 +59,21 @@ const Login = () => {
               ระบบลางานพนักงาน Funch.tech
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-slate-200">อีเมล</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400"
-                  placeholder="your.email@funch.tech"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-slate-200">รหัสผ่าน</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full bg-blue-600 hover:bg-blue-700"
-                disabled={loginMutation.isPending}
-              >
-                <LogIn className="mr-2 h-4 w-4" />
-                {loginMutation.isPending ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
-              </Button>
-            </form>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-slate-600" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-slate-800 px-2 text-slate-400">หรือ</span>
-              </div>
-            </div>
-
+          <CardContent className="space-y-6">
             <Button 
               onClick={handleGoogleLogin}
-              variant="outline" 
-              className="w-full border-slate-600 bg-slate-700/50 text-white hover:bg-slate-600"
+              className="w-full bg-white text-gray-900 hover:bg-gray-100 h-12 text-base font-medium"
               disabled={googleLoginMutation.isPending}
             >
-              <Chrome className="mr-2 h-4 w-4" />
+              <Chrome className="mr-3 h-5 w-5" />
               {googleLoginMutation.isPending ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบด้วย Google'}
             </Button>
+            
+            <div className="text-center">
+              <p className="text-sm text-slate-400">
+                ใช้บัญชี Google ของบริษัทในการเข้าสู่ระบบ
+              </p>
+            </div>
           </CardContent>
         </Card>
 

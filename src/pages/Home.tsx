@@ -1,51 +1,104 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, LogOut, User, Clock, FileText } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { useQuery } from '@tanstack/react-query';
+import { 
+  Calendar, 
+  Clock, 
+  User, 
+  Building, 
+  LogOut,
+  Plus,
+  CheckCircle,
+  XCircle,
+  AlertCircle
+} from 'lucide-react';
 import { leaveService } from '@/services/leaveService';
+import { toast } from '@/hooks/use-toast';
+
+interface LeaveBalance {
+  sick: number;
+  personal: number;
+  vacation: number;
+}
+
+interface LeaveRequest {
+  id: string;
+  type: string;
+  startDate: string;
+  endDate: string;
+  days: number;
+  reason: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
 
 const Home = () => {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
 
-  const { data: leaveBalance } = useQuery({
+  const { data: leaveBalance } = useQuery<LeaveBalance>({
     queryKey: ['leaveBalance'],
-    queryFn: leaveService.getLeaveBalance
+    queryFn: leaveService.getLeaveBalance,
   });
 
-  const { data: recentLeaves } = useQuery({
-    queryKey: ['recentLeaves'],
-    queryFn: leaveService.getRecentLeaves
+  const { data: leaveRequests } = useQuery<LeaveRequest[]>({
+    queryKey: ['leaveRequests'],
+    queryFn: leaveService.getLeaveRequests,
   });
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    toast({
+      title: "ออกจากระบบสำเร็จ",
+      description: "ขอบคุณที่ใช้บริการ",
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'approved': return 'bg-green-500';
+      case 'rejected': return 'bg-red-500';
+      default: return 'bg-yellow-500';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'approved': return <CheckCircle className="h-4 w-4" />;
+      case 'rejected': return <XCircle className="h-4 w-4" />;
+      default: return <AlertCircle className="h-4 w-4" />;
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
-      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700">
+      <header className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+          <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-white">Funch.tech</h1>
-              <span className="text-slate-400">ระบบลางานพนักงาน</span>
+              <h1 className="text-xl font-bold text-white">ระบบลางาน Funch.tech</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-white">
-                <User className="h-5 w-5" />
-                <span>{user?.firstName} {user?.lastName}</span>
+              <div className="flex items-center space-x-3">
+                <Avatar>
+                  <AvatarImage src={user?.avatar} />
+                  <AvatarFallback className="bg-blue-600 text-white">
+                    {user?.firstName?.[0]}{user?.lastName?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="text-sm">
+                  <p className="text-white font-medium">{user?.firstName} {user?.lastName}</p>
+                  <p className="text-slate-400">{user?.position}</p>
+                </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
+              <Button 
+                variant="ghost" 
+                size="sm" 
                 onClick={handleLogout}
-                className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                className="text-slate-400 hover:text-white"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 ออกจากระบบ
@@ -53,113 +106,124 @@ const Home = () => {
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Leave Balance Cards */}
           <Card className="bg-slate-800/50 border-slate-700">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg text-white flex items-center">
-                <Calendar className="mr-2 h-5 w-5 text-green-400" />
-                ลาป่วย
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-400">
-                {leaveBalance?.sick || 10}
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-slate-400 text-sm">ลาป่วย</p>
+                  <p className="text-2xl font-bold text-white">{leaveBalance?.sick || 0}</p>
+                  <p className="text-slate-400 text-xs">วันคงเหลือ</p>
+                </div>
+                <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-red-400" />
+                </div>
               </div>
-              <p className="text-slate-400 text-sm">วันที่เหลือ</p>
             </CardContent>
           </Card>
 
           <Card className="bg-slate-800/50 border-slate-700">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg text-white flex items-center">
-                <Calendar className="mr-2 h-5 w-5 text-blue-400" />
-                ลากิจ
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-400">
-                {leaveBalance?.personal || 6}
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-slate-400 text-sm">ลากิจ</p>
+                  <p className="text-2xl font-bold text-white">{leaveBalance?.personal || 0}</p>
+                  <p className="text-slate-400 text-xs">วันคงเหลือ</p>
+                </div>
+                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                  <User className="h-6 w-6 text-blue-400" />
+                </div>
               </div>
-              <p className="text-slate-400 text-sm">วันที่เหลือ</p>
             </CardContent>
           </Card>
 
           <Card className="bg-slate-800/50 border-slate-700">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg text-white flex items-center">
-                <Calendar className="mr-2 h-5 w-5 text-purple-400" />
-                ลาพักผ่อน
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-purple-400">
-                {leaveBalance?.vacation || 15}
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-slate-400 text-sm">ลาพักร้อน</p>
+                  <p className="text-2xl font-bold text-white">{leaveBalance?.vacation || 0}</p>
+                  <p className="text-slate-400 text-xs">วันคงเหลือ</p>
+                </div>
+                <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+                  <Calendar className="h-6 w-6 text-green-400" />
+                </div>
               </div>
-              <p className="text-slate-400 text-sm">วันที่เหลือ</p>
             </CardContent>
           </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Quick Actions */}
+          {/* Profile Card */}
           <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader>
-              <CardTitle className="text-xl text-white">การดำเนินการ</CardTitle>
-              <CardDescription className="text-slate-300">
-                จัดการคำขอลาและตรวจสอบสถานะ
-              </CardDescription>
+              <CardTitle className="text-white">ข้อมูลส่วนตัว</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 justify-start">
-                <FileText className="mr-2 h-4 w-4" />
-                ขอลางาน
-              </Button>
-              <Button variant="outline" className="w-full border-slate-600 text-slate-300 hover:bg-slate-700 justify-start">
-                <Clock className="mr-2 h-4 w-4" />
-                ประวัติการลา
-              </Button>
-              <Button variant="outline" className="w-full border-slate-600 text-slate-300 hover:bg-slate-700 justify-start">
-                <Calendar className="mr-2 h-4 w-4" />
-                ปฏิทินวันหยุด
-              </Button>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src={user?.avatar} />
+                  <AvatarFallback className="bg-blue-600 text-white text-lg">
+                    {user?.firstName?.[0]}{user?.lastName?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">
+                    {user?.firstName} {user?.lastName}
+                  </h3>
+                  <p className="text-slate-400">{user?.email}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Building className="h-4 w-4 text-slate-400" />
+                  <span className="text-slate-300">{user?.department}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <User className="h-4 w-4 text-slate-400" />
+                  <span className="text-slate-300">{user?.position}</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Recent Leave Requests */}
+          {/* Leave Requests */}
           <Card className="bg-slate-800/50 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-xl text-white">คำขอลาล่าสุด</CardTitle>
-              <CardDescription className="text-slate-300">
-                ประวัติการขอลา 5 รายการล่าสุด
-              </CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-white">คำขอลาล่าสุด</CardTitle>
+              <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                <Plus className="h-4 w-4 mr-2" />
+                ขอลาใหม่
+              </Button>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {recentLeaves?.length ? (
-                recentLeaves.map((leave: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg border border-slate-600">
-                    <div>
-                      <h4 className="font-medium text-white">{leave.type}</h4>
-                      <p className="text-sm text-slate-400">{leave.date}</p>
+            <CardContent className="space-y-4">
+              {leaveRequests && leaveRequests.length > 0 ? (
+                leaveRequests.map((request) => (
+                  <div key={request.id} className="p-4 bg-slate-700/30 rounded-lg border border-slate-600">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="outline" className="text-white border-slate-500">
+                          {request.type}
+                        </Badge>
+                        <span className="text-sm text-slate-400">{request.days} วัน</span>
+                      </div>
+                      <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs text-white ${getStatusColor(request.status)}`}>
+                        {getStatusIcon(request.status)}
+                        <span>{request.status}</span>
+                      </div>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      leave.status === 'approved' ? 'bg-green-500/20 text-green-400' :
-                      leave.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                      'bg-red-500/20 text-red-400'
-                    }`}>
-                      {leave.status === 'approved' ? 'อนุมัติ' :
-                       leave.status === 'pending' ? 'รอพิจารณา' : 'ไม่อนุมัติ'}
-                    </span>
+                    <p className="text-sm text-slate-300 mb-1">
+                      {new Date(request.startDate).toLocaleDateString('th-TH')} - {new Date(request.endDate).toLocaleDateString('th-TH')}
+                    </p>
+                    <p className="text-sm text-slate-400">{request.reason}</p>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-slate-400">
-                  ยังไม่มีประวัติการลา
-                </div>
+                <p className="text-slate-400 text-center py-4">ยังไม่มีคำขอลา</p>
               )}
             </CardContent>
           </Card>

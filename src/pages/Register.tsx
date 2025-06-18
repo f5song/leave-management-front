@@ -15,9 +15,6 @@ const Register = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
     department: '',
     position: ''
   });
@@ -26,6 +23,18 @@ const Register = () => {
   const location = useLocation();
   const { login } = useAuth();
   const googleData = location.state?.googleData;
+
+  // Set initial data from Google if available
+  useState(() => {
+    if (googleData) {
+      const nameParts = googleData.name?.split(' ') || [];
+      setFormData(prev => ({
+        ...prev,
+        firstName: nameParts[0] || '',
+        lastName: nameParts.slice(1).join(' ') || ''
+      }));
+    }
+  });
 
   const registerMutation = useMutation({
     mutationFn: authService.register,
@@ -48,18 +57,11 @@ const Register = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "รหัสผ่านไม่ตรงกัน",
-        description: "กรุณาตรวจสอบรหัสผ่านให้ตรงกัน",
-        variant: "destructive",
-      });
-      return;
-    }
 
     const registerData = {
       ...formData,
+      email: googleData?.email || '',
+      password: '', // No password needed for Google login
       googleId: googleData?.id || null,
       avatar: googleData?.picture || null
     };
@@ -89,7 +91,7 @@ const Register = () => {
             สมัครสมาชิก
           </CardTitle>
           <CardDescription className="text-slate-300">
-            สร้างบัญชีใหม่สำหรับระบบลางาน Funch.tech
+            กรอกข้อมูลเพิ่มเติมสำหรับระบบลางาน Funch.tech
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -119,18 +121,14 @@ const Register = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-200">อีเมล</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400"
-                placeholder="your.email@funch.tech"
-                required
-              />
-            </div>
+            {googleData && (
+              <div className="space-y-2">
+                <Label className="text-slate-200">อีเมล</Label>
+                <div className="bg-slate-700/30 border border-slate-600 rounded-md px-3 py-2">
+                  <span className="text-slate-300">{googleData.email}</span>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="department" className="text-slate-200">แผนก</Label>
@@ -155,36 +153,6 @@ const Register = () => {
                 required
               />
             </div>
-
-            {!googleData && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-slate-200">รหัสผ่าน</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => handleInputChange('password', e.target.value)}
-                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-slate-200">ยืนยันรหัสผ่าน</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    value={formData.confirmPassword}
-                    onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-              </>
-            )}
 
             <Button 
               type="submit" 
