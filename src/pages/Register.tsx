@@ -15,6 +15,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    email: '',
     department: '',
     position: ''
   });
@@ -31,7 +32,8 @@ const Register = () => {
       setFormData(prev => ({
         ...prev,
         firstName: nameParts[0] || '',
-        lastName: nameParts.slice(1).join(' ') || ''
+        lastName: nameParts.slice(1).join(' ') || '',
+        email: googleData.email || ''
       }));
     }
   });
@@ -58,15 +60,25 @@ const Register = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate required fields
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.department || !formData.position) {
+      toast({
+        title: "ข้อมูลไม่ครบ",
+        description: "กรุณากรอกข้อมูลให้ครบทุกช่อง",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Mock successful registration
     const mockUser = {
-      id: '1',
+      id: Date.now().toString(),
       firstName: formData.firstName,
       lastName: formData.lastName,
-      email: googleData?.email || 'user@funch.tech',
+      email: formData.email,
       department: formData.department,
       position: formData.position,
-      avatar: googleData?.picture || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+      avatar: googleData?.picture || `https://ui-avatars.com/api/?name=${formData.firstName}+${formData.lastName}&background=f97316&color=ffffff`
     };
 
     login(mockUser, 'mock-token');
@@ -109,17 +121,17 @@ const Register = () => {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <CardTitle className="text-2xl font-bold text-white pt-4">
-              สมัครสมาชิก
+              {googleData ? 'ลงทะเบียนข้อมูลเพิ่มเติม' : 'สมัครสมาชิก'}
             </CardTitle>
             <CardDescription className="text-gray-400">
-              กรอกข้อมูลเพิ่มเติมสำหรับระบบลางาน
+              {googleData ? 'กรอกข้อมูลเพิ่มเติมเพื่อใช้งานระบบ' : 'สร้างบัญชีใหม่สำหรับระบบลางาน'}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-gray-200">ชื่อ</Label>
+                  <Label htmlFor="firstName" className="text-gray-200">ชื่อ *</Label>
                   <Input
                     id="firstName"
                     value={formData.firstName}
@@ -130,7 +142,7 @@ const Register = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-gray-200">นามสกุล</Label>
+                  <Label htmlFor="lastName" className="text-gray-200">นามสกุล *</Label>
                   <Input
                     id="lastName"
                     value={formData.lastName}
@@ -142,17 +154,27 @@ const Register = () => {
                 </div>
               </div>
 
-              {googleData && (
-                <div className="space-y-2">
-                  <Label className="text-gray-200">อีเมล</Label>
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-gray-200">อีเมล *</Label>
+                {googleData ? (
                   <div className="bg-black/30 border border-orange-500/20 rounded-md px-3 py-2">
                     <span className="text-gray-300">{googleData.email}</span>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    className="bg-black/50 border-orange-500/30 text-white placeholder:text-gray-500 focus:border-orange-400 focus:ring-orange-400/20"
+                    placeholder="example@company.com"
+                    required
+                  />
+                )}
+              </div>
 
               <div className="space-y-2">
-                <Label htmlFor="department" className="text-gray-200">แผนก</Label>
+                <Label htmlFor="department" className="text-gray-200">แผนก *</Label>
                 <Input
                   id="department"
                   value={formData.department}
@@ -164,7 +186,7 @@ const Register = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="position" className="text-gray-200">ตำแหน่ง</Label>
+                <Label htmlFor="position" className="text-gray-200">ตำแหน่ง *</Label>
                 <Input
                   id="position"
                   value={formData.position}
@@ -186,6 +208,20 @@ const Register = () => {
             </form>
           </CardContent>
         </Card>
+
+        {!googleData && (
+          <div className="text-center mt-6">
+            <p className="text-gray-400">
+              มีบัญชีแล้ว?{' '}
+              <button
+                onClick={() => navigate('/login')}
+                className="text-orange-400 hover:text-orange-300 font-medium transition-colors"
+              >
+                เข้าสู่ระบบ
+              </button>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
