@@ -97,7 +97,7 @@ const Home = () => {
                 </Avatar>
                 <div className="text-sm">
                   <p className="text-white font-medium">{user?.firstName} {user?.lastName}</p>
-                  <p className="text-gray-400">{user?.position}</p>
+                  <p className="text-gray-400">{user?.jobTitleId}</p>
                 </div>
               </div>
               <Button 
@@ -187,11 +187,11 @@ const Home = () => {
               <div className="space-y-3">
                 <div className="flex items-center space-x-3 p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
                   <Building className="h-5 w-5 text-orange-400" />
-                  <span className="text-gray-300">{user?.department}</span>
+                  <span className="text-gray-300">{user?.departmentId}</span>
                 </div>
                 <div className="flex items-center space-x-3 p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
                   <User className="h-5 w-5 text-orange-400" />
-                  <span className="text-gray-300">{user?.position}</span>
+                  <span className="text-gray-300">{user?.jobTitleId}</span>
                 </div>
               </div>
             </CardContent>

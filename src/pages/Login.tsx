@@ -7,6 +7,7 @@ import { Calendar, Chrome, Building2 } from 'lucide-react';
 import { authService } from '@/services/authService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -16,7 +17,16 @@ const Login = () => {
     mutationFn: authService.googleLogin,
     onSuccess: (data) => {
       if (data.isNewUser) {
-        navigate('/register', { state: { googleData: data.googleData } });
+        navigate('/register', {
+          state: {
+            googleData: {
+              ...data.user,
+              email: data.email,
+              // avatar: data.avatar,
+            }
+          }
+        });
+        console.log("data email login page", data.email);
       } else {
         login(data.user, data.token);
         navigate('/home');
@@ -35,26 +45,19 @@ const Login = () => {
     }
   });
 
-  const handleGoogleLogin = () => {
-    // Mock successful login for demo
-    const mockUser = {
-      id: '1',
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@funch.tech',
-      department: 'IT',
-      position: 'Developer',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
-    };
-    
-    login(mockUser, 'mock-token');
-    navigate('/home');
-    toast({
-      title: "เข้าสู่ระบบสำเร็จ",
-      description: "ยินดีต้อนรับสู่ระบบลางาน Funch.tech",
-    });
-  };
 
+  const handleGoogleLogin = (credentialResponse: any) => {
+    const idToken = credentialResponse.credential;
+    if (idToken) {
+      googleLoginMutation.mutate(idToken);
+    } else {
+      toast({
+        title: 'Google Login ล้มเหลว',
+        description: 'ไม่สามารถรับ idToken ได้',
+        variant: 'destructive',
+      });
+    }
+  };
   // Mock holidays data for this month
   const thisMonthHolidays = [
     { date: '2025-01-01', name: 'วันขึ้นปีใหม่' },
@@ -96,15 +99,24 @@ const Login = () => {
                 ใช้บัญชี Google ของบริษัทในการเข้าสู่ระบบ
               </CardDescription>
             </CardHeader>
+            {/* login google button */}
             <CardContent className="space-y-6">
-              <Button 
-                onClick={handleGoogleLogin}
-                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white h-14 text-lg font-medium shadow-lg hover:shadow-orange-500/25 transition-all duration-300"
-                disabled={googleLoginMutation.isPending}
-              >
-                <Chrome className="mr-3 h-6 w-6" />
-                {googleLoginMutation.isPending ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบด้วย Google'}
-              </Button>
+              <CardContent className="space-y-6">
+                <GoogleLogin
+                  onSuccess={handleGoogleLogin}
+                  onError={() =>
+                    toast({
+                      title: "Google Login ล้มเหลว",
+                      description: "ไม่สามารถเข้าสู่ระบบได้",
+                      variant: "destructive",
+                    })
+                  }
+                  theme="filled_black"
+                  shape="pill"
+                  size="large"
+                  width="100%"
+                />
+              </CardContent>
             </CardContent>
           </Card>
         </div>

@@ -7,8 +7,10 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-  department: string;
-  position: string;
+  departmentId: string;
+  jobTitleId: string;
+  nickName: string;
+  birthDate: string;
   avatar?: string;
 }
 
