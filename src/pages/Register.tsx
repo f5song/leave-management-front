@@ -21,16 +21,15 @@ const Register = () => {
     departmentId: '',
     jobTitleId: '',
     nickName: '',
-    // avatar: '',
     birthDate: null,
+    roleId: 'employee',
+    googleId: '',
   });
 
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
   const googleData = location.state?.googleData;
-
-  console.log("googleData in Register", googleData);
 
   useEffect(() => {
     if (googleData) {
@@ -40,17 +39,16 @@ const Register = () => {
         firstName: nameParts[0] || '',
         lastName: nameParts.slice(1).join(' ') || '',
         email: googleData.email || '',
-        // avatar: googleData.avatar || '',
+        googleId: googleData.googleId,
       }));
     }
   }, [googleData]);
 
-  // console.log("googleData in Register ", googleData?.avatar);
-
   const registerMutation = useMutation({
     mutationFn: createUser,
-    onSuccess: (data) => {
-      login(data.user.id, data.access_token);
+    onSuccess: (res) => {
+      const { user, access_token } = res.data;
+      login(user, access_token); // ✅ set localStorage
       navigate('/home');
       toast({
         title: "สมัครสมาชิกสำเร็จ",
@@ -65,6 +63,8 @@ const Register = () => {
       });
     }
   });
+  
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +80,6 @@ const Register = () => {
 
     const userData = {
       ...formData,
-      googleId: googleData?.id,
     };
 
     registerMutation.mutate(userData);
@@ -89,8 +88,6 @@ const Register = () => {
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
-  console.log("formData", formData);
-  console.log("googleData", googleData?.email);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-orange-900 flex items-center justify-center p-4">

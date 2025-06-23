@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { leaveService } from '@/services/leaveService';
 import { toast } from '@/hooks/use-toast';
+import Navbar from '@/components/ui/navbar';
 
 interface LeaveBalance {
   sick: number;
@@ -75,55 +76,17 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-orange-900">
-      {/* Header */}
-      <header className="bg-black/40 backdrop-blur-xl border-b border-orange-500/20 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                <Building2 className="h-5 w-5 text-white" />
-              </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
-                Funch.tech - ระบบลางาน
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-3">
-                <Avatar className="ring-2 ring-orange-500/30">
-                  <AvatarImage src={user?.avatar} />
-                  <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
-                    {user?.firstName?.[0]}{user?.lastName?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="text-sm">
-                  <p className="text-white font-medium">{user?.firstName} {user?.lastName}</p>
-                  <p className="text-gray-400">{user?.jobTitleId}</p>
-                </div>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleLogout}
-                className="text-gray-400 hover:text-orange-400 hover:bg-orange-500/10"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                ออกจากระบบ
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* <Navbar /> */}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Leave Balance Cards */}
-          <Card className="bg-black/40 border-orange-500/20 backdrop-blur-xl shadow-lg hover:shadow-orange-500/10 transition-all duration-300">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-400 text-sm">ลาป่วย</p>
                   <p className="text-3xl font-bold text-white">{leaveBalance?.sick || 0}</p>
-                  <p className="text-gray-400 text-xs">วันคงเหลือ</p>
                 </div>
                 <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center border border-red-500/30">
                   <Clock className="h-6 w-6 text-red-400" />
@@ -132,13 +95,12 @@ const Home = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-black/40 border-orange-500/20 backdrop-blur-xl shadow-lg hover:shadow-orange-500/10 transition-all duration-300">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-400 text-sm">ลากิจ</p>
                   <p className="text-3xl font-bold text-white">{leaveBalance?.personal || 0}</p>
-                  <p className="text-gray-400 text-xs">วันคงเหลือ</p>
                 </div>
                 <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center border border-blue-500/30">
                   <User className="h-6 w-6 text-blue-400" />
@@ -147,13 +109,12 @@ const Home = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-black/40 border-orange-500/20 backdrop-blur-xl shadow-lg hover:shadow-orange-500/10 transition-all duration-300">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-400 text-sm">ลาพักร้อน</p>
                   <p className="text-3xl font-bold text-white">{leaveBalance?.vacation || 0}</p>
-                  <p className="text-gray-400 text-xs">วันคงเหลือ</p>
                 </div>
                 <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center border border-green-500/30">
                   <Calendar className="h-6 w-6 text-green-400" />
@@ -165,14 +126,14 @@ const Home = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Profile Card */}
-          <Card className="bg-black/40 border-orange-500/20 backdrop-blur-xl shadow-lg">
+          <Card>
             <CardHeader className="border-b border-orange-500/20">
               <CardTitle className="text-white">ข้อมูลส่วนตัว</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
               <div className="flex items-center space-x-4">
                 <Avatar className="h-20 w-20 ring-2 ring-orange-500/30">
-                  <AvatarImage src={user?.avatar} />
+                  <AvatarImage src={user?.avatarUrl} />
                   <AvatarFallback className="bg-gradient-to-br from-orange-500 to-orange-600 text-white text-xl">
                     {user?.firstName?.[0]}{user?.lastName?.[0]}
                   </AvatarFallback>
@@ -198,7 +159,7 @@ const Home = () => {
           </Card>
 
           {/* Leave Requests */}
-          <Card className="bg-black/40 border-orange-500/20 backdrop-blur-xl shadow-lg">
+          <Card >
             <CardHeader className="flex flex-row items-center justify-between border-b border-orange-500/20">
               <CardTitle className="text-white">คำขอลาล่าสุด</CardTitle>
               <Button size="sm" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-orange-500/25">

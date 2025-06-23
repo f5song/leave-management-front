@@ -7,11 +7,13 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
+  googleId: string;
+  roleId: string;
   departmentId: string;
   jobTitleId: string;
   nickName: string;
   birthDate: string;
-  avatar?: string;
+  avatarUrl: string;
 }
 
 interface AuthContextType {
@@ -30,14 +32,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on app start
     const checkAuth = async () => {
       try {
         const storedToken = localStorage.getItem('authToken');
+
         if (storedToken) {
           const userData = await authService.getCurrentUser();
-          setUser(userData.user);
-          setToken(storedToken);
+
+          if (userData && userData.id) {
+            setUser(userData);
+            setToken(storedToken);
+          } else {
+            setUser(null);
+            localStorage.removeItem('authToken');
+          }
         }
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -49,6 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     checkAuth();
   }, []);
+
 
   const login = (userData: User, authToken: string) => {
     setUser(userData);

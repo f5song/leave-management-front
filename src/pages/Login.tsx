@@ -22,11 +22,14 @@ const Login = () => {
             googleData: {
               ...data.user,
               email: data.email,
-              // avatar: data.avatar,
+              googleId: data.googleId,
+              avatarUrl: data.avatarUrl,
             }
           }
         });
         console.log("data email login page", data.email);
+        console.log("data gg id login page", data.googleId);
+        console.log("data avatar login page", data.avatarUrl);
       } else {
         login(data.user, data.token);
         navigate('/home');

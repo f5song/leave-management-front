@@ -52,7 +52,6 @@ export const authService = {
       if (data.access_token) {
         localStorage.setItem('authToken', data.access_token);
       }
-      // console.log("data avatar in service",data.user.avatar);
 
       return {
         googleId: data.googleId,
@@ -60,7 +59,7 @@ export const authService = {
         token: data.access_token,
         isNewUser: data.isNewUser,
         email: data.email,
-        // avatar: data.user.avatar,
+        avatarUrl: data.avatarUrl,
       };
     } catch (err) {
       throw new Error('Google login failed');
@@ -79,6 +78,9 @@ export const authService = {
         'Authorization': `Bearer ${token}`,
       },
     });
+
+    console.log("response", response);
+    console.log("token", token);
 
     if (!response.ok) {
       if (response.status === 401) {
