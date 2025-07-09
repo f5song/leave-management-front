@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authService } from '@/services/authService';
+import { authService } from '@/Api/auth-service';
 
 interface User {
   id: string;
@@ -8,7 +8,7 @@ interface User {
   lastName: string;
   email: string;
   googleId: string;
-  roleId: string;
+  role: string;
   departmentId: string;
   jobTitleId: string;
   nickName: string;

@@ -1,9 +1,9 @@
 
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/Contexts/AuthContext';
+import { Button } from '@/Components/Button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/Card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/Components/Avatar';
+import { Badge } from '@/Components/Badge';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Calendar, 
@@ -17,9 +17,8 @@ import {
   AlertCircle,
   Building2
 } from 'lucide-react';
-import { leaveService } from '@/services/leaveService';
-import { toast } from '@/hooks/use-toast';
-import Navbar from '@/components/ui/navbar';
+import { leaveService } from '@/Api/leave-service';
+import { toast } from '@/Hooks/UseToast';
 
 interface LeaveBalance {
   sick: number;

@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { UserPlus, ArrowLeft, Building2, CalendarIcon } from 'lucide-react';
-import { authService } from '@/services/authService';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/hooks/use-toast';
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { createUser } from '@/services/userService';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/Contexts/AuthContext';
+import { toast } from '@/Hooks/UseToast';
+import { createUser } from '@/Api/user-service';
+// import Label from '@/components/ui/label'
+import Input from '@/Components/Input';
+import Label from '@/Components/Label';
+import SelectField from '@/Components/SelectField';
+import PrimaryButton from '@/Components/PrimaryButton';
+import { getJobTitles } from '@/Api/job-title-service';
+import { getDepartments } from '@/Api/department-service';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -24,12 +23,35 @@ const Register = () => {
     birthDate: null,
     roleId: 'employee',
     googleId: '',
+    salary: 0,
+    avatar: '',
   });
+
+  const [avatar, setavatar] = useState<File | null>(null);
+
+
 
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
   const googleData = location.state?.googleData;
+  const {
+    data: departments = [],
+  } = useQuery({
+    queryKey: ['departments'],
+    queryFn: getDepartments,
+  });
+
+  const {
+    data: jobTitles = [],
+  } = useQuery({
+    queryKey: ['jobTitles'],
+    queryFn: getJobTitles,
+  });
+
+  console.log("department", departments);
+  console.log("jobTitles", jobTitles);
+
 
   useEffect(() => {
     if (googleData) {
@@ -48,7 +70,7 @@ const Register = () => {
     mutationFn: createUser,
     onSuccess: (res) => {
       const { user, access_token } = res.data;
-      login(user, access_token); // ✅ set localStorage
+      login(user, access_token);
       navigate('/home');
       toast({
         title: "สมัครสมาชิกสำเร็จ",
@@ -63,187 +85,264 @@ const Register = () => {
       });
     }
   });
-  
 
 
-  const handleSubmit = (e: React.FormEvent) => {
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.departmentId || !formData.jobTitleId || !formData.nickName || !formData.birthDate) {
+    const {
+      firstName,
+      lastName,
+      email,
+      departmentId,
+      jobTitleId,
+      nickName,
+      birthDate,
+      googleId,
+      salary,
+    } = formData;
+
+    if (!firstName || !lastName || !email || !departmentId || !jobTitleId || !nickName || !birthDate || salary === null || salary === undefined || !googleId || !avatar) {
       toast({
         title: "ข้อมูลไม่ครบ",
-        description: "กรุณากรอกข้อมูลให้ครบทุกช่อง",
+        description: "กรุณากรอกข้อมูลให้ครบทุกช่อง จ้าาาา",
         variant: "destructive",
       });
       return;
     }
 
-    const userData = {
-      ...formData,
-    };
+    const form = new FormData();
+    form.append('firstName', firstName);
+    form.append('lastName', lastName);
+    form.append('email', email);
+    form.append('departmentId', departmentId);
+    form.append('jobTitleId', jobTitleId);
+    form.append('nickName', nickName);
+    form.append('birthDate', birthDate);
+    form.append('roleId', 'employee');
+    form.append('googleId', googleId);
+    form.append('salary', salary.toString());
+    form.append('avatar', avatar); // ✅ ส่งไฟล์จริง
 
-    registerMutation.mutate(userData);
+    registerMutation.mutate(form);
   };
+
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+
+  useEffect(() => {
+    console.log("formData:", formData);
+  }, [formData]);
+
+  useEffect(() => {
+    console.log("avatarFile:", avatar);
+  }, [avatar]);
+
+  // const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onload = (event) => {
+  //       const result = event.target?.result;
+  //       if (result) {
+  //         setFormData(prev => ({ ...prev, avatar: result }));
+  //       }
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setavatar(file); // เก็บไว้ใช้ตอน submit
+      const previewUrl = URL.createObjectURL(file); // preview รูป
+      setFormData(prev => ({
+        ...prev,
+        avatar: previewUrl, // สำหรับ preview
+      }));
+    }
+  };
+
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-orange-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-2xl">
-              <Building2 className="h-6 w-6 text-white" />
-            </div>
-            <div className="ml-3">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
-                Funch.tech
-              </h1>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-quaternary text-white px-4 md:px-10 py-12 flex items-center justify-center relative">
+      {/* background gradient */}
+      <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-[#FFA100] via-[#FF400084] to-[rgba(157,74,44,0)] pointer-events-none" />
 
-        <Card className="bg-black/40 border-orange-500/20 backdrop-blur-xl shadow-2xl">
-          <CardHeader className="text-center relative">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/login')}
-              className="absolute left-4 top-4 text-gray-400 hover:text-orange-400 hover:bg-orange-500/10"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <CardTitle className="text-2xl font-bold text-white pt-4">
-              {googleData ? 'ลงทะเบียนข้อมูลเพิ่มเติม' : 'สมัครสมาชิก'}
-            </CardTitle>
-            <CardDescription className="text-gray-400">
-              {googleData ? 'กรอกข้อมูลเพิ่มเติมเพื่อใช้งานระบบ' : 'สร้างบัญชีใหม่สำหรับระบบลางาน'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-gray-200">ชื่อ *</Label>
-                  <Input
-                    id="firstName"
-                    value={formData.firstName}
-                    onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    className="bg-black/50 border-orange-500/30 text-white"
-                    placeholder="ชื่อ"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-gray-200">นามสกุล *</Label>
-                  <Input
-                    id="lastName"
-                    value={formData.lastName}
-                    onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    className="bg-black/50 border-orange-500/30 text-white"
-                    placeholder="นามสกุล"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="nickname" className="text-gray-200">ชื่อเล่น *</Label>
-                  <Input
-                    id="nickname"
-                    value={formData.nickName}
-                    onChange={(e) => handleInputChange('nickName', e.target.value)}
-                    className="bg-black/50 border-orange-500/30 text-white"
-                    placeholder="ชื่อเล่น"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="birth_date" className="text-gray-200">วันเกิด *</Label>
-                  <div className="relative">
-                    <DatePicker
-                      id="birth_date"
-                      selected={formData.birthDate}
-                      onChange={(date: Date) => handleInputChange('birthDate', date)}
-                      dateFormat="dd/MM/yyyy"
-                      placeholderText="เลือกวันเกิด"
-                      className="w-full pl-10 pr-4 py-2 rounded-md bg-black/50 border border-orange-500/30 text-white placeholder:text-gray-500 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/40 focus:outline-none"
-                    />
-                    <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-orange-400 pointer-events-none" />
-                  </div>
-                </div>
-              </div>
+      {/* main frame */}
+      <div className="flex items-center justify-center w-full max-w-6xl rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] shadow-[0_4px_43px_0_rgba(0,0,0,0.32)] z-10">
+        <div className="flex flex-col w-full px-6 py-10 md:px-10 md:py-[40px]">
 
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-200">อีเมล *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={googleData?.email}
-                  disabled
-                  className="bg-black/30 border border-orange-500/20 text-gray-300"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="department" className="text-gray-200">แผนก *</Label>
-                <select
-                  id="department"
-                  value={formData.departmentId}
-                  onChange={(e) => handleInputChange('departmentId', e.target.value)}
-                  className="w-full bg-black/50 border border-orange-500/30 text-white p-2 rounded-md"
-                  required
-                >
-                  <option value="">เลือกแผนก</option>
-                  <option value="HR">HR</option>
-                  <option value="IT">IT</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="jobTitle" className="text-gray-200">ตำแหน่ง *</Label>
-                <select
-                  id="jobTitle"
-                  value={formData.jobTitleId}
-                  onChange={(e) => handleInputChange('jobTitleId', e.target.value)}
-                  className="w-full bg-black/50 border border-orange-500/30 text-white p-2 rounded-md"
-                  required
-                >
-                  <option value="">เลือกตำแหน่ง</option>
-                  <option value="DEPARTMENT_HEAD">Department Head</option>
-                  <option value="STAFF">Staff</option>
-                </select>
-              </div>
-
-
-              <Button
-                type="submit"
-                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white h-12 text-lg font-medium shadow-lg"
-                disabled={registerMutation.isPending}
-              >
-                <UserPlus className="mr-2 h-5 w-5" />
-                {registerMutation.isPending ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {!googleData && (
-          <div className="text-center mt-6">
-            <p className="text-gray-400">
-              มีบัญชีแล้ว?{' '}
-              <button
-                onClick={() => navigate('/login')}
-                className="text-orange-400 hover:text-orange-300 font-medium"
-              >
-                เข้าสู่ระบบ
-              </button>
+          {/* header */}
+          <div className="flex flex-col md:flex-row justify-between items-center w-full">
+            <img
+              src="/Frame 58.svg"
+              alt="logo"
+              className="w-[200px] md:w-[276px] h-[53px] object-contain"
+            />
+            <p className="font-sukhumvit text-[20px] md:text-[24px] font-bold text-center md:text-right">
+              กรอกข้อมูลส่วนตัวเพิ่มเติม
             </p>
           </div>
-        )}
+
+          <div className="border-t border-white opacity-20 w-full my-6" />
+          <form onSubmit={handleSubmit}>
+
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* employee image */}
+              <div className="flex flex-col">
+                <div className="font-sukhumvit text-[16px] text-[var(--color-font)] mb-2">รูปภาพพนักงาน</div>
+                <div className="flex flex-col items-center justify-center w-full lg:w-[325px] h-[372px] bg-[#00000052] gap-[10px] rounded-[4px]">
+                  <img
+                    src={formData.avatar || "/iconamoon_profile-fill.svg"}
+                    alt="employee"
+                    className="w-[130px] h-[130px] object-contain rounded-full"
+                  />
+
+                  <p className="font-sukhumvit text-[16px] text-[var(--color-font)]">
+                    กดเพื่อเลือกรูปจากในอุปกรณ์ของคุณ
+                  </p>
+                  {/* ปุ่มเลือกไฟล์ */}
+                  <label
+                    htmlFor="employee-image"
+                    className="cursor-pointer w-[143px] h-[49px] border border-[color:var(--color-font)] rounded-[4px] text-[color:var(--color-font)] font-sukhumvit font-bold text-[16px] leading-[100%] flex items-center justify-center"
+                    style={{ letterSpacing: '0%' }}
+                  >
+                    เลือกรูปพนักงาน
+                  </label>
+                  <input
+                    type="file"
+                    id="employee-image"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setavatar(file);
+                        const previewUrl = URL.createObjectURL(file);
+                        setFormData(prev => ({ ...prev, avatar: previewUrl }));
+                      }
+                    }}
+                  />
+
+
+                </div>
+              </div>
+
+
+              {/* form section */}
+              <div className="flex flex-col gap-6 text-white font-sukhumvit w-full">
+
+                {/* Email */}
+                <div className="flex flex-col gap-2">
+                  <Label>อีเมล*</Label>
+                  <Input
+                    type="email"
+                    placeholder={googleData?.email || "อีเมลของคุณ"}
+                    disabled
+                    className="w-full h-[49px] p-[12px] rounded-[4px] bg-[rgba(0,0,0,0.12)] 
+              backdrop-blur-[8px] text-[var(--color-font)] placeholder-[var(--color-font)] cursor-not-allowed"
+                  />
+                </div>
+
+                {/* ชื่อจริง + นามสกุล */}
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="flex flex-col gap-2 w-full">
+                    <Label>ชื่อจริง*</Label>
+                    <Input
+                      type="text"
+                      placeholder="กรอกชื่อ"
+                      value={formData.firstName}
+                      onChange={(e) => handleInputChange("firstName", e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2 w-full">
+                    <Label>นามสกุล*</Label>
+                    <Input
+                      type="text"
+                      placeholder="กรอกนามสกุล"
+                      value={formData.lastName}
+                      onChange={(e) => handleInputChange("lastName", e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* ชื่อเล่น + วันเกิด */}
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="flex flex-col gap-2 w-full">
+                    <Label>ชื่อเล่น*</Label>
+                    <Input
+                      type="text"
+                      placeholder="กรอกชื่อเล่น"
+                      value={formData.nickName}
+                      onChange={(e) => handleInputChange("nickName", e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2 w-full">
+                    <Label>วันเกิด*</Label>
+                    <Input
+                      type="date"
+                      value={formData.birthDate}
+                      onChange={(e) => handleInputChange("birthDate", e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* แผนก + ตำแหน่ง */}
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="flex flex-col gap-2 w-full">
+                    <SelectField
+                      label="แผนก"
+                      name="department"
+                      value={formData.departmentId}
+                      options={(departments?.data || []).map((d: any) => ({
+                        value: d.id,
+                        label: d.name,
+                      }))}
+                      onChange={(value) => handleInputChange('departmentId', value)}
+                      required
+                    />
+
+                  </div>
+
+                  <div className="flex flex-col gap-2 w-full">
+                    <SelectField
+                      label="ตำแหน่ง"
+                      name="jobTitle"
+                      value={formData.jobTitleId}
+                      options={(jobTitles?.data || []).map((j: any) => ({
+                        value: j.id,
+                        label: j.name,
+                      }))}
+                      onChange={(value) => handleInputChange('jobTitleId', value)}
+                      required
+                    />
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div className="flex flex-row justify-end gap-6 mt-9">
+              <button className="h-[49px] p-[12px] rounded-[4px] text-[var(--color-primary)] font-sukhumvit text-[16px] font-bold">ยกเลิก</button>
+              <PrimaryButton type="submit">
+                ยืนยันการสมัคร
+              </PrimaryButton>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
+
+
   );
 };
+
 
 export default Register;

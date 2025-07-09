@@ -1,163 +1,245 @@
-
-import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Chrome, Building2 } from 'lucide-react';
-import { authService } from '@/services/authService';
+import { authService } from '@/Api/auth-service';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/hooks/use-toast';
-import { GoogleLogin } from '@react-oauth/google';
+import { toast } from '@/Hooks/UseToast';
+import { useState } from 'react';
+import { LoginResponse } from '@/Api/auth-service/Interface/login.interface';
+import { useGoogleLogin } from '@react-oauth/google';
+
 
 const Login = () => {
+  const [view, setView] = useState<"monthly" | "yearly">("monthly");
+
+  const yearlyHolidays = [
+    {
+      month: "มกราคม",
+      holidays: [
+        { day: "จันทร์", date: "01", name: "วันขึ้นปีใหม่" },
+      ],
+    },
+    {
+      month: "กุมภาพันธ์",
+      holidays: [
+        { day: "พุธ", date: "14", name: "วันวาเลนไทน์" },
+        { day: "พฤหัสบดี", date: "15", name: "วันวาเลนไทน์" },
+        { day: "ศุกร์", date: "16", name: "วันวาเลนไทน์" },
+      ],
+    },
+    {
+      month: "มีนาคม",
+      holidays: [
+        { day: "จันทร์", date: "01", name: "วันขึ้นปีใหม่" },
+      ],
+    },
+  ];
+
+
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const googleLoginMutation = useMutation({
+  const googleLoginMutation = useMutation<LoginResponse, Error, string>({
     mutationFn: authService.googleLogin,
     onSuccess: (data) => {
-      if (data.isNewUser) {
+      if (!data.user) {
+        // ถ้าไม่มี user → ให้ไป register
         navigate('/register', {
           state: {
-            googleData: {
-              ...data.user,
-              email: data.email,
-              googleId: data.googleId,
-              avatarUrl: data.avatarUrl,
-            }
-          }
+            googleData: { ...data },
+          },
         });
-        console.log("data email login page", data.email);
-        console.log("data gg id login page", data.googleId);
-        console.log("data avatar login page", data.avatarUrl);
       } else {
-        login(data.user, data.token);
+        // ถ้ามี user แล้ว → login และเข้า home
+        login(data.user, data.access_token);
         navigate('/home');
         toast({
-          title: "เข้าสู่ระบบสำเร็จ",
-          description: "ยินดีต้อนรับสู่ระบบลางาน Funch.tech",
+          title: 'เข้าสู่ระบบสำเร็จ',
+          description: 'ยินดีต้อนรับสู่ระบบลางาน Funch.tech',
         });
       }
+
     },
     onError: (error: any) => {
       toast({
-        title: "Google Login ไม่สำเร็จ",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
-
-
-  const handleGoogleLogin = (credentialResponse: any) => {
-    const idToken = credentialResponse.credential;
-    if (idToken) {
-      googleLoginMutation.mutate(idToken);
-    } else {
-      toast({
         title: 'Google Login ล้มเหลว',
-        description: 'ไม่สามารถรับ idToken ได้',
+        description: error.message || 'ไม่สามารถเข้าสู่ระบบได้',
         variant: 'destructive',
       });
-    }
-  };
-  // Mock holidays data for this month
-  const thisMonthHolidays = [
-    { date: '2025-01-01', name: 'วันขึ้นปีใหม่' },
-    { date: '2025-01-13', name: 'วันเด็กแห่งชาติ' },
-    { date: '2025-01-28', name: 'วันตรุษจีน' },
-  ];
+    },
+  });
+
+  const googleLogin = useGoogleLogin({
+    scope: 'https://www.googleapis.com/auth/drive.metadata.readonly',
+    flow: 'auth-code',
+    onSuccess: async (codeResponse) => {
+      await googleLoginMutation.mutateAsync(codeResponse.code);
+    },
+    onError: (error) => {
+      console.log("error google login ", error);
+    },
+  });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-orange-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl grid md:grid-cols-2 gap-12 items-center">
-        {/* Left side - Branding & Login */}
-        <div className="space-y-8">
-          {/* Logo & Brand */}
-          <div className="text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-2xl">
-                <Building2 className="h-8 w-8 text-white" />
+    <div className="relative min-h-screen flex lg:flex-row flex-col">
+      {/* left */}
+      <div className="flex relative z-10 flex-col flex-1 bg-quaternary text-white px-10 py-12 justify-center max-w-auto mx-auto">
+        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-[#FFA100] via-[#FF400084] to-[rgba(157,74,44,0)] pointer-events-none" />
+        <div className="w-[906px] mx-auto">
+
+          {/* head */}
+          <div className="flex justify-between items-center gap-4">
+
+            <div className="flex flex-row gap-4 ">
+              <img
+                src="/fe_calendar.png"
+                alt="calendar icon"
+                className="w-[84px] h-[84px] gap-[10px]"
+              />
+
+              <div className="flex flex-col">
+                <h1 className="font-prompt text-[36px] font-semibold leading-none py-3">ปฏิทินบริษัท</h1>
+                <p className="font-prompt text-[24px] text-white leading-tight">
+                  {view === "monthly" ? "วันหยุดประจำเดือน" : "วันหยุดประจำปี"}
+                </p>
               </div>
-              <div className="ml-4">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
-                  Funch.tech
-                </h1>
-                <p className="text-gray-400 text-sm">Employee Leave System</p>
-              </div>
+
             </div>
-            <p className="text-xl text-gray-300 leading-relaxed">
-              ระบบบริหารจัดการการลางานที่ทันสมัย<br />
-              สำหรับทีมงาน Funch.tech
-            </p>
+            <div className=" flex justify-end gap-4 relative z-10 rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] p-1 shadow-[0_4px_43px_0_rgba(0,0,0,0.32)] ">
+              <button
+                className={`font-sukhumvit text-[20px] font-bold py-2 px-4 gap-3 rounded-[4px] w-[130px] h-[48px]  ${view === "monthly" ? "bg-primary text-[#191919]" : " text-primary"}`}
+                onClick={() => setView("monthly")}
+              >
+                พฤศจิกายน
+              </button>
+              <button
+                className={`font-sukhumvit text-[20px] font-bold py-2 px-4 rounded-[4px] w-[130px] h-[48px]  ${view === "yearly" ? "bg-primary text-[#191919]" : " text-primary"}`}
+                onClick={() => setView("yearly")}
+              >
+                ปี 2025
+              </button>
+            </div>
           </div>
-
-          {/* Login Card */}
-          <Card className="bg-black/40 border-orange-500/20 backdrop-blur-xl shadow-2xl">
-            <CardHeader className="text-center pb-4">
-              <CardTitle className="text-2xl font-bold text-white">
-                เข้าสู่ระบบ
-              </CardTitle>
-              <CardDescription className="text-gray-400">
-                ใช้บัญชี Google ของบริษัทในการเข้าสู่ระบบ
-              </CardDescription>
-            </CardHeader>
-            {/* login google button */}
-            <CardContent className="space-y-6">
-              <CardContent className="space-y-6">
-                <GoogleLogin
-                  onSuccess={handleGoogleLogin}
-                  onError={() =>
-                    toast({
-                      title: "Google Login ล้มเหลว",
-                      description: "ไม่สามารถเข้าสู่ระบบได้",
-                      variant: "destructive",
-                    })
-                  }
-                  theme="filled_black"
-                  shape="pill"
-                  size="large"
-                  width="100%"
-                />
-              </CardContent>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right side - Holidays Display */}
-        <Card className="bg-black/40 border-orange-500/20 backdrop-blur-xl shadow-2xl">
-          <CardHeader className="border-b border-orange-500/20">
-            <CardTitle className="text-2xl font-bold text-white flex items-center">
-              <Calendar className="mr-3 h-6 w-6 text-orange-400" />
-              วันหยุดเดือนนี้
-            </CardTitle>
-            <CardDescription className="text-gray-400 text-lg">
-              มกราคม 2025
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-6">
-            {thisMonthHolidays.map((holiday, index) => (
-              <div key={index} className="group p-5 bg-gradient-to-r from-black/50 to-orange-900/20 rounded-xl border border-orange-500/10 hover:border-orange-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <h3 className="font-semibold text-white text-lg group-hover:text-orange-100 transition-colors">
-                      {holiday.name}
-                    </h3>
-                    <p className="text-gray-400 group-hover:text-gray-300 transition-colors">
-                      {new Date(holiday.date).toLocaleDateString('th-TH', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                      })}
-                    </p>
+          {view === "monthly" ? (
+            <>
+              {/* วันหยุดประจำเดือน แก้เป็น object*/}
+              <div className="mt-10 flex flex-wrap gap-3 justify-center">
+                {["จันทร์ 11", "อังคาร 14", "พุธ 15", "พฤหัสบดี 16", "ศุกร์ 17", "จันทร์ 18"].map((item, index) => (
+                  <div
+                    key={index}
+                    className="w-[141px] h-[102px] gap-[12px] rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] p-3 py-2 shadow-[0_4px_43px_0_rgba(0,0,0,0.32)]"
+                    style={{ backdropFilter: 'blur(8px)' }}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="font-sukhumvit w-[69px] h-[30px] p-[4px] rounded-[4px] border-[1px] border-[#FDC911] text-[#FDC911] text-[16px] font-semibold flex items-center justify-center">
+                        {item.split(" ")[0]}
+                      </div>
+                      <div className="font-sukhumvit text-primary text-[32px] font-bold padding-[4px]">
+                        {item.split(" ")[1]}
+                      </div>
+                    </div>
+                    <div className="h-[1px] bg-white/30 mb-2" />
+                    <p className="font-sukhumvit text-white/70 text-[14px] truncate">หยุดชดเชยวันประ...</p>
                   </div>
-                  <div className="w-4 h-4 bg-gradient-to-r from-orange-500 to-red-500 rounded-full shadow-lg group-hover:shadow-orange-500/50 transition-all"></div>
+                ))}
+              </div>
+
+              {/* วันเกิด */}
+              <div className="mt-16 flex flex-col">
+                <h3 className="font-prompt justify-start font-semibold mb-3 flex items-center gap-2 text-[20px]">
+                  <img src="/mingcute_cake-fill.svg" alt="cake" className="w-8 h-8" />
+                  วันเกิดพนักงานสุดน่ารัก
+                </h3>
+                <div className="flex gap-3 justify-start">
+                  {"จันทร์ 11|ชาลี, อังคาร 14|ทะเล".split(", ").map((item, index) => {
+                    const [dayDate, name] = item.split("|");
+                    const [day, date] = dayDate.split(" ");
+                    return (
+                      <div
+                        key={index}
+                        className="w-[141px] h-[102px] gap-[12px] rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] p-3 py-2 shadow-[0_4px_43px_0_rgba(0,0,0,0.32)]"
+                        style={{ backdropFilter: 'blur(8px)' }}
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="font-sukhumvit w-[69px] h-[30px] p-[4px] rounded-[4px] border-[1px] border-[#FDC911] text-[#FDC911] text-sm font-semibold flex items-center justify-center">
+                            {day}
+                          </div>
+                          <div className="font-sukhumvit text-primary text-[32px] font-bold">
+                            {date}
+                          </div>
+                        </div>
+                        <div className="h-[1px] bg-white/30 mb-2" />
+                        <p className="font-sukhumvit text-white/70 text-sm truncate">วันเกิด{name}</p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            ))}
-          </CardContent>
-        </Card>
+            </>
+          ) : (
+            <div className="flex justify-start items-center gap-4 mt-3">
+              {yearlyHolidays.map((monthData, i) => (
+                <div
+                  key={i}
+                  className="flex flex-col w-auto h-auto gap-[12px] rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] p-3 shadow-[0_4px_43px_0_rgba(0,0,0,0.32)]"
+                  style={{ backdropFilter: 'blur(8px)' }}
+                >
+                  <div className="flex items-center">
+                    <h3 className="font-sukhumvit text-white text-[16px] font-bold">
+                      {monthData.month}
+                    </h3>
+                  </div>
+
+                  <div>
+                    <ul className="flex flex-row">
+                      {monthData.holidays.map((h, idx) => (
+                        <li
+                          key={idx}
+                          className="text-white/80 text-sm flex flex-col gap-3 mr-[18px] pr-4 border-r border-white/30 last:mr-0 last:pr-0 last:border-none"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="font-sukhumvit w-[69px] h-[30px] p-[4px] rounded-[4px] border-[1px] border-[#FDC911] text-[#FDC911] text-[16px] font-semibold flex items-center justify-center">
+                              {h.day}
+                            </div>
+                            <div className="font-sukhumvit text-primary text-[32px] font-bold">{h.date}</div>
+                          </div>
+                          <span className="font-sukhumvit text-white font-semibold">{h.name}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                  </div>
+
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
+
+
+
+      {/* login */}
+      <div className="bg-tertiary w-full lg:w-[409px] flex flex-col justify-center items-center p-12 shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+        <img src="/LOGO_2.svg" alt="Funch Logo" className="w-192 h-327 gap-23 mb-4" />
+        <button className="font-sukhumvit font-bold px-6 py-3 bg-primary hover:brightness-110 text-blackpx-6 rounded flex items-center gap-2" onClick={() => googleLogin()}>
+          <img src="/formkit_google.svg" alt="Google icon" className="w-5 h-5" />
+          เข้าสู่ระบบด้วยบัญชี Google
+        </button>
+      </div>
+
+      {/* <GoogleLogin
+          onSuccess={handleGoogleLogin}
+          onError={() =>
+            toast({
+              title: "Google Login ล้มเหลว",
+              description: "ไม่สามารถเข้าสู่ระบบได้",
+              variant: "destructive",
+            })
+          }
+          shape="pill"
+          theme="filled_black"
+          width="100%"
+        /> */}
     </div>
   );
 };

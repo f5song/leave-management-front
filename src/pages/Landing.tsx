@@ -1,23 +1,28 @@
-import { Card } from "@/components/ui/card";
-import Navbar from "@/components/ui/navbar";
+
+import Navbar from "@/Components/Navbar";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useEffect, useState } from "react";
-import Sidebar from "@/components/ui/sidebar";
 import { DateSelectArg } from "@fullcalendar/core";
 import { Dialog } from "@headlessui/react";
 import { format, differenceInCalendarDays, addDays } from "date-fns";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createLeave, getLeaves, LeaveInput } from "@/services/leaveService";
-import { useAuth } from "@/contexts/AuthContext";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createLeave, getLeaves, ILeaveInput, updateLeaveStatus } from "@/Api/leave-service";
+import { useAuth } from "@/Contexts/AuthContext";
+
+import Sidebar from "@/Components/Sidebar";
+import { Card } from "@/Components/Card";
 const Landing = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [cachedLeaves, setCachedLeaves] = useState<any[]>([]);
+  const [selectedLeave, setSelectedLeave] = useState<any>(null);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+
 
   const [form, setForm] = useState({
     title: "",
@@ -30,7 +35,7 @@ const Landing = () => {
   const todayStr = format(new Date(), "yyyy-MM-dd");
 
   const mutation = useMutation({
-    mutationFn: (newLeave: LeaveInput) => createLeave(user.id, newLeave),
+    mutationFn: (newLeave: ILeaveInput) => createLeave(user.id, newLeave),
     onSuccess: async (data) => {
       const { title, description, startDate, endDate, totalDays } = data;
       setCalendarEvents((prev) => [
@@ -39,7 +44,7 @@ const Landing = () => {
           title,
           start: startDate,
           end: endDate,
-          allDay: true, 
+          allDay: true,
           color: "#8a8a8as",
           extendedProps: {
             description,
@@ -64,38 +69,42 @@ const Landing = () => {
     enabled: !!visibleRange,
   });
 
-  // const { data: allLeaves, refetch: refetchLeaves } = useQuery({
-  //   queryKey: ["leaves"],
-  //   queryFn: () => getLeaves(),
-  //   enabled: true,
-  // });
-
-
-
   useEffect(() => {
     if (allLeaves?.data && Array.isArray(allLeaves.data)) {
-      const mappedEvents = allLeaves.data.map((leave: any) => ({
-        title: leave.title,
-        start: leave.startDate,
-        end: format(addDays(new Date(leave.endDate), 1), "yyyy-MM-dd"),
-        color: "#8a8a8a",
-        allDay: true, 
-        extendedProps: {
-          description: leave.description,
-          totalDays: leave.totalDays,
-          status: leave.status,
-        },
-      }));
+      const isAdmin = user.role === "admin";
+  
+      const mappedEvents = allLeaves.data
+        .filter((leave: any) => {
+          if (leave.status === "REJECTED") return false;
+  
+          if (leave.userId === user?.id) return true;
 
-      setCachedLeaves(mappedEvents); 
-      setCalendarEvents(mappedEvents); 
+          if (isAdmin) return true;
+  
+          return leave.status === "APPROVED";
+        })
+        .map((leave: any) => ({
+          id: leave.id,
+          title: leave.title,
+          start: leave.startDate,
+          end: format(addDays(new Date(leave.endDate), 1), "yyyy-MM-dd"),
+          color:
+            leave.status === "APPROVED"
+              ? leave.userInfo?.color || "#8a8a8a"
+              : "#cccccc",
+          allDay: true,
+          extendedProps: {
+            description: leave.description,
+            totalDays: leave.totalDays,
+            status: leave.status,
+          },
+        }));
+  
+      setCachedLeaves(mappedEvents);
+      setCalendarEvents(mappedEvents);
     }
-  }, [allLeaves]);
-
-
-
-  // console.log("allLeaves", allLeaves);
-
+  }, [allLeaves, user]);
+  
 
   const handleDateClick = (arg: DateSelectArg) => {
     const dateStr = format(arg.start, "yyyy-MM-dd");
@@ -131,7 +140,7 @@ const Landing = () => {
 
     const totalDays = differenceInCalendarDays(new Date(endDate), new Date(startDate)) + 1;
 
-    const leaveData: LeaveInput = {
+    const leaveData: ILeaveInput = {
       title,
       description,
       startDate: new Date(startDate).toISOString(),
@@ -143,7 +152,24 @@ const Landing = () => {
 
     mutation.mutate(leaveData);
   };
-  // console.log("calendarEvents", calendarEvents);
+
+  const handleChangeStatus = async (newStatus: "APPROVED" | "REJECTED") => {
+    console.log("🚀 ~ handleChangeStatus ~ newStatus:", newStatus)
+    try {
+      if (!selectedLeave?.id || !token) return;
+
+      await updateLeaveStatus(token, selectedLeave.id, newStatus);
+      console.log("🚀 ~ handleChangeStatus ~ selectedLeave:", selectedLeave)
+
+      alert(`✅ เปลี่ยนสถานะเป็น ${newStatus} แล้ว`);
+      setIsAdminModalOpen(false);
+      await refetchLeaves();
+    } catch (error) {
+      alert("❌ เปลี่ยนสถานะไม่สำเร็จ");
+      console.error(error);
+    }
+  };
+
 
 
   return (
@@ -168,15 +194,26 @@ const Landing = () => {
             events={calendarEvents.length > 0 ? calendarEvents : cachedLeaves}
             eventClick={(info) => {
               const { title, extendedProps } = info.event;
-              alert(
-                `📌 ชื่อการลา: ${title}\n📄 รายละเอียด: ${extendedProps.description || "-"}\n📅 จำนวนวัน: ${extendedProps.totalDays}`
-              );
+
+              if (extendedProps.status === "PENDING" && user.role === "admin") {
+                setSelectedLeave({
+                  id: info.event.id,
+                  title: title,
+                  ...extendedProps
+                });
+                setIsAdminModalOpen(true);
+              } else {
+                alert(
+                  `📌 ชื่อการลา: ${title}\n📄 รายละเอียด: ${extendedProps.description || "-"}\n📅 จำนวนวัน: ${extendedProps.totalDays}`
+                );
+              }
             }}
+
             datesSet={(arg) => {
               const start = format(arg.start, "yyyy-MM-dd");
               const end = format(arg.end, "yyyy-MM-dd");
 
-              const currentMonth = format(arg.start, "MMMM yyyy"); 
+              const currentMonth = format(arg.start, "MMMM yyyy");
               console.log(`ตอนนี้ปฏิทินแสดงเดือน: ${currentMonth}`);
               console.log(`ช่วงวันที่ถูกโหลดข้อมูล: ${start} ถึง ${end}`);
 
@@ -268,6 +305,45 @@ const Landing = () => {
           </div>
         </div>
       </Dialog>
+      <Dialog
+        open={isAdminModalOpen}
+        onClose={() => setIsAdminModalOpen(false)}
+        className="fixed inset-0 z-50 flex items-center justify-center"
+      >
+        <div className="bg-white text-black rounded-lg p-6 shadow-xl w-full max-w-md">
+          <Dialog.Title className="text-xl font-bold mb-4">
+            อนุมัติคำขอลา
+          </Dialog.Title>
+          {selectedLeave && (
+            <div className="mb-4">
+              <p><strong>ชื่อการลา:</strong> {selectedLeave.title}</p>
+              <p><strong>รายละเอียด:</strong> {selectedLeave.description || "-"}</p>
+              <p><strong>จำนวนวัน:</strong> {selectedLeave.totalDays}</p>
+            </div>
+          )}
+          <div className="flex justify-end space-x-2">
+            <button
+              className="px-4 py-2 bg-gray-300 rounded-md"
+              onClick={() => setIsAdminModalOpen(false)}
+            >
+              ปิด
+            </button>
+            <button
+              className="px-4 py-2 bg-red-600 text-white rounded-md"
+              onClick={() => handleChangeStatus("REJECTED")}
+            >
+              ปฏิเสธ
+            </button>
+            <button
+              className="px-4 py-2 bg-green-600 text-white rounded-md"
+              onClick={() => handleChangeStatus("APPROVED")}
+            >
+              อนุมัติ
+            </button>
+          </div>
+        </div>
+      </Dialog>
+
     </div>
   );
 };
