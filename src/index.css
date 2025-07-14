@@ -6,6 +6,8 @@
   :root {
     --font-prompt: "Prompt", sans-serif;
     --font-sukhumvit: "Sukhumvit", sans-serif;
+    --font-sukhumvit-bold: "SukhumvitBold", sans-serif;
+    --font-prompt-semibold: "PromptSemiBold", sans-serif;
     --color-font: #ADADAD;
     --color-primary: #FFD000;
     --color-secondary: #191919;
@@ -14,17 +16,25 @@
   @font-face {
     font-family: "Sukhumvit";
     font-style: normal;
-    font-weight: 600;
+    font-weight: 500;
     font-display: swap;
-    src: url("/fonts/SukhumvitSet-Text.ttf") format("truetype");
+    src: url("Shared/Asseet/fonts/SukhumvitSet-Text.ttf") format("truetype");
   }
 
   @font-face {
-    font-family: "Sukhumvit";
+    font-family: "SukhumvitBold";
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: url("/fonts/SukhumvitSet-Bold.ttf") format("truetype");
+    src: url("Shared/Asseet/fonts/SukhumvitSet-Bold.ttf") format("truetype");
+  }
+
+  @font-face {
+    font-family: "SukhumvitSemiBold";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("Shared/Asseet/fonts/SukhumvitSet-SemiBold.ttf") format("truetype");
   }
 
   @font-face {
@@ -32,6 +42,6 @@
     font-style: normal;
     font-weight: 600;
     font-display: swap;
-    src: url("/fonts/Prompt-SemiBold.ttf") format("truetype");
+    src: url("Shared/Asseet/fonts/Prompt-SemiBold.ttf") format("truetype");
   }
 }

@@ -1,70 +1,89 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useForm, Controller } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/Contexts/AuthContext';
 import { toast } from '@/Hooks/UseToast';
-import { createUser } from '@/Api/user-service';
-// import Label from '@/components/ui/label'
+import { createUser } from '@/Api/users-service';
+import { getJobTitles } from '@/Api/job-title-service';
+import { getDepartments } from '@/Api/departments-service';
+
 import Input from '@/Components/Input';
 import Label from '@/Components/Label';
 import SelectField from '@/Components/SelectField';
 import PrimaryButton from '@/Components/PrimaryButton';
-import { getJobTitles } from '@/Api/job-title-service';
-import { getDepartments } from '@/Api/department-service';
+import { FunchIcon, FunchLogo } from '@/Shared/Asseet/Icons';
+
+const schema = z.object({
+  firstName: z.string().min(1, 'กรุณากรอกชื่อจริง'),
+  lastName: z.string().min(1, 'กรุณากรอกนามสกุล'),
+  email: z.string().email('รูปแบบอีเมลไม่ถูกต้อง'),
+  departmentId: z.string().min(1, 'กรุณาเลือกแผนก'),
+  jobTitleId: z.string().min(1, 'กรุณาเลือกตำแหน่ง'),
+  nickName: z.string().min(1, 'กรุณากรอกชื่อเล่น'),
+  birthDate: z.string().min(1, 'กรุณาเลือกวันเกิด'),
+  googleId: z.string().min(1, 'ไม่มี Google ID'),
+  salary: z.coerce.number().gt(0, 'กรุณาระบุเงินเดือนมากกว่า 0'),
+});
+
+type RegisterFormData = z.infer<typeof schema>;
 
 const Register = () => {
-  const [formData, setFormData] = useState({
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
+  const googleData = location.state?.googleData;
+  const [avatar, setAvatar] = useState<File | null>(null);
+  const [formData, setFormData] = useState<{ avatar?: string }>({});
+
+  const { data: departments = [] } = useQuery({ queryKey: ['departments'], queryFn: getDepartments });
+  const { data: jobTitles = [] } = useQuery({ queryKey: ['jobTitles'], queryFn: getJobTitles });
+
+  const {
+    control,
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+    reset,
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      departmentId: '',
+      jobTitleId: '',
+      nickName: '',
+      birthDate: '',
+      googleId: '',
+      salary: 0,
+    },
+  });
+
+  const initialState = {
     firstName: '',
     lastName: '',
     email: '',
     departmentId: '',
     jobTitleId: '',
     nickName: '',
-    birthDate: null,
-    roleId: 'employee',
+    birthDate: '',
     googleId: '',
-    salary: 0,
-    avatar: '',
-  });
-
-  const [avatar, setavatar] = useState<File | null>(null);
-
-
-
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { login } = useAuth();
-  const googleData = location.state?.googleData;
-  const {
-    data: departments = [],
-  } = useQuery({
-    queryKey: ['departments'],
-    queryFn: getDepartments,
-  });
-
-  const {
-    data: jobTitles = [],
-  } = useQuery({
-    queryKey: ['jobTitles'],
-    queryFn: getJobTitles,
-  });
-
-  console.log("department", departments);
-  console.log("jobTitles", jobTitles);
-
+    avatar: undefined,
+  };
 
   useEffect(() => {
     if (googleData) {
       const nameParts = googleData.name?.split(' ') || [];
-      setFormData(prev => ({
-        ...prev,
-        firstName: nameParts[0] || '',
-        lastName: nameParts.slice(1).join(' ') || '',
-        email: googleData.email || '',
-        googleId: googleData.googleId,
-      }));
+      setValue('firstName', nameParts[0] || '');
+      setValue('lastName', nameParts.slice(1).join(' ') || '');
+      setValue('email', googleData.email || '');
+      setValue('googleId', googleData.googleId);
     }
-  }, [googleData]);
+  }, [googleData, setValue]);
 
   const registerMutation = useMutation({
     mutationFn: createUser,
@@ -73,102 +92,47 @@ const Register = () => {
       login(user, access_token);
       navigate('/home');
       toast({
-        title: "สมัครสมาชิกสำเร็จ",
-        description: "ยินดีต้อนรับสู่ระบบลางาน Funch.tech",
+        title: 'สมัครสมาชิกสำเร็จ',
+        description: 'ยินดีต้อนรับสู่ระบบลางาน Funch.tech',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "สมัครสมาชิกไม่สำเร็จ",
-        description: error.message || "กรุณาตรวจสอบข้อมูลและลองใหม่",
-        variant: "destructive",
+        title: 'สมัครสมาชิกไม่สำเร็จ',
+        description: error.message || 'กรุณาตรวจสอบข้อมูลและลองใหม่',
+        variant: 'destructive',
       });
-    }
+    },
   });
 
-
-
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const {
-      firstName,
-      lastName,
-      email,
-      departmentId,
-      jobTitleId,
-      nickName,
-      birthDate,
-      googleId,
-      salary,
-    } = formData;
-
-    if (!firstName || !lastName || !email || !departmentId || !jobTitleId || !nickName || !birthDate || salary === null || salary === undefined || !googleId || !avatar) {
+  const onSubmit = (data: RegisterFormData) => {
+    if (!avatar) {
       toast({
-        title: "ข้อมูลไม่ครบ",
-        description: "กรุณากรอกข้อมูลให้ครบทุกช่อง จ้าาาา",
-        variant: "destructive",
+        title: 'ข้อมูลไม่ครบ',
+        description: 'กรุณาเลือกรูปพนักงานด้วย',
+        variant: 'destructive',
       });
       return;
     }
 
     const form = new FormData();
-    form.append('firstName', firstName);
-    form.append('lastName', lastName);
-    form.append('email', email);
-    form.append('departmentId', departmentId);
-    form.append('jobTitleId', jobTitleId);
-    form.append('nickName', nickName);
-    form.append('birthDate', birthDate);
+    Object.entries(data).forEach(([key, value]) => {
+      form.append(key, value.toString());
+    });
     form.append('roleId', 'employee');
-    form.append('googleId', googleId);
-    form.append('salary', salary.toString());
-    form.append('avatar', avatar); // ✅ ส่งไฟล์จริง
+    form.append('avatar', avatar);
 
     registerMutation.mutate(form);
   };
 
-
-  const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-
-  useEffect(() => {
-    console.log("formData:", formData);
-  }, [formData]);
-
-  useEffect(() => {
-    console.log("avatarFile:", avatar);
-  }, [avatar]);
-
-  // const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = (event) => {
-  //       const result = event.target?.result;
-  //       if (result) {
-  //         setFormData(prev => ({ ...prev, avatar: result }));
-  //       }
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
-
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setavatar(file); // เก็บไว้ใช้ตอน submit
-      const previewUrl = URL.createObjectURL(file); // preview รูป
-      setFormData(prev => ({
-        ...prev,
-        avatar: previewUrl, // สำหรับ preview
-      }));
+      setAvatar(file);
+      const previewUrl = URL.createObjectURL(file);
+      setFormData((prev) => ({ ...prev, avatar: previewUrl }));
     }
   };
-
 
   return (
     <div className="min-h-screen bg-quaternary text-white px-4 md:px-10 py-12 flex items-center justify-center relative">
@@ -181,20 +145,18 @@ const Register = () => {
 
           {/* header */}
           <div className="flex flex-col md:flex-row justify-between items-center w-full">
-            <img
-              src="/Frame 58.svg"
-              alt="logo"
-              className="w-[200px] md:w-[276px] h-[53px] object-contain"
-            />
+            <FunchIcon />
             <p className="font-sukhumvit text-[20px] md:text-[24px] font-bold text-center md:text-right">
               กรอกข้อมูลส่วนตัวเพิ่มเติม
             </p>
           </div>
 
           <div className="border-t border-white opacity-20 w-full my-6" />
-          <form onSubmit={handleSubmit}>
+
+          <form onSubmit={handleSubmit(onSubmit)}>
 
             <div className="flex flex-col lg:flex-row gap-8">
+
               {/* employee image */}
               <div className="flex flex-col">
                 <div className="font-sukhumvit text-[16px] text-[var(--color-font)] mb-2">รูปภาพพนักงาน</div>
@@ -208,6 +170,7 @@ const Register = () => {
                   <p className="font-sukhumvit text-[16px] text-[var(--color-font)]">
                     กดเพื่อเลือกรูปจากในอุปกรณ์ของคุณ
                   </p>
+
                   {/* ปุ่มเลือกไฟล์ */}
                   <label
                     htmlFor="employee-image"
@@ -221,20 +184,10 @@ const Register = () => {
                     id="employee-image"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setavatar(file);
-                        const previewUrl = URL.createObjectURL(file);
-                        setFormData(prev => ({ ...prev, avatar: previewUrl }));
-                      }
-                    }}
+                    onChange={handleAvatarChange}
                   />
-
-
                 </div>
               </div>
-
 
               {/* form section */}
               <div className="flex flex-col gap-6 text-white font-sukhumvit w-full">
@@ -242,34 +195,21 @@ const Register = () => {
                 {/* Email */}
                 <div className="flex flex-col gap-2">
                   <Label>อีเมล*</Label>
-                  <Input
-                    type="email"
-                    placeholder={googleData?.email || "อีเมลของคุณ"}
-                    disabled
-                    className="w-full h-[49px] p-[12px] rounded-[4px] bg-[rgba(0,0,0,0.12)] 
-              backdrop-blur-[8px] text-[var(--color-font)] placeholder-[var(--color-font)] cursor-not-allowed"
-                  />
+                  <Input type="email" disabled {...register('email')} />
+                  {errors.email && <p className="text-red-500">{errors.email.message}</p>}
                 </div>
 
                 {/* ชื่อจริง + นามสกุล */}
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="flex flex-col gap-2 w-full">
                     <Label>ชื่อจริง*</Label>
-                    <Input
-                      type="text"
-                      placeholder="กรอกชื่อ"
-                      value={formData.firstName}
-                      onChange={(e) => handleInputChange("firstName", e.target.value)}
-                    />
+                    <Input {...register('firstName')} />
+                    {errors.firstName && <p className="text-red-500">{errors.firstName.message}</p>}
                   </div>
                   <div className="flex flex-col gap-2 w-full">
                     <Label>นามสกุล*</Label>
-                    <Input
-                      type="text"
-                      placeholder="กรอกนามสกุล"
-                      value={formData.lastName}
-                      onChange={(e) => handleInputChange("lastName", e.target.value)}
-                    />
+                    <Input {...register('lastName')} />
+                    {errors.lastName && <p className="text-red-500">{errors.lastName.message}</p>}
                   </div>
                 </div>
 
@@ -277,72 +217,88 @@ const Register = () => {
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="flex flex-col gap-2 w-full">
                     <Label>ชื่อเล่น*</Label>
-                    <Input
-                      type="text"
-                      placeholder="กรอกชื่อเล่น"
-                      value={formData.nickName}
-                      onChange={(e) => handleInputChange("nickName", e.target.value)}
-                    />
+                    <Input {...register('nickName')} />
+                    {errors.nickName && <p className="text-red-500">{errors.nickName.message}</p>}
                   </div>
                   <div className="flex flex-col gap-2 w-full">
                     <Label>วันเกิด*</Label>
-                    <Input
-                      type="date"
-                      value={formData.birthDate}
-                      onChange={(e) => handleInputChange("birthDate", e.target.value)}
-                    />
+                    <Input type="date" {...register('birthDate')} />
+                    {errors.birthDate && <p className="text-red-500">{errors.birthDate.message}</p>}
                   </div>
                 </div>
 
-                {/* แผนก + ตำแหน่ง */}
+                {/* แผนก */}
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="flex flex-col gap-2 w-full">
-                    <SelectField
-                      label="แผนก"
-                      name="department"
-                      value={formData.departmentId}
-                      options={(departments?.data || []).map((d: any) => ({
-                        value: d.id,
-                        label: d.name,
-                      }))}
-                      onChange={(value) => handleInputChange('departmentId', value)}
-                      required
+                    <Controller
+                      name="departmentId"
+                      control={control}
+                      render={({ field }) => (
+                        <SelectField
+                          label="แผนก"
+                          name="departmentId"
+                          options={(departments?.data || []).map((d: any) => ({
+                            value: d.id,
+                            label: d.name,
+                          }))}
+                          value={field.value}
+                          onChange={field.onChange}
+                          disabled={departments.length === 0}
+                          required
+                        />
+                      )}
                     />
-
+                    {errors.departmentId && <p className="text-red-500">{errors.departmentId.message}</p>}
                   </div>
-
+                  {/* ตำแหน่ง */}
                   <div className="flex flex-col gap-2 w-full">
-                    <SelectField
-                      label="ตำแหน่ง"
-                      name="jobTitle"
-                      value={formData.jobTitleId}
-                      options={(jobTitles?.data || []).map((j: any) => ({
-                        value: j.id,
-                        label: j.name,
-                      }))}
-                      onChange={(value) => handleInputChange('jobTitleId', value)}
-                      required
+                    <Controller
+                      name="jobTitleId"
+                      control={control}
+                      render={({ field }) => (
+                        <SelectField
+                          label="ตำแหน่ง"
+                          name="jobTitleId"
+                          options={(jobTitles?.data || []).map((j: any) => ({
+                            value: j.id,
+                            label: j.name,
+                          }))}
+                          value={field.value}
+                          onChange={field.onChange}
+                          disabled={jobTitles.length === 0}
+                          required
+                        />
+                      )}
                     />
-
+                    {errors.jobTitleId && <p className="text-red-500">{errors.jobTitleId.message}</p>}
                   </div>
                 </div>
 
               </div>
             </div>
+
             <div className="flex flex-row justify-end gap-6 mt-9">
-              <button className="h-[49px] p-[12px] rounded-[4px] text-[var(--color-primary)] font-sukhumvit text-[16px] font-bold">ยกเลิก</button>
+              <button
+                type="button"
+                className="h-[49px] p-[12px] rounded-[4px] text-[var(--color-primary)] font-sukhumvit text-[16px] font-bold"
+                onClick={() => {
+                  reset();
+                  setAvatar(null);
+                  setFormData(initialState);
+                }}
+              >
+                ยกเลิก
+              </button>
               <PrimaryButton type="submit">
                 ยืนยันการสมัคร
               </PrimaryButton>
             </div>
+
           </form>
         </div>
       </div>
     </div>
-
-
   );
 };
-
 
 export default Register;

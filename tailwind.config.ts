@@ -54,8 +54,10 @@ export default {
 			},
 			fontFamily: {
 				prompt: ['var(--font-prompt)'],
-				sukhumvit: ['var(--font-sukhumvit)'],
-			}
+				sukhumvit: ['var(--font-sukhumvit)'],          
+				'sukhumvit-semibold': ['var(--font-sukhumvit-semibold)'], 
+				'sukhumvit-bold': ['var(--font-sukhumvit-bold)'],         
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
