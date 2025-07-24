@@ -1,19 +1,21 @@
 import React from "react";
 
 type TableHeadProps = {
-  columns: string[];
+  columns: {
+    label: string;
+  }[];
 };
 
 const TableHead: React.FC<TableHeadProps> = ({ columns }) => {
   return (
-    <thead className="bg-gray-200">
+    <thead className="bg-[#00000052] text-white h-[54px]">
       <tr>
         {columns.map((col, index) => (
           <th
             key={index}
-            className="px-4 py-2 text-left text-sm font-semibold text-gray-700"
+            className={`px-4 py-2 font-bold font-sukhumvit text-left`}
           >
-            {col}
+            {col.label}
           </th>
         ))}
       </tr>

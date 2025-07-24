@@ -5,6 +5,8 @@ import {
   ArrowRightIcon,
   CloseIcon,
 } from "@/Shared/Asseet/Icons";
+import TableHead from "./Table/TableHead";
+import TableBody from "./Table/TableBody";
 
 type BaseModalProps = {
   isOpen: boolean;
@@ -15,6 +17,7 @@ type BaseModalProps = {
 };
 
 const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
+
   const getStatusClass = (status: string): string => {
     switch (status) {
       case "อนุมัติ":
@@ -27,6 +30,14 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
         return "border-gray-400 text-gray-400";
     }
   };
+
+  const columns = [
+    "ประเภท",
+    "สาเหตุ",
+    "จำนวนวันลา",
+    "สถานะ",
+    "วันที่ลา",
+  ];
 
   const leaveData = Array.from({ length: 50 }, (_, i) => ({
     leaveType: "ลาพักร้อน",
@@ -42,6 +53,7 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
     { label: "รออนุมัติ", value: "รออนุมัติ", color: "#6FA5F7" },
     { label: "ปฏิเสธ", value: "ปฏิเสธ", color: "#EF4444" },
   ];
+
 
   const itemPerPage = 9;
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,7 +96,7 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
 
   return (
     <div className="bg-black bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center">
-      <div className="relative bg-[var(--color-bg)] rounded-[8px] p-9 w-full max-w-[1080px] h-[75vh] max-h-[756px] flex flex-col">
+      <div className="relative bg-[var(--color-bg)] rounded-[8px] p-9 w-full max-w-[120vh] h-[80vh] max-h-[80vh] flex flex-col">
         {/* Header */}
         <div className="flex flex-row justify-between">
           <p className="font-sukhumvit text-[20px] font-bold">{data.title}</p>
@@ -102,11 +114,10 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
             <div
               key={tab.value}
               onClick={() => handleTabClick(tab.value)}
-              className={`rounded-[4px] w-full h-[33px] bg-[#00000052] flex items-center justify-center cursor-pointer border ${
-                selectedStatus === tab.value
-                  ? `text-[${tab.color}] border-[${tab.color}]`
-                  : "text-[var(--color-gray)] border-transparent hover:text-white"
-              } transition-colors`}
+              className={`rounded-[4px] w-full h-[33px] bg-[#00000052] flex items-center justify-center cursor-pointer border ${selectedStatus === tab.value
+                ? `text-[${tab.color}] border-[${tab.color}]`
+                : "text-[var(--color-gray)] border-transparent hover:text-white"
+                } transition-colors`}
             >
               <p className="font-sukhumvit text-[16px] font-bold">
                 {tab.label}
@@ -115,54 +126,54 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
           ))}
         </div>
 
-        {/* Table */}
-        <div className="flex flex-col flex-1 overflow-y-auto">
-          {/* Table Head */}
-          <div className="flex flex-row gap-5 bg-[#00000052] rounded-[4px] h-[54px] items-center px-4">
-            <p className="text-white font-bold w-[162px] font-sukhumvit">ประเภท</p>
-            <p className="text-white font-bold w-[344px] font-sukhumvit">สาเหตุ</p>
-            <p className="text-white font-bold w-[81px] font-sukhumvit">จำนวนวันลา</p>
-            <p className="text-white font-bold w-[65px] font-sukhumvit">สถานะ</p>
-            <p className="text-white font-bold w-[200px] font-sukhumvit">วันที่ลา</p>
-          </div>
+        {/* <div className="overflow-x-auto rounded-[4px]">
+          <table className="w-full table-fixed border-separate border-spacing-0">
+            <TableHead columns={columns} />
+            <TableBody data={paginatedData} getStatusClass={getStatusClass} />
+          </table>
+        </div> */}
 
-          {/* Table Body */}
-          {paginatedData.map((item, index) => (
-            <div
-              key={index}
-              className="flex flex-row border-b border-[#676767] px-4 py-[10px] gap-5"
-            >
-              <div className="w-[162px]">
-                <p className="text-white font-sukhumvit">{item.leaveType}</p>
-              </div>
-              <div className="w-[344px]">
-                <p className="text-[var(--color-font-gray)] font-sukhumvit">{item.reason}</p>
-              </div>
-              <div className="w-[81px] text-center">
-                <p className="text-[var(--color-font-gray)] font-sukhumvit">
-                  {item.numberOfDays}
-                </p>
-              </div>
-              <div
-                className={`bg-[#00000052] w-[65px] h-[26px] rounded-[16px] border flex items-center justify-center ${getStatusClass(
-                  item.status
-                )}`}
-              >
-                <p className="text-[14px] text-center font-sukhumvit">{item.status}</p>
-              </div>
-              <div className="w-[200px] flex items-center gap-1">
-                <p className="text-[var(--color-font-gray)] font-sukhumvit">
-                  {item.startDate}
-                </p>
-                <ArrowIcon className="fill-white" />
-                <p className="text-[var(--color-font-gray)] font-sukhumvit">{item.endDate}</p>
-              </div>
-            </div>
-          ))}
+        <div className="overflow-x-auto rounded-[4px]">
+          <table className="min-w-[1008px] w-full table-fixed border-separate border-spacing-y-3">
+            <thead>
+              <tr className="bg-[#00000052] h-[54px] font-sukhumvit text-white text-left">
+                <th className="px-4">ลาพักร้อน/ลาป่วย/ลากิจ</th>
+                <th className="px-4">สาเหตุ</th>
+                <th className="px-4">จำนวนวันลา</th>
+                <th className="px-4">สถานะ</th>
+                <th className="px-4">วันที่ลา</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedData.map((item, index) => (
+                <tr key={index} className="text-[var(--color-font-gray)] font-sukhumvit">
+                  <td className={`px-4 ${index !== 0 ? 'border-t border-[#444] pt-2' : ''}`}>{item.leaveType}</td>
+                  <td className={`px-4 ${index !== 0 ? 'border-t border-[#444] pt-2' : ''}`}>{item.reason}</td>
+                  <td className={`px-4 ${index !== 0 ? 'border-t border-[#444] pt-2' : ''}`}>{item.numberOfDays}</td>
+                  <td className={`px-4 ${index !== 0 ? 'border-t border-[#444] pt-2' : ''}`}>
+                    <span
+                      className={`flex items-center justify-center text-[14px] bg-[#00000052] w-[65px] h-[26px] rounded-[16px] border ${getStatusClass(
+                        item.status
+                      )}`}
+                    >
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className={`px-4 ${index !== 0 ? 'border-t border-[#444] pt-2' : ''}`}>
+                    <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                      <span>{item.startDate}</span>
+                      <ArrowIcon className="fill-white w-[15px] h-[15px]" />
+                      <span>{item.endDate}</span>
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         {/* Footer */}
-        <div className="flex justify-between pt-5">
+        <div className="absolute bottom-0 left-0 right-0 flex justify-between px-9 pb-9">
           {/* Pagination */}
           <div className="flex gap-2 items-center">
             <button
@@ -177,11 +188,10 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                className={`px-3 py-1 rounded-[4px] text-[16px] font-sukhumvit font-semibold ${
-                  currentPage === page
-                    ? "border border-white text-white"
-                    : "text-[var(--color-gray)]"
-                }`}
+                className={`px-3 py-1 rounded-[4px] text-[16px] font-sukhumvit font-semibold ${currentPage === page
+                  ? "border border-white text-white"
+                  : "text-[var(--color-gray)]"
+                  }`}
               >
                 {page}
               </button>
@@ -199,7 +209,7 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
           </div>
 
           <button
-            className="text-[var(--color-primary)] font-bold"
+            className="text-[var(--color-primary)] font-bold font-sukhumvit"
             onClick={onClose}
           >
             ปิด
