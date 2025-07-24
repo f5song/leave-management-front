@@ -5,8 +5,7 @@ import {
   ArrowRightIcon,
   CloseIcon,
 } from "@/Shared/Asseet/Icons";
-import TableHead from "./Table/TableHead";
-import TableBody from "./Table/TableBody";
+import Table from "@/Components/Table/Table";
 
 type BaseModalProps = {
   isOpen: boolean;
@@ -40,6 +39,7 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
   ];
 
   const leaveData = Array.from({ length: 50 }, (_, i) => ({
+    id: i + 1,
     leaveType: "ลาพักร้อน",
     reason: `ลาไปทำธุระ ${i + 1}`,
     numberOfDays: "1 วัน",
@@ -75,7 +75,7 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
       currentPage - Math.floor(pageLimit / 2),
       totalPages - pageLimit + 1
     )
-  );
+  ); 
   const endPage = Math.min(totalPages, startPage + pageLimit - 1);
 
   const visiblePages = Array.from(
@@ -134,6 +134,30 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
         </div> */}
 
         <div className="overflow-x-auto rounded-[4px]">
+          <Table.Container>
+            <table className="w-full">
+              <Table.Head>
+                <Table.Row>
+                  <th>ประเภท</th>
+                  <th>เหตุผล</th>
+                  <th>จำนวนวันลา</th>
+                  <th>สถานะ</th>
+                  <th>วันที่ลา</th>
+                </Table.Row>
+              </Table.Head>
+              <Table.Body>
+                {leaveData.map((item) => (
+                  <Table.Row key={item.id}>
+                    <td>{item.leaveType}</td>
+                    <td>{item.reason}</td>
+                    <td>{item.numberOfDays}</td>
+                    <td>{item.status}</td>
+                    <td>{item.startDate}</td>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </table>
+          </Table.Container>
           <table className="min-w-[1008px] w-full table-fixed border-separate border-spacing-y-3">
             <thead>
               <tr className="bg-[#00000052] h-[54px] font-sukhumvit text-white text-left">

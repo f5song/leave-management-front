@@ -1,52 +1,47 @@
 import React from "react";
-import { ReactComponent as ArrowIcon } from "@/assets/icons/arrow.svg";
+import { ArrowIcon } from "@/Shared/Asseet/Icons";
 
 type LeaveItem = {
-  leaveType: string;
-  reason: string;
-  numberOfDays: number;
-  status: string;
-  startDate: string;
-  endDate: string;
+  [key: string]: any;
+};
+
+type Column = {
+  key: string; // ชื่อฟิลด์ใน item
+  label?: string; // ถ้าต้องการ
+  className?: string; // ใส่ class เฉพาะคอลัมน์นี้ได้
+  render?: (value: any, item: LeaveItem) => React.ReactNode; // custom render เฉพาะคอลัมน์นี้
 };
 
 type TableRowProps = {
   item: LeaveItem;
+  index: number;
+  columns: Column[];
+  getStatusClass: (status: string) => string;
 };
 
-function getStatusClass(status: string) {
-  switch (status) {
-    case "อนุมัติ":
-      return "border-green-400";
-    case "รอดำเนินการ":
-      return "border-yellow-400";
-    case "ไม่อนุมัติ":
-      return "border-red-400";
-    default:
-      return "border-gray-400";
-  }
-}
-
-const TableRow: React.FC<TableRowProps> = ({ item }) => {
+const TableRow: React.FC<TableRowProps> = ({
+  item,
+  index,
+  columns,
+  getStatusClass,
+}) => {
   return (
-    <tr className="border-b border-[#676767] text-[var(--color-font-gray)]">
-      <td className="px-4 py-2 w-[162px] text-white font-sukhumvit">{item.leaveType}</td>
-      <td className="px-4 py-2 w-[344px] font-sukhumvit">{item.reason}</td>
-      <td className="px-4 py-2 w-[81px] text-center font-sukhumvit">{item.numberOfDays}</td>
-      <td className="px-4 py-2 w-[65px] text-center">
-        <div
-          className={`bg-[#00000052] w-[65px] h-[26px] rounded-[16px] border flex items-center justify-center ${getStatusClass(
-            item.status
-          )}`}
-        >
-          <span className="text-[14px] font-sukhumvit text-white">{item.status}</span>
-        </div>
-      </td>
-      <td className="px-4 py-2 w-[200px] font-sukhumvit flex items-center gap-1">
-        <span>{item.startDate}</span>
-        <ArrowIcon className="fill-white" />
-        <span>{item.endDate}</span>
-      </td>
+    <tr className="text-[var(--color-font-gray)] font-sukhumvit">
+      {columns.map((col, colIndex) => {
+        const value = item[col.key];
+        return (
+          <td
+            key={colIndex}
+            className={`px-4 ${index !== 0 ? "border-t border-[#444] pt-2" : ""} ${
+              col.className || ""
+            }`}
+          >
+            {col.render
+              ? col.render(value, item) // ถ้าใส่ render มา ให้ใช้ render นั้น
+              : value}
+          </td>
+        );
+      })}
     </tr>
   );
 };
