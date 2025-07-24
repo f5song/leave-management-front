@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, redirect } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
@@ -14,21 +14,7 @@ import Input from '@/Components/Input';
 import Label from '@/Components/Label';
 import SelectField from '@/Components/SelectField';
 import PrimaryButton from '@/Components/PrimaryButton';
-import { FunchIcon, FunchLogo } from '@/Shared/Asseet/Icons';
-
-const schema = z.object({
-  firstName: z.string().min(1, 'กรุณากรอกชื่อจริง'),
-  lastName: z.string().min(1, 'กรุณากรอกนามสกุล'),
-  email: z.string().email('รูปแบบอีเมลไม่ถูกต้อง'),
-  departmentId: z.string().min(1, 'กรุณาเลือกแผนก'),
-  jobTitleId: z.string().min(1, 'กรุณาเลือกตำแหน่ง'),
-  nickName: z.string().min(1, 'กรุณากรอกชื่อเล่น'),
-  birthDate: z.string().min(1, 'กรุณาเลือกวันเกิด'),
-  googleId: z.string().min(1, 'ไม่มี Google ID'),
-  salary: z.coerce.number().gt(0, 'กรุณาระบุเงินเดือนมากกว่า 0'),
-});
-
-type RegisterFormData = z.infer<typeof schema>;
+import { DangerIcon, FunchIcon, ProfileIcon } from '@/Shared/Asseet/Icons';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -41,11 +27,37 @@ const Register = () => {
   const { data: departments = [] } = useQuery({ queryKey: ['departments'], queryFn: getDepartments });
   const { data: jobTitles = [] } = useQuery({ queryKey: ['jobTitles'], queryFn: getJobTitles });
 
+  const schema = z.object({
+    firstName: z
+      .string()
+      .trim()
+      .min(1, 'กรุณากรอกชื่อจริง')
+      .regex(/^[ก-๙a-zA-Z\s]+$/, 'ชื่อจริงต้องเป็นตัวอักษรเท่านั้น'),
+    lastName: z
+      .string()
+      .trim()
+      .min(1, 'กรุณากรอกนามสกุล')
+      .regex(/^[ก-๙a-zA-Z\s]+$/, 'นามสกุลต้องเป็นตัวอักษรเท่านั้น'),
+    email: z.string().email('รูปแบบอีเมลไม่ถูกต้อง'),
+    departmentId: z.string().trim().min(1, 'เลือกแผนก'),
+    jobTitleId: z.string().trim().min(1, 'เลือกตำแหน่ง'),
+    nickName: z
+      .string()
+      .trim()
+      .min(1, 'กรอกชื่อเล่น')
+      .regex(/^[ก-๙a-zA-Z\s]+$/, 'ชื่อเล่นต้องเป็นตัวอักษรเท่านั้น'),
+    birthDate: z.string().trim().min(1, 'เลือกวันเกิด'),
+    googleId: z.string().trim().min(1, 'ไม่มี Google ID'),
+    avatar: z.string().optional(),
+  });
+
+
+  type RegisterFormData = z.infer<typeof schema>;
   const {
     control,
     register,
     handleSubmit,
-    setValue,
+    watch,
     formState: { errors },
     reset,
   } = useForm<RegisterFormData>({
@@ -59,36 +71,25 @@ const Register = () => {
       nickName: '',
       birthDate: '',
       googleId: '',
-      salary: 0,
+      avatar: undefined,
     },
   });
 
-  const initialState = {
-    firstName: '',
-    lastName: '',
-    email: '',
-    departmentId: '',
-    jobTitleId: '',
-    nickName: '',
-    birthDate: '',
-    googleId: '',
-    avatar: undefined,
-  };
-
+  // set ค่าจาก google data
   useEffect(() => {
     if (googleData) {
-      const nameParts = googleData.name?.split(' ') || [];
-      setValue('firstName', nameParts[0] || '');
-      setValue('lastName', nameParts.slice(1).join(' ') || '');
-      setValue('email', googleData.email || '');
-      setValue('googleId', googleData.googleId);
+      reset({
+        email: googleData.email || '',
+        googleId: googleData.googleId || '',
+      });
     }
-  }, [googleData, setValue]);
+  }, [googleData, reset]);
+
 
   const registerMutation = useMutation({
     mutationFn: createUser,
     onSuccess: (res) => {
-      const { user, access_token } = res.data;
+      const { user, access_token } = res;
       login(user, access_token);
       navigate('/home');
       toast({
@@ -106,14 +107,6 @@ const Register = () => {
   });
 
   const onSubmit = (data: RegisterFormData) => {
-    if (!avatar) {
-      toast({
-        title: 'ข้อมูลไม่ครบ',
-        description: 'กรุณาเลือกรูปพนักงานด้วย',
-        variant: 'destructive',
-      });
-      return;
-    }
 
     const form = new FormData();
     Object.entries(data).forEach(([key, value]) => {
@@ -145,7 +138,7 @@ const Register = () => {
 
           {/* header */}
           <div className="flex flex-col md:flex-row justify-between items-center w-full">
-            <FunchIcon />
+            <FunchIcon className="w-[276px] h-[52px]" />
             <p className="font-sukhumvit text-[20px] md:text-[24px] font-bold text-center md:text-right">
               กรอกข้อมูลส่วนตัวเพิ่มเติม
             </p>
@@ -160,34 +153,62 @@ const Register = () => {
               {/* employee image */}
               <div className="flex flex-col">
                 <div className="font-sukhumvit text-[16px] text-[var(--color-font)] mb-2">รูปภาพพนักงาน</div>
-                <div className="flex flex-col items-center justify-center w-full lg:w-[325px] h-[372px] bg-[#00000052] gap-[10px] rounded-[4px]">
-                  <img
-                    src={formData.avatar || "/iconamoon_profile-fill.svg"}
-                    alt="employee"
-                    className="w-[130px] h-[130px] object-contain rounded-full"
-                  />
 
-                  <p className="font-sukhumvit text-[16px] text-[var(--color-font)]">
-                    กดเพื่อเลือกรูปจากในอุปกรณ์ของคุณ
-                  </p>
+                <div className="relative w-full lg:w-[325px] h-[372px] rounded-[4px] overflow-hidden group">
 
-                  {/* ปุ่มเลือกไฟล์ */}
-                  <label
-                    htmlFor="employee-image"
-                    className="cursor-pointer w-[143px] h-[49px] border border-[color:var(--color-font)] rounded-[4px] text-[color:var(--color-font)] font-sukhumvit font-bold text-[16px] leading-[100%] flex items-center justify-center"
-                    style={{ letterSpacing: '0%' }}
-                  >
-                    เลือกรูปพนักงาน
-                  </label>
-                  <input
-                    type="file"
-                    id="employee-image"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleAvatarChange}
-                  />
+                  {/* ถ้ายังไม่มีรูป ให้แสดง default UI แบบ icon */}
+                  {!(formData.avatar) ? (
+                    <div className="flex flex-col items-center justify-center w-full h-full bg-[#00000052] gap-[10px] rounded-[4px]">
+                      <ProfileIcon className="w-[130px] h-[130px] object-contain" />
+                      <p className="font-sukhumvit text-[16px] text-[var(--color-font)]">
+                        กดเพื่อเลือกรูปจากในอุปกรณ์ของคุณ
+                      </p>
+                      <label
+                        htmlFor="employee-image"
+                        className="cursor-pointer w-[143px] h-[49px] border border-[color:var(--color-font)] rounded-[4px] text-[color:var(--color-font)] font-sukhumvit font-bold text-[16px] leading-[100%] flex items-center justify-center"
+                      >
+                        เลือกรูปพนักงาน
+                      </label>
+                      <input
+                        type="file"
+                        id="employee-image"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleAvatarChange}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      {/* แสดงรูปที่อัปโหลด */}
+                      <img
+                        src={formData.avatar}
+                        alt="employee"
+                        className="w-full h-full object-cover"
+                      />
+
+                      {/* overlay แสดงเฉพาะตอนมีรูป */}
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2">
+                        <p className="text-white font-sukhumvit text-[16px]">กดเพื่อเลือกรูปจากในอุปกรณ์ของคุณ</p>
+                        <label
+                          htmlFor="employee-image"
+                          className="cursor-pointer w-[94px] h-[49px] border border-white rounded-[4px] text-white font-sukhumvit font-bold text-[16px] leading-[100%] flex items-center justify-center"
+                        >
+                          เปลี่ยนรูป
+                        </label>
+                      </div>
+
+                      <input
+                        type="file"
+                        id="employee-image"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleAvatarChange}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
+
 
               {/* form section */}
               <div className="flex flex-col gap-6 text-white font-sukhumvit w-full">
@@ -195,21 +216,23 @@ const Register = () => {
                 {/* Email */}
                 <div className="flex flex-col gap-2">
                   <Label>อีเมล*</Label>
-                  <Input type="email" disabled {...register('email')} />
-                  {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+                  <Input
+                    type="email"
+                    disabled
+                    {...register('email')}
+                    value={watch('email')} // ให้แสดงค่าที่ถูกเซ็ตไว้
+                  />
                 </div>
 
                 {/* ชื่อจริง + นามสกุล */}
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="flex flex-col gap-2 w-full">
                     <Label>ชื่อจริง*</Label>
-                    <Input {...register('firstName')} />
-                    {errors.firstName && <p className="text-red-500">{errors.firstName.message}</p>}
+                    <Input {...register('firstName')} placeholder='กรอกชื่อจริง' />
                   </div>
                   <div className="flex flex-col gap-2 w-full">
                     <Label>นามสกุล*</Label>
-                    <Input {...register('lastName')} />
-                    {errors.lastName && <p className="text-red-500">{errors.lastName.message}</p>}
+                    <Input {...register('lastName')} placeholder='กรอกนามสกุล' />
                   </div>
                 </div>
 
@@ -217,19 +240,18 @@ const Register = () => {
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="flex flex-col gap-2 w-full">
                     <Label>ชื่อเล่น*</Label>
-                    <Input {...register('nickName')} />
-                    {errors.nickName && <p className="text-red-500">{errors.nickName.message}</p>}
+                    <Input {...register('nickName')} placeholder='กรอกชื่อเล่น' />
                   </div>
                   <div className="flex flex-col gap-2 w-full">
                     <Label>วันเกิด*</Label>
-                    <Input type="date" {...register('birthDate')} />
-                    {errors.birthDate && <p className="text-red-500">{errors.birthDate.message}</p>}
+                    <Input type="date" {...register('birthDate')} placeholder='เลือกวันเกิด' />
                   </div>
                 </div>
 
                 {/* แผนก */}
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="flex flex-col gap-2 w-full">
+                    <Label>แผนก*</Label>
                     <Controller
                       name="departmentId"
                       control={control}
@@ -244,14 +266,15 @@ const Register = () => {
                           value={field.value}
                           onChange={field.onChange}
                           disabled={departments.length === 0}
+                          placeholder='เลือกแผนก'
                           required
                         />
                       )}
                     />
-                    {errors.departmentId && <p className="text-red-500">{errors.departmentId.message}</p>}
                   </div>
                   {/* ตำแหน่ง */}
                   <div className="flex flex-col gap-2 w-full">
+                    <Label>ตำแหน่ง*</Label>
                     <Controller
                       name="jobTitleId"
                       control={control}
@@ -266,32 +289,62 @@ const Register = () => {
                           value={field.value}
                           onChange={field.onChange}
                           disabled={jobTitles.length === 0}
+                          placeholder='เลือกตำแหน่ง'
                           required
                         />
                       )}
                     />
-                    {errors.jobTitleId && <p className="text-red-500">{errors.jobTitleId.message}</p>}
                   </div>
                 </div>
 
               </div>
             </div>
 
-            <div className="flex flex-row justify-end gap-6 mt-9">
-              <button
-                type="button"
-                className="h-[49px] p-[12px] rounded-[4px] text-[var(--color-primary)] font-sukhumvit text-[16px] font-bold"
-                onClick={() => {
-                  reset();
-                  setAvatar(null);
-                  setFormData(initialState);
-                }}
-              >
-                ยกเลิก
-              </button>
-              <PrimaryButton type="submit">
-                ยืนยันการสมัคร
-              </PrimaryButton>
+            <div className="flex flex-row justify-between mt-9">
+              {errors.firstName || errors.lastName || errors.nickName || errors.birthDate || errors.departmentId || errors.jobTitleId ? (
+                <div className="flex items-stretch bg-[#00000052] border border-[#ED363F] rounded-[4px] overflow-hidden h-[48px]">
+
+                  <div className="flex items-center justify-center px-3 bg-transparent">
+                    <DangerIcon className="w-[24px] h-[24px]" />
+                  </div>
+
+                  {/* เส้นคั่นแนวตั้ง */}
+                  <div className="w-px bg-[#ED363F]" />
+
+                  <div className="flex items-center px-2">
+                    <p className="text-red-500 font-sukhumvit-bold">
+                      {[
+                        errors.firstName?.message,
+                        errors.lastName?.message,
+                        errors.nickName?.message,
+                        errors.birthDate?.message,
+                        errors.departmentId?.message,
+                        errors.jobTitleId?.message,
+                      ]
+                        .filter(Boolean)
+                        .join(', ')}
+                    </p>
+                  </div>
+
+                </div>
+              ) : (
+                <p></p>
+              )}
+
+              <div className='flex flex-row justify-end gap-6'>
+                <button
+                  type="button"
+                  className="h-[49px] p-[12px] rounded-[4px] text-[var(--color-primary)] font-sukhumvit text-[16px] font-bold"
+                  onClick={() => {
+                    navigate('/login');
+                  }}
+                >
+                  ยกเลิก
+                </button>
+                <PrimaryButton type="submit">
+                  ยืนยันการสมัคร
+                </PrimaryButton>
+              </div>
             </div>
 
           </form>

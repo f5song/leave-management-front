@@ -12,6 +12,7 @@ import { getHolidays } from '@/Api/holidays-service';
 import { groupHolidaysByMonth } from '@/Api/holidays-service/utils/groupHolidays';
 import { IHoliday } from '@/Api/holidays-service/interfaces/holidays.interface';
 import { expandHolidayDates } from '@/Api/holidays-service/utils/expandHolidayDates';
+import { getBirthdays } from '@/Api/users-service';
 
 const monthNames = [
   'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -23,8 +24,9 @@ const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  // ดึงข้อมูลวันหยุดจาก API
-  const { data: holidays = [], isLoading, error } = useQuery<IHoliday[]>({
+
+  // fetch holiday
+  const { data: holidays = [] } = useQuery<IHoliday[]>({
     queryKey: ['holidays'],
     queryFn: getHolidays,
   });
@@ -36,13 +38,17 @@ const Login = () => {
 
   // กรองวันหยุดเฉพาะเดือนปัจจุบัน (รายเดือน)
   const filteredHolidays = expandedHolidays.filter(h => new Date(h.startDate).getMonth() === currentMonth);
-  console.log(filteredHolidays)
-
-  console.log(holidays);
 
   // จัดกลุ่มวันหยุดตามเดือน (รายปี)
   const holidaysGroupedByMonth = groupHolidaysByMonth(expandedHolidays);
 
+  const { data: birthdays = [] } = useQuery({ queryKey: ['birthdays'], queryFn: getBirthdays });
+  const filteredBirthdays = birthdays.filter((item) => {
+    const birthMonth = new Date(item.birthDate).getMonth();
+    return birthMonth === currentMonth;
+  });
+
+// call google login api
   const googleLoginMutation = useMutation<ILoginResponse, Error, string>({
     mutationFn: authService.googleLogin,
     onSuccess: (data) => {
@@ -63,7 +69,8 @@ const Login = () => {
     },
   });
 
-  const googleLogin = useGoogleLogin({
+  // for button google login
+  const googleLoginButton = useGoogleLogin({
     scope: 'https://www.googleapis.com/auth/drive.metadata.readonly',
     flow: 'auth-code',
     onSuccess: async (codeResponse) => {
@@ -82,7 +89,7 @@ const Login = () => {
           <div className="sticky top-0 bg-quaternary z-20 pb-4 pt-2">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-[125px]">
               <div className="flex flex-row gap-4 items-center">
-                <CalendarIcon className="w-[64px] h-[64px] md:w-[84px] md:h-[84px]" />
+                <CalendarIcon className="w-[64px] h-[64px] md:w-[84px] md:h-[84px] fill-white" />
                 <div>
                   <h1 className="font-prompt text-[28px] md:text-[36px] font-semibold leading-none py-2">ปฏิทินบริษัท</h1>
                   <p className="font-prompt text-[18px] md:text-[24px]">
@@ -110,11 +117,11 @@ const Login = () => {
           {/* Content */}
           {view === 'monthly' ? (
             <>
-              <div className="mt-10 flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3">
                 {filteredHolidays.map((item) => {
                   const dateObj = new Date(item.startDate);
-                  const dayName = dateObj.toLocaleDateString('th-TH', { weekday: 'long' }).replace(/^วัน/, ''); // เช่น "พุธ"
-                  const dayNumber = dateObj.toLocaleDateString('th-TH', { day: '2-digit' }); // เช่น "01"
+                  const dayName = dateObj.toLocaleDateString('th-TH', { weekday: 'long' }).replace(/^วัน/, ''); 
+                  const dayNumber = dateObj.toLocaleDateString('th-TH', { day: '2-digit' });
                   return (
                     <div key={item.id} className="w-[141px] h-[102px] rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] p-3 py-2 shadow-md backdrop-blur-sm">
                       <div className="flex items-center gap-2 mb-2">
@@ -135,30 +142,34 @@ const Login = () => {
               {/* ตัวอย่างวันเกิด */}
               <div className="mt-12">
                 <h3 className="font-prompt font-semibold mb-3 flex items-center gap-2 text-[18px] md:text-[20px]">
-                  <CakeIcon className="w-6 h-6 md:w-8 md:h-8" /> วันเกิดพนักงานสุดน่ารัก
+                  <CakeIcon className="w-6 h-6 md:w-8 md:h-8 fill-white" /> วันเกิดพนักงานสุดน่ารัก
                 </h3>
                 <div className="flex flex-wrap gap-3">
-                  {"จันทร์ 11|ชาลี, อังคาร 14|ทะเล".split(", ").map((item, index) => {
-                    const [dayDate, name] = item.split('|');
-                    const [day, date] = dayDate.split(' ');
+                  {filteredBirthdays.map((item, index) => {
+                    const dateObj = new Date(item.birthDate);
+                    const dayName = dateObj.toLocaleDateString('th-TH', { weekday: 'long' }).replace(/^วัน/, '');
+                    const dayNumber = dateObj.toLocaleDateString('th-TH', { day: '2-digit' });
+                    const displayName = item.nickName || item.firstName || 'ไม่มีชื่อ';
+
                     return (
                       <div key={index} className="w-[141px] h-[102px] rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] p-3 py-2 shadow-md backdrop-blur-sm">
                         <div className="flex items-center gap-2 mb-2">
                           <div className="font-sukhumvit w-[69px] h-[30px] rounded-[4px] border border-[#FDC911] text-[#FDC911] text-sm font-semibold flex items-center justify-center">
-                            {day}
+                            {dayName}
                           </div>
-                          <div className="font-sukhumvit text-primary text-[32px] font-bold">{date}</div>
+                          <div className="font-sukhumvit text-primary text-[32px] font-bold">{dayNumber}</div>
                         </div>
                         <div className="h-[1px] bg-white/30 mb-2" />
-                        <p className="font-sukhumvit text-white/70 text-sm truncate">วันเกิด{name}</p>
+                        <p className="font-sukhumvit text-white/70 text-sm truncate">วันเกิด{displayName}</p>
                       </div>
                     );
                   })}
+
                 </div>
               </div>
             </>
           ) : (
-            <div className="flex flex-row gap-4 mt-6 flex-wrap">
+            <div className="flex flex-row gap-4 flex-wrap">
               {Object.entries(holidaysGroupedByMonth).map(([month, holidaysInMonth]) => (
                 <div key={month} className="rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] p-4 shadow-md backdrop-blur-sm">
                   <h3 className="font-sukhumvit text-white text-[16px] font-bold mb-2">{month}</h3>
@@ -197,7 +208,7 @@ const Login = () => {
         <FunchLogo className="w-[192px] h-[327px] mb-4" />
         <button
           className="font-sukhumvit font-bold px-6 py-3 bg-primary hover:brightness-110 text-black rounded flex items-center gap-2"
-          onClick={() => googleLogin()}
+          onClick={() => googleLoginButton()}
         >
           <GoogleIcon className="w-5 h-5" /> เข้าสู่ระบบด้วยบัญชี Google
         </button>

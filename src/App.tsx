@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/Contexts/AuthContext";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
-import Calendar from "./Pages/Calendar";
+import Profile from "./Pages/Profile";
 import NotFound from "./Pages/NotFound";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import Landing from "./Pages/Landing";
@@ -28,7 +28,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/landing" element={<Landing />} />
-            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/profile" element={<Profile />} />
             {/* <Route 
               path="/home" 
               element={

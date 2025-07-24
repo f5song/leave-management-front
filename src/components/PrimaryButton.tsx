@@ -19,7 +19,7 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({
             onClick={onClick}
             disabled={disabled}
             className={clsx(
-                "h-[49px] p-[12px] rounded-[4px] font-sukhumvit text-[16px] font-bold z-10",
+                "h-[49px] p-[12px] rounded-[4px] font-sukhumvit text-[16px] font-bold z-10 py-3 px-4",
                 "bg-[var(--color-primary)] text-[var(--color-secondary)]",
                 "shadow-[4px_6px_15px_0px_#00000085]",
                 "hover:shadow-[4px_6px_15px_0px_#00000085]",
@@ -27,7 +27,7 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({
                 "active:bg-[#F3A600] active:text-[#191919]",
                 "active:shadow-[4px_6px_15px_0px_#00000085]",
                 "transition duration-200",
-                disabled && "bg-gray-400 text-white cursor-not-allowed"
+                disabled && "bg-[#414141] text-[var(--color-gray)] cursor-not-allowed"
             )}
         >
             {children}

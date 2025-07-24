@@ -1,78 +1,98 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
-import { Building2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { LogOut } from "lucide-react"
-import { useAuth } from "@/contexts/AuthContext"
-import { toast } from "@/Hooks/UseToast"
-import { Menu } from 'lucide-react';
+import {
+    ComputerIcon,
+    StarIcon,
+    CalendarIcon,
+    ProfileSmallIcon,
+    LogOutIcon,
+} from '@/Shared/Asseet/Icons';
+import { useLocation, useNavigate } from 'react-router-dom';
+import clsx from 'clsx';
 
 interface NavbarProps {
     onClick: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = (props): JSX.Element => {
-    const { user, logout } = useAuth();
-    const handleLogout = () => {
-        logout();
-        toast({
-            title: "ออกจากระบบสำเร็จ",
-            description: "ขอบคุณที่ใช้บริการ",
-        });
-    };
+const Navbar: React.FC<NavbarProps> = ({ onClick }) => {
+    const location = useLocation();
+    const navigate = useNavigate();
 
     const menuItems = [
-        { label: 'แดชบอร์ด', icon: 'calendar.svg' },
-        { label: 'อุปกรณ์', icon: 'computer.svg' },
-        { label: 'ขอพร', icon: 'star.svg' },
-        { label: 'โปรไฟล์', icon: 'star.svg' },
+        { label: 'แดชบอร์ด', icon: CalendarIcon, path: '/home' },
+        { label: 'อุปกรณ์', icon: ComputerIcon, path: '/devices' },
+        { label: 'ขอพร', icon: StarIcon, path: '/pray' },
+        { label: 'โปรไฟล์', icon: ProfileSmallIcon, path: '/profile' },
     ];
 
     return (
-        <div className="flex justify-between items-start w-full">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center w-full gap-4">
             {/* Left: เมนู */}
-            <div className="flex flex-row gap-4">
-                {menuItems.map((item, i) => (
-                    <div
-                        key={i}
-                        className="flex flex-col items-center justify-center w-[80px] h-[78px] bg-[#FFFFFF14] rounded-[8px] border border-[#FFFFFF14] shadow-[0_4px_43px_0_rgba(0,0,0,0.32)] cursor-pointer px-2 py-3 gap-1"
-                    >
-                        <img src={item.icon} alt={item.label} className="w-6 h-6" />
-                        <div className="font-sukhumvit text-[12px] font-semibold text-[var(--color-font)] text-center">
-                            {item.label}
-                        </div>
-                    </div>
-                ))}
-            </div>
+            <div className="flex flex-wrap justify-center md:justify-start gap-2 md:gap-4">
+                {menuItems.map((item, i) => {
+                    const isActive = location.pathname.startsWith(item.path);
 
-
-
-
-            {/* Right: กรอบโปรไฟล์ */}
-            <div className="flex-1 max-w-[300px] flex justify-end">
-                <div className="flex flex-col w-full h-[78px] bg-[#FFFFFF14] rounded-[8px] border border-[#FFFFFF14] p-1 shadow-[0_4px_43px_0_rgba(0,0,0,0.32)] cursor-pointer px-2 py-3 gap-1">
-                    <div className="flex items-center justify-between">
-
-                        <div className="flex flex-row items-center gap-2">
-                            {/* name */}
-                            <div className="flex flex-row items-center gap-2">
-                                <div className="bg-[#FFFFFF14] p-2 w-[54px] h-[54px] rounded-[4px]"></div>
-                                <div className="flex flex-col">
-                                    <div className="font-sukhumvit text-white text-[18px] font-semibold">
-                                        Songfolk
-                                    </div>
-                                    <div className="font-sukhumvit text-[14px] font-semibold text-[var(--color-font)]">ดูโปรไฟล์</div>
-                                </div>
+                    return (
+                        <div
+                            key={i}
+                            onClick={() => navigate(item.path)}
+                            className={clsx(
+                                'group flex flex-col items-center justify-center w-[70px] h-[70px] rounded-[8px] border cursor-pointer px-2 py-2 gap-1 transition-colors shadow-[0_4px_15px_0_rgba(0,0,0,0.2)]',
+                                isActive
+                                    ? 'border-yellow-400 bg-[#FFFFFF22]'
+                                    : 'border-[#FFFFFF14] bg-[#FFFFFF14] hover:bg-[#FFFFFF22]'
+                            )}
+                        >
+                            <item.icon
+                                className={clsx(
+                                    'w-5 h-5 transition-colors',
+                                    isActive
+                                        ? 'fill-yellow-400'
+                                        : 'fill-[#676767] group-hover:fill-white'
+                                )}
+                            />
+                            <div
+                                className={clsx(
+                                    'font-sukhumvit text-[12px] font-semibold text-center transition-colors',
+                                    isActive
+                                        ? 'text-yellow-400'
+                                        : 'text-[var(--color-font)] group-hover:text-white'
+                                )}
+                            >
+                                {item.label}
                             </div>
                         </div>
+                    );
+                })}
+            </div>
 
+            {/* Right: โปรไฟล์และออก */}
+            <div className="flex justify-center md:justify-end items-center gap-3 flex-wrap">
+                {/* Profile Box */}
+                <div className="flex items-center gap-3 h-[70px] bg-[#FFFFFF14] rounded-[8px] border border-[#FFFFFF14] p-2 shadow-[0_4px_15px_0_rgba(0,0,0,0.2)] min-w-[200px]">
+                    <div className="w-[48px] h-[48px] rounded-[4px] bg-[#FFFFFF14] overflow-hidden">
+                        <img src="" alt="profile" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex flex-col">
+                        <p className="font-sukhumvit text-white text-[14px] font-semibold leading-none pb-3">
+                            Songfolk
+                        </p>
+                        <p className="font-sukhumvit text-[12px] font-semibold text-[var(--color-font)] leading-none">
+                            ดูโปรไฟล์
+                        </p>
+                    </div>
+                    {/* Divider */}
+                    <div className="w-px h-[80%] bg-[#676767] mx-2 my-auto" />
+
+                    {/* Logout */}
+                    <div className="flex flex-col items-center justify-center w-[65px]">
+                        <LogOutIcon className="w-6 h-6 fill-[#676767]" />
                         <div className="font-sukhumvit text-[14px] font-semibold text-[var(--color-font)]">ออก</div>
                     </div>
                 </div>
+
+
             </div>
         </div>
+    );
+};
 
-
-    )
-}
-
-export default Navbar
+export default Navbar;

@@ -1,36 +1,23 @@
-// userService.ts
+import axios from 'axios';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+export async function createUser(userData: FormData) {
+  const response = await axios.post(`${API_BASE_URL}/users`, userData);
+  return response.data;
+}
+
+
 export async function updateUser(userId: string, updateData: any, token: string) {
-  const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
-    method: 'PUT',
+  const response = await axios.put(`${API_BASE_URL}/users/${userId}`, updateData, {
     headers: {
-      'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
     },
-    body: JSON.stringify(updateData),
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to update user');
-  }
-
-  return response.json();
+  return response.data;
 }
 
-
-export async function createUser(userData: FormData) {
-  const response = await fetch(`${API_BASE_URL}/users`, {
-    method: 'POST',
-    body: userData,
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to create user');
-  }
-
-  return response.json();
+export async function getBirthdays() {
+  const response = await axios.get(`${API_BASE_URL}/users/birthdays`);
+  return response.data.data;
 }
-

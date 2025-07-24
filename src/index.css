@@ -11,6 +11,9 @@
     --color-font: #ADADAD;
     --color-primary: #FFD000;
     --color-secondary: #191919;
+    --color-font-gray: #DCDCDC;
+    --color-gray: #676767;
+    --color-bg: #292929;
   }
 
   @font-face {
