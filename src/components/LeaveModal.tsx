@@ -6,37 +6,20 @@ import {
   CloseIcon,
 } from "@/Shared/Asseet/Icons";
 import Table from "@/Components/Table/Table";
+import TableHead from "./Table/TableHead";
+import StatusBadge from "./StatusBadge";
+import StatusTab from "./StatusTab";
 
-type BaseModalProps = {
+type LeaveModalProps = {
   isOpen: boolean;
   onClose: () => void;
   data: {
     title: string;
   };
+  toggleModal: () => void;
 };
 
-const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
-
-  const getStatusClass = (status: string): string => {
-    switch (status) {
-      case "อนุมัติ":
-        return "border-[#34D399] text-[#34D399]";
-      case "รออนุมัติ":
-        return "border-[#6FA5F7] text-[#6FA5F7]";
-      case "ปฏิเสธ":
-        return "border-[#EF4444] text-[#EF4444]";
-      default:
-        return "border-gray-400 text-gray-400";
-    }
-  };
-
-  const columns = [
-    "ประเภท",
-    "สาเหตุ",
-    "จำนวนวันลา",
-    "สถานะ",
-    "วันที่ลา",
-  ];
+const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, data }) => {
 
   const leaveData = Array.from({ length: 50 }, (_, i) => ({
     id: i + 1,
@@ -75,7 +58,7 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
       currentPage - Math.floor(pageLimit / 2),
       totalPages - pageLimit + 1
     )
-  ); 
+  );
   const endPage = Math.min(totalPages, startPage + pageLimit - 1);
 
   const visiblePages = Array.from(
@@ -96,7 +79,7 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
 
   return (
     <div className="bg-black bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center">
-      <div className="relative bg-[var(--color-bg)] rounded-[8px] p-9 w-full max-w-[120vh] h-[80vh] max-h-[80vh] flex flex-col">
+      <div className="relative bg-[var(--color-bg)] rounded-[8px] p-9 w-[75vw] max-w-[75vw] h-[85vh] max-h-[85vh] flex flex-col">
         {/* Header */}
         <div className="flex flex-row justify-between">
           <p className="font-sukhumvit text-[20px] font-bold">{data.title}</p>
@@ -111,18 +94,12 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
         {/* Tabs */}
         <div className="flex flex-row gap-4 py-5">
           {statusTabs.map((tab) => (
-            <div
+            <StatusTab
               key={tab.value}
-              onClick={() => handleTabClick(tab.value)}
-              className={`rounded-[4px] w-full h-[33px] bg-[#00000052] flex items-center justify-center cursor-pointer border ${selectedStatus === tab.value
-                ? `text-[${tab.color}] border-[${tab.color}]`
-                : "text-[var(--color-gray)] border-transparent hover:text-white"
-                } transition-colors`}
-            >
-              <p className="font-sukhumvit text-[16px] font-bold">
-                {tab.label}
-              </p>
-            </div>
+              tab={tab}
+              selected={selectedStatus === tab.value}
+              onClick={handleTabClick}
+            />
           ))}
         </div>
 
@@ -134,66 +111,66 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
         </div> */}
 
         <div className="overflow-x-auto rounded-[4px]">
+
+
           <Table.Container>
-            <table className="w-full">
-              <Table.Head>
-                <Table.Row>
-                  <th>ประเภท</th>
-                  <th>เหตุผล</th>
-                  <th>จำนวนวันลา</th>
-                  <th>สถานะ</th>
-                  <th>วันที่ลา</th>
-                </Table.Row>
-              </Table.Head>
-              <Table.Body>
-                {leaveData.map((item) => (
-                  <Table.Row key={item.id}>
-                    <td>{item.leaveType}</td>
-                    <td>{item.reason}</td>
-                    <td>{item.numberOfDays}</td>
-                    <td>{item.status}</td>
-                    <td>{item.startDate}</td>
+            <TableHead
+              columns={[
+                {
+                  label: "ลาพักร้อน/ลาป่วย/ลากิจ",
+                  width: "w-[120px]",
+                  className: "text-left",
+                },
+                {
+                  label: "สาเหตุ",
+                  width: "w-[275px]",
+                  className: "text-left",
+                  style: { fontWeight: "bold" },
+                },
+                {
+                  label: "จำนวนวันลา",
+                  width: "w-[81px]",
+                  className: "text-left",
+                  style: { fontWeight: "bold" },
+                },
+                {
+                  label: "สถานะ",
+                  width: "w-[65px]",
+                  className: "text-left",
+                },
+                {
+                  label: "วันที่ลา",
+                  width: "w-[120px]",
+                  className: "text-left",
+                  style: { fontWeight: "bold" },
+                },
+              ]}
+            />
+
+            <Table.Body>
+              {paginatedData.map((item, index) => {
+                const cellClass = `px-4 ${index !== 0 ? 'border-t border-[#444] pt-2' : ''}`;
+                return (
+                  <Table.Row key={index}>
+                    <td className={cellClass}>{item.leaveType}</td>
+                    <td className={cellClass}>{item.reason}</td>
+                    <td className={cellClass}>{item.numberOfDays}</td>
+                    <td className={cellClass}>
+                      <StatusBadge status={item.status} />
+                    </td>
+                    <td className={cellClass}>
+                      <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                        <span>{item.startDate}</span>
+                        <ArrowIcon className="fill-white w-[15px] h-[15px]" />
+                        <span>{item.endDate}</span>
+                      </span>
+                    </td>
                   </Table.Row>
-                ))}
-              </Table.Body>
-            </table>
+                );
+              })}
+            </Table.Body>
           </Table.Container>
-          <table className="min-w-[1008px] w-full table-fixed border-separate border-spacing-y-3">
-            <thead>
-              <tr className="bg-[#00000052] h-[54px] font-sukhumvit text-white text-left">
-                <th className="px-4">ลาพักร้อน/ลาป่วย/ลากิจ</th>
-                <th className="px-4">สาเหตุ</th>
-                <th className="px-4">จำนวนวันลา</th>
-                <th className="px-4">สถานะ</th>
-                <th className="px-4">วันที่ลา</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedData.map((item, index) => (
-                <tr key={index} className="text-[var(--color-font-gray)] font-sukhumvit">
-                  <td className={`px-4 ${index !== 0 ? 'border-t border-[#444] pt-2' : ''}`}>{item.leaveType}</td>
-                  <td className={`px-4 ${index !== 0 ? 'border-t border-[#444] pt-2' : ''}`}>{item.reason}</td>
-                  <td className={`px-4 ${index !== 0 ? 'border-t border-[#444] pt-2' : ''}`}>{item.numberOfDays}</td>
-                  <td className={`px-4 ${index !== 0 ? 'border-t border-[#444] pt-2' : ''}`}>
-                    <span
-                      className={`flex items-center justify-center text-[14px] bg-[#00000052] w-[65px] h-[26px] rounded-[16px] border ${getStatusClass(
-                        item.status
-                      )}`}
-                    >
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className={`px-4 ${index !== 0 ? 'border-t border-[#444] pt-2' : ''}`}>
-                    <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                      <span>{item.startDate}</span>
-                      <ArrowIcon className="fill-white w-[15px] h-[15px]" />
-                      <span>{item.endDate}</span>
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
         </div>
 
         {/* Footer */}
@@ -244,4 +221,4 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, data }) => {
   );
 };
 
-export default BaseModal;
+export default LeaveModal;

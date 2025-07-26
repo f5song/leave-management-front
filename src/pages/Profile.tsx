@@ -13,7 +13,9 @@ import { getJobTitles } from "@/Api/job-title-service";
 import { ArrowIcon, BackIcon, CalendarIcon, ComputerIcon, EditIcon } from "@/Shared/Asseet/Icons";
 import PrimaryButton from "@/Components/PrimaryButton";
 import { useState } from "react";
-import BaseModal from "@/Components/BaseModals";
+import BaseModal from "@/Components/LeaveModal";
+import LeaveModal from "@/Components/LeaveModal";
+import FacilitiesModal from "@/Components/FacilitiesModal";
 
 // mock data
 const leaveData = [
@@ -113,16 +115,26 @@ const Profile = () => {
         setIsEditing((prev) => !prev);
     };
 
-    const [isModalOpen, setModalOpen] = useState(false);
+    const [isLeaveModalOpen, setLeaveModalOpen] = useState(false);
+    const [isFacilitiesModalOpen, setFacilitiesModalOpen] = useState(false);
 
-    const toggleModal = () => setModalOpen(!isModalOpen);
+    const toggleLeaveModal = () => setLeaveModalOpen(!isLeaveModalOpen);
+    const toggleFacilitiesModal = () => setFacilitiesModalOpen(!isFacilitiesModalOpen);
 
     return (
         <div className="flex flex-col min-h-screen bg-quaternary text-white px-4 md:px-8 py-8 relative">
-            <BaseModal
-                isOpen={isModalOpen}
-                onClose={() => setModalOpen(false)}
+            <LeaveModal
+                isOpen={isLeaveModalOpen}
+                onClose={() => setLeaveModalOpen(false)}
                 data={{ title: 'ประวัติการลา' }}
+                toggleModal={toggleLeaveModal}
+                
+            />
+            <FacilitiesModal
+                isOpen={isFacilitiesModalOpen}
+                onClose={() => setFacilitiesModalOpen(false)}
+                data={{ title: 'ประวัติยืมอุปกรณ์' }}
+                toggleModal={toggleFacilitiesModal}
             />
             <Navbar onClick={() => navigate('/home')} />
             <BackgroundGradient />
@@ -314,7 +326,7 @@ const Profile = () => {
                                         <p className="font-sukhumvit text-[20px] font-bold ">
                                             ประวัติการลา
                                         </p>
-                                        <div className="flex flex-row items-center cursor-pointer group hover:text-white" onClick={toggleModal}>
+                                        <div className="flex flex-row items-center cursor-pointer group hover:text-white" onClick={toggleLeaveModal}>
                                             <CalendarIcon className="w-[15px] h-[15px] fill-[#DCDCDC] group-hover:fill-white transition-colors" />
                                             <p className="font-sukhumvit text-[16px] text-[#DCDCDC] group-hover:text-white transition-colors ml-1">ดูทั้งหมด</p>
                                         </div>
@@ -353,7 +365,7 @@ const Profile = () => {
                                         <p className="font-sukhumvit text-[20px] font-bold ">
                                             ประวัติยืมอุปกรณ์
                                         </p>
-                                        <div className="flex flex-row items-center cursor-pointer group hover:text-white">
+                                        <div className="flex flex-row items-center cursor-pointer group hover:text-white" onClick={toggleFacilitiesModal}>
                                             <ComputerIcon className="w-[15px] h-[15px] fill-[#DCDCDC] group-hover:fill-white transition-colors" />
                                             <p className="font-sukhumvit text-[16px] text-[#DCDCDC] group-hover:text-white transition-colors ml-1">ดูทั้งหมด</p>
                                         </div>
