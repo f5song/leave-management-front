@@ -137,3 +137,19 @@ export const updateLeaveStatus = async (
 };
 export type { ILeaveInput };
 
+
+export const getPaginatedLeaves = async (page: number, limit: number) => {
+  const response = await fetch(`${API_BASE_URL}/leaves?_page=${page}&_limit=${limit}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch leaves");
+  }
+
+  return response.json();
+};

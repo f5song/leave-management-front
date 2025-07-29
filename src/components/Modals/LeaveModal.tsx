@@ -6,11 +6,11 @@ import {
   CloseIcon,
 } from "@/Shared/Asseet/Icons";
 import Table from "@/Components/Table/Table";
-import TableHead from "./Table/TableHead";
-import StatusBadge from "./StatusBadge";
-import StatusTab from "./StatusTab";
+import TableHead from "@/Components/Table/TableHead";
+import StatusBadge from "@/Components/StatusBadge";
+import StatusTab from "@/Components/StatusTab";
 
-type FacilitiesModalProps = {
+type LeaveModalProps = {
   isOpen: boolean;
   onClose: () => void;
   data: {
@@ -19,12 +19,13 @@ type FacilitiesModalProps = {
   toggleModal: () => void;
 };
 
-const FacilitiesModal: React.FC<FacilitiesModalProps> = ({ isOpen, onClose, data, toggleModal }) => {
+const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, data }) => {
 
-  const facilitiesData = Array.from({ length: 50 }, (_, i) => ({
+  const leaveData = Array.from({ length: 50 }, (_, i) => ({
     id: i + 1,
-    name: "MACKBOOK",
-    quantity: "1",
+    leaveType: "ลาพักร้อน",
+    reason: `ลาไปทำธุระ ${i + 1}`,
+    numberOfDays: "1 วัน",
     status: i % 3 === 0 ? "รออนุมัติ" : i % 3 === 1 ? "อนุมัติ" : "ปฏิเสธ",
     startDate: "2025-07-21",
     endDate: "2025-07-21",
@@ -42,8 +43,8 @@ const FacilitiesModal: React.FC<FacilitiesModalProps> = ({ isOpen, onClose, data
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
   const filteredData = selectedStatus
-    ? facilitiesData.filter((item) => item.status === selectedStatus)
-    : facilitiesData;
+    ? leaveData.filter((item) => item.status === selectedStatus)
+    : leaveData;
   const totalPages = Math.ceil(filteredData.length / itemPerPage);
 
   const startIndex = (currentPage - 1) * itemPerPage;
@@ -113,27 +114,32 @@ const FacilitiesModal: React.FC<FacilitiesModalProps> = ({ isOpen, onClose, data
 
 
           <Table.Container>
-            <TableHead
+            <Table.Head
               columns={[
                 {
-                  label: "อุปกรณ์ที่ขอยืม",
-                  width: "w-[380px]",
+                  label: "ลาพักร้อน/ลาป่วย/ลากิจ",
+                  width: "w-[120px]",
                   className: "text-left",
                 },
                 {
-                  label: "จำนวน",
-                  width: "w-[120px]",
+                  label: "สาเหตุ",
+                  width: "w-[275px]",
                   className: "text-left",
                   style: { fontWeight: "bold" },
                 },
                 {
-                  label: "สถานะ",
+                  label: "จำนวนวันลา",
                   width: "w-[81px]",
                   className: "text-left",
                   style: { fontWeight: "bold" },
                 },
                 {
-                  label: "วันที่ยืม",
+                  label: "สถานะ",
+                  width: "w-[65px]",
+                  className: "text-left",
+                },
+                {
+                  label: "วันที่ลา",
                   width: "w-[120px]",
                   className: "text-left",
                   style: { fontWeight: "bold" },
@@ -142,26 +148,26 @@ const FacilitiesModal: React.FC<FacilitiesModalProps> = ({ isOpen, onClose, data
             />
 
             <Table.Body>
-              {paginatedData.map((item, index) => {
-                const cellClass = `px-4 ${index !== 0 ? 'border-t border-[#444] pt-2' : ''}`;
-                return (
-                  <Table.Row key={index}>
-                    <td className={cellClass}>{item.name}</td>
-                    <td className={cellClass}>{item.quantity}</td>
-                    <td className={cellClass}>
-                      <StatusBadge status={item.status} />
-                    </td>
-                    <td className={cellClass}>
-                      <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                        <span>{item.startDate}</span>
-                        <ArrowIcon className="fill-white w-[15px] h-[15px]" />
-                        <span>{item.endDate}</span>
-                      </span>
-                    </td>
-                  </Table.Row>
-                );
-              })}
+              {paginatedData.map((item, index) => (
+                <Table.Row key={index}>
+                  <Table.Cell hasTopBorder={index !== 0}>{item.leaveType}</Table.Cell>
+                  <Table.Cell hasTopBorder={index !== 0}>{item.reason}</Table.Cell>
+                  <Table.Cell hasTopBorder={index !== 0}>{item.numberOfDays}</Table.Cell>
+                  <Table.Cell hasTopBorder={index !== 0}>
+                    <StatusBadge status={item.status} />
+                  </Table.Cell>
+                  <Table.Cell hasTopBorder={index !== 0}>
+                    <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                      <span>{item.startDate}</span>
+                      <ArrowIcon className="fill-white w-[15px] h-[15px]" />
+                      <span>{item.endDate}</span>
+                    </span>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
             </Table.Body>
+
+
           </Table.Container>
 
         </div>
@@ -214,4 +220,4 @@ const FacilitiesModal: React.FC<FacilitiesModalProps> = ({ isOpen, onClose, data
   );
 };
 
-export default FacilitiesModal;
+export default LeaveModal;

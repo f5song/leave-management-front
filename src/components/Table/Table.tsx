@@ -32,12 +32,14 @@ import Row from "./TableRow";
 import Head from "./TableHead";
 import Body from "./TableBody";
 import Container from "./Container";
+import Cell from "./TableCell";
 
 const Table = {
   Row,
   Head,
   Body,
   Container,
+  Cell,
 } as const;
 
 export default Table;

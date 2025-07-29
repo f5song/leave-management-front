@@ -6,11 +6,11 @@ import {
   CloseIcon,
 } from "@/Shared/Asseet/Icons";
 import Table from "@/Components/Table/Table";
-import TableHead from "./Table/TableHead";
-import StatusBadge from "./StatusBadge";
-import StatusTab from "./StatusTab";
+import TableHead from "../Table/TableHead";
+import StatusBadge from "../StatusBadge";
+import StatusTab from "../StatusTab";
 
-type LeaveModalProps = {
+type FacilitiesModalProps = {
   isOpen: boolean;
   onClose: () => void;
   data: {
@@ -19,13 +19,12 @@ type LeaveModalProps = {
   toggleModal: () => void;
 };
 
-const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, data }) => {
+const FacilitiesModal: React.FC<FacilitiesModalProps> = ({ isOpen, onClose, data, toggleModal }) => {
 
-  const leaveData = Array.from({ length: 50 }, (_, i) => ({
+  const facilitiesData = Array.from({ length: 50 }, (_, i) => ({
     id: i + 1,
-    leaveType: "ลาพักร้อน",
-    reason: `ลาไปทำธุระ ${i + 1}`,
-    numberOfDays: "1 วัน",
+    name: "MACKBOOK",
+    quantity: "1",
     status: i % 3 === 0 ? "รออนุมัติ" : i % 3 === 1 ? "อนุมัติ" : "ปฏิเสธ",
     startDate: "2025-07-21",
     endDate: "2025-07-21",
@@ -43,8 +42,8 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, data }) => {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
   const filteredData = selectedStatus
-    ? leaveData.filter((item) => item.status === selectedStatus)
-    : leaveData;
+    ? facilitiesData.filter((item) => item.status === selectedStatus)
+    : facilitiesData;
   const totalPages = Math.ceil(filteredData.length / itemPerPage);
 
   const startIndex = (currentPage - 1) * itemPerPage;
@@ -117,29 +116,24 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, data }) => {
             <TableHead
               columns={[
                 {
-                  label: "ลาพักร้อน/ลาป่วย/ลากิจ",
+                  label: "อุปกรณ์ที่ขอยืม",
+                  width: "w-[380px]",
+                  className: "text-left",
+                },
+                {
+                  label: "จำนวน",
                   width: "w-[120px]",
-                  className: "text-left",
-                },
-                {
-                  label: "สาเหตุ",
-                  width: "w-[275px]",
-                  className: "text-left",
-                  style: { fontWeight: "bold" },
-                },
-                {
-                  label: "จำนวนวันลา",
-                  width: "w-[81px]",
                   className: "text-left",
                   style: { fontWeight: "bold" },
                 },
                 {
                   label: "สถานะ",
-                  width: "w-[65px]",
+                  width: "w-[81px]",
                   className: "text-left",
+                  style: { fontWeight: "bold" },
                 },
                 {
-                  label: "วันที่ลา",
+                  label: "วันที่ยืม",
                   width: "w-[120px]",
                   className: "text-left",
                   style: { fontWeight: "bold" },
@@ -149,22 +143,20 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, data }) => {
 
             <Table.Body>
               {paginatedData.map((item, index) => {
-                const cellClass = `px-4 ${index !== 0 ? 'border-t border-[#444] pt-2' : ''}`;
                 return (
                   <Table.Row key={index}>
-                    <td className={cellClass}>{item.leaveType}</td>
-                    <td className={cellClass}>{item.reason}</td>
-                    <td className={cellClass}>{item.numberOfDays}</td>
-                    <td className={cellClass}>
+                    <Table.Cell hasTopBorder={index !== 0}>{item.name}</Table.Cell>
+                    <Table.Cell hasTopBorder={index !== 0}>{item.quantity}</Table.Cell>
+                    <Table.Cell hasTopBorder={index !== 0}>
                       <StatusBadge status={item.status} />
-                    </td>
-                    <td className={cellClass}>
+                    </Table.Cell>
+                    <Table.Cell hasTopBorder={index !== 0}>
                       <span className="inline-flex items-center gap-1 whitespace-nowrap">
                         <span>{item.startDate}</span>
                         <ArrowIcon className="fill-white w-[15px] h-[15px]" />
                         <span>{item.endDate}</span>
                       </span>
-                    </td>
+                    </Table.Cell>
                   </Table.Row>
                 );
               })}
@@ -221,4 +213,4 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, data }) => {
   );
 };
 
-export default LeaveModal;
+export default FacilitiesModal;

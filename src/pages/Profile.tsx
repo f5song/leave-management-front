@@ -13,9 +13,8 @@ import { getJobTitles } from "@/Api/job-title-service";
 import { ArrowIcon, BackIcon, CalendarIcon, ComputerIcon, EditIcon } from "@/Shared/Asseet/Icons";
 import PrimaryButton from "@/Components/PrimaryButton";
 import { useState } from "react";
-import BaseModal from "@/Components/LeaveModal";
-import LeaveModal from "@/Components/LeaveModal";
-import FacilitiesModal from "@/Components/FacilitiesModal";
+import LeaveModal from "@/Components/Modals/LeaveModal";
+import FacilitiesModal from "@/Components/Modals/FacilitiesModal";
 
 // mock data
 const leaveData = [
