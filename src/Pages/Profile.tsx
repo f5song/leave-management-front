@@ -15,7 +15,7 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import { useState } from "react";
 import LeaveModal from "@/Components/Modals/LeaveModal";
 import FacilitiesModal from "@/Components/Modals/FacilitiesModal";
-import { useAuth } from "@/Contexts/AuthContext";
+import { useAuth } from "@/Context/AuthContext";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 

@@ -10,7 +10,7 @@ import { Dialog } from "@headlessui/react";
 import { format, differenceInCalendarDays, addDays } from "date-fns";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createLeave, getLeaves, ILeaveInput, updateLeaveStatus } from "@/Api/leave-service";
-import { useAuth } from "@/Contexts/AuthContext";
+import { useAuth } from "@/Context/AuthContext";
 
 import Sidebar from "@/Components/Sidebar";
 import { Card } from "@/Components/Card";

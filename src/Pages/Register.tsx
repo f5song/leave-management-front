@@ -4,7 +4,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuth } from '@/Contexts/AuthContext';
+import { useAuth } from '@/Context/AuthContext';
 import { toast } from '@/Shared/Hooks/UseToast';
 import { createUser } from '@/Api/users-service';
 import { getJobTitles } from '@/Api/job-title-service';

@@ -4,7 +4,7 @@ import { Toaster } from "@/Components/Toaster";
 // import { TooltipProvider } from "@components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/Contexts/AuthContext";
+import { AuthProvider } from "@/Context/AuthContext";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
 import Profile from "./Pages/Profile";

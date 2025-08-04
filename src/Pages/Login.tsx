@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { authService } from '@/Api/auth-service';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/Contexts/AuthContext';
+import { useAuth } from '@/Context/AuthContext';
 import { useState } from 'react';
 import { ILoginResponse } from '@/Api/auth-service/Interface/login.interface';
 import { useGoogleLogin } from '@react-oauth/google';
