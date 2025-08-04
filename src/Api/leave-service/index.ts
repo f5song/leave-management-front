@@ -49,9 +49,7 @@ export const getLeavesByUser = async (userId: string, start?: string, end?: stri
 };
 
 export const updateLeaveStatus = async (
-  leaveId: string,
-  newStatus: "APPROVED" | "REJECTED"
-) => {
+leaveId: string, newStatus: "APPROVED" | "REJECTED") => {
   const response = await apiClient.patch(`leaves/${leaveId}/status`, {
     status: newStatus
   });
