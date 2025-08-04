@@ -2,7 +2,6 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { authService } from '@/Api/auth-service';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/Contexts/AuthContext';
-import { toast } from '@/Hooks/UseToast';
 import { useState } from 'react';
 import { ILoginResponse } from '@/Api/auth-service/Interface/login.interface';
 import { useGoogleLogin } from '@react-oauth/google';
@@ -48,24 +47,19 @@ const Login = () => {
     return birthMonth === currentMonth;
   });
 
-// call google login api
+  // call google login api
   const googleLoginMutation = useMutation<ILoginResponse, Error, string>({
     mutationFn: authService.googleLogin,
     onSuccess: (data) => {
       if (!data.user) {
         navigate('/register', { state: { googleData: { ...data } } });
       } else {
-        login(data.user, data.access_token);
-        navigate('/home');
-        toast({ title: 'เข้าสู่ระบบสำเร็จ', description: 'ยินดีต้อนรับสู่ระบบลางาน Funch.tech' });
+        login(data.user);
+        navigate('/profile');
       }
     },
     onError: (error) => {
-      toast({
-        title: 'Google Login ล้มเหลว',
-        description: error.message || 'ไม่สามารถเข้าสู่ระบบได้',
-        variant: 'destructive',
-      });
+      console.log('error google login ', error);
     },
   });
 
@@ -120,7 +114,7 @@ const Login = () => {
               <div className="flex flex-wrap gap-3">
                 {filteredHolidays.map((item) => {
                   const dateObj = new Date(item.startDate);
-                  const dayName = dateObj.toLocaleDateString('th-TH', { weekday: 'long' }).replace(/^วัน/, ''); 
+                  const dayName = dateObj.toLocaleDateString('th-TH', { weekday: 'long' }).replace(/^วัน/, '');
                   const dayNumber = dateObj.toLocaleDateString('th-TH', { day: '2-digit' });
                   return (
                     <div key={item.id} className="w-[141px] h-[102px] rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] p-3 py-2 shadow-md backdrop-blur-sm">

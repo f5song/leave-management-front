@@ -5,10 +5,6 @@ import { componentTagger } from "lovable-tagger";
 import svgr from "vite-plugin-svgr";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8081,
-  },
   plugins: [
     react(),
     svgr({

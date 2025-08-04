@@ -15,6 +15,9 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import { useState } from "react";
 import LeaveModal from "@/Components/Modals/LeaveModal";
 import FacilitiesModal from "@/Components/Modals/FacilitiesModal";
+import { useAuth } from "@/Contexts/AuthContext";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 // mock data
 const leaveData = [
@@ -69,39 +72,40 @@ const facilitiesData = [
 
 ];
 
-
-
-
-const schema = z.object({
-    firstName: z.string().min(2, 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร'),
-    lastName: z.string().min(2, 'นามสกุลต้องมีอย่างน้อย 2 ตัวอักษร'),
-    email: z.string().email('กรุณากรอกอีเมลที่ถูกต้อง'),
-    departmentId: z.string().min(1, 'กรุณาเลือกแผนก'),
-    jobTitleId: z.string().min(1, 'กรุณาเลือกตำแหน่ง'),
-    nickName: z.string().min(2, 'ชื่อเล่นต้องมีอย่างน้อย 2 ตัวอักษร'),
-    birthDate: z.string().min(1, 'กรุณาเลือกวันเกิด'),
-    googleId: z.string().min(1, 'กรุณากรอกรหัส Google'),
-    avatar: z.string().optional(),
-});
-
 const Profile = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
+
+    const schema = z.object({
+        firstName: z.string().min(2, 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร'),
+        lastName: z.string().min(2, 'นามสกุลต้องมีอย่างน้อย 2 ตัวอักษร'),
+        email: z.string().email('กรุณากรอกอีเมลที่ถูกต้อง'),
+        departmentId: z.string().min(1, 'กรุณาเลือกแผนก'),
+        jobTitleId: z.string().min(1, 'กรุณาเลือกตำแหน่ง'),
+        nickName: z.string().min(2, 'ชื่อเล่นต้องมีอย่างน้อย 2 ตัวอักษร'),
+        birthDate: z.string().min(1, 'กรุณาเลือกวันเกิด'),
+        googleId: z.string().min(1, 'กรุณากรอกรหัส Google'),
+        avatar: z.string().optional(),
+    });
+
     type ProfileData = z.infer<typeof schema>;
+
     const {
         control,
         register,
+        setValue,
     } = useForm<ProfileData>({
         resolver: zodResolver(schema),
         defaultValues: {
-            firstName: '',
-            lastName: '',
-            email: '',
-            departmentId: '',
-            jobTitleId: '',
-            nickName: '',
-            birthDate: '',
-            googleId: '',
-            avatar: undefined,
+            firstName: user?.firstName || '',
+            lastName: user?.lastName || '',
+            email: user?.email || '',
+            departmentId: user?.departmentId || '',
+            jobTitleId: user?.jobTitleId || '',
+            nickName: user?.nickName || '',
+            birthDate: user?.birthDate || '',
+            googleId: user?.googleId || '',
+            avatar: user?.avatarUrl || '',
         },
     });
 
@@ -120,6 +124,11 @@ const Profile = () => {
     const toggleLeaveModal = () => setLeaveModalOpen(!isLeaveModalOpen);
     const toggleFacilitiesModal = () => setFacilitiesModalOpen(!isFacilitiesModalOpen);
 
+    const formatDateForInput = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+    };
+
     return (
         <div className="flex flex-col min-h-screen bg-quaternary text-white px-4 md:px-8 py-8 relative">
             <LeaveModal
@@ -127,7 +136,7 @@ const Profile = () => {
                 onClose={() => setLeaveModalOpen(false)}
                 data={{ title: 'ประวัติการลา' }}
                 toggleModal={toggleLeaveModal}
-                
+
             />
             <FacilitiesModal
                 isOpen={isFacilitiesModalOpen}
@@ -178,7 +187,7 @@ const Profile = () => {
                                     <p className="font-sukhumvit text-[16px]">รูปพนักงาน</p>
                                     <img
                                         className="w-[160px] h-[160px] rounded-[4px] border border-[#000000]"
-                                        src=""
+                                        src={user?.avatarUrl}
                                         alt=""
                                     />
                                 </div>
@@ -187,28 +196,35 @@ const Profile = () => {
                                 <div className="flex flex-col w-full gap-3">
                                     <div className="w-full">
                                         <p className="text-[16px] text-white font-sukhumvit">อีเมล</p>
-                                        <Input className="w-full text-white" {...register('email')} disabled={!isEditing} />
+                                        <Input {...register('email')} disabled={!isEditing} />
                                     </div>
 
                                     <div className="flex flex-col md:flex-row gap-3">
                                         <div className="flex flex-col w-full">
                                             <p className="text-[16px] text-white font-sukhumvit">ชื่อจริง</p>
-                                            <Input className="text-white" {...register('firstName')} disabled={!isEditing} />
+                                            <Input {...register('firstName')} disabled={!isEditing} />
                                         </div>
                                         <div className="flex flex-col w-full">
                                             <p className="text-[16px] text-white font-sukhumvit">นามสกุล</p>
-                                            <Input className="text-white" {...register('lastName')} disabled={!isEditing} />
+                                            <Input {...register('lastName')} disabled={!isEditing} />
                                         </div>
                                     </div>
 
                                     <div className="flex flex-col md:flex-row gap-3">
                                         <div className="flex flex-col w-full">
                                             <p className="text-[16px] text-white font-sukhumvit">ชื่อเล่น</p>
-                                            <Input className="text-white" {...register('nickName')} disabled={!isEditing} />
+                                            <Input {...register('nickName')} disabled={!isEditing} />
                                         </div>
                                         <div className="flex flex-col w-full">
                                             <p className="text-[16px] text-white font-sukhumvit">วันเกิด</p>
-                                            <Input className="text-white" type="date" {...register('birthDate')} disabled={!isEditing} />
+                                            <DatePicker
+                                                selected={new Date(user.birthDate)} // ค่า default เป็น Date object
+                                                onChange={(date: Date) => setValue('birthDate', date.toString())} // setValue ด้วย Date
+                                                dateFormat="dd/MM/yyyy"
+                                                className=" w-full h-[49px] p-[12px] rounded-[4px] backdrop-blur-[8px] transition duration-200 bg-[#00000052] text-[var(--color-font)] placeholder-[var(--color-font)] border border-transparent hover:border-[#FFD000] hover:text-[#FFD000] hover:placeholder-[#FFD000] active:border-[#FFFFFF] active:text-[#FFFFFF] active:outline-none disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[#1A1A1A]"
+                                                disabled={!isEditing}
+                                            />
+
                                         </div>
                                     </div>
 

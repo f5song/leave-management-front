@@ -15,7 +15,7 @@ import { useAuth } from "@/Contexts/AuthContext";
 import Sidebar from "@/Components/Sidebar";
 import { Card } from "@/Components/Card";
 const Landing = () => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -156,9 +156,9 @@ const Landing = () => {
   const handleChangeStatus = async (newStatus: "APPROVED" | "REJECTED") => {
     console.log("🚀 ~ handleChangeStatus ~ newStatus:", newStatus)
     try {
-      if (!selectedLeave?.id || !token) return;
+      if (!selectedLeave?.id) return;
 
-      await updateLeaveStatus(token, selectedLeave.id, newStatus);
+      await updateLeaveStatus(selectedLeave.id, newStatus);
       console.log("🚀 ~ handleChangeStatus ~ selectedLeave:", selectedLeave)
 
       alert(`✅ เปลี่ยนสถานะเป็น ${newStatus} แล้ว`);

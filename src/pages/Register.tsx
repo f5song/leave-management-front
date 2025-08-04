@@ -5,7 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/Contexts/AuthContext';
-import { toast } from '@/Hooks/UseToast';
+import { toast } from '@/Shared/Hooks/UseToast';
 import { createUser } from '@/Api/users-service';
 import { getJobTitles } from '@/Api/job-title-service';
 import { getDepartments } from '@/Api/departments-service';
@@ -89,8 +89,8 @@ const Register = () => {
   const registerMutation = useMutation({
     mutationFn: createUser,
     onSuccess: (res) => {
-      const { user, access_token } = res;
-      login(user, access_token);
+      const { user } = res;
+      login(user);
       navigate('/home');
       toast({
         title: 'สมัครสมาชิกสำเร็จ',
