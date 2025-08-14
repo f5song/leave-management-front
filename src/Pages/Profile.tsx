@@ -18,55 +18,29 @@ import FacilitiesModal from "@/Components/Modals/FacilitiesModal";
 import { useAuth } from "@/Context/AuthContext";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { getLeavesByUser } from "@/Api/leave-service";
+import { getItemsRequestByUser } from "@/Api/items-requests";
 
-// mock data
-const leaveData = [
-    {
-        type: 'ลากิจ 2 วัน',
-        reason: 'ลาไปทำระทุ',
-        startDate: '26-07-2026',
-        endDate: '28-07-2026',
-    },
-    {
-        type: 'ลาป่วย 1 วัน',
-        reason: 'เป็นไข้',
-        startDate: '01-08-2026',
-        endDate: '01-08-2026',
-    },
-    {
-        type: 'ลาพักร้อน 3 วัน',
-        reason: 'ไปเที่ยวทะเล',
-        startDate: '10-08-2026',
-        endDate: '12-08-2026',
-    },
-    {
-        type: 'ลาพักร้อน 3 วัน',
-        reason: 'ไปเที่ยวทะเล',
-        startDate: '10-08-2026',
-        endDate: '12-08-2026',
-    },
-];
-
-const facilitiesData = [
+const itemData = [
     {
         name: 'MACKBOOK',
         quantity: 'จำนวน 1',
-        timeStamp: '26-07-2026 12:30',
+        createdAt: '26-07-2026 12:30',
     },
     {
         name: 'Adobe Creative Cloud',
         quantity: 'จำนวน 1',
-        timeStamp: '26-07-2026 12:30',
+        createdAt: '26-07-2026 12:30',
     },
     {
         name: 'Midjourney Image Generator AI',
         quantity: 'จำนวน 1',
-        timeStamp: '26-07-2026 12:30',
+        createdAt: '26-07-2026 12:30',
     },
     {
         name: 'CHAT GPT',
         quantity: 'จำนวน 1',
-        timeStamp: '26-07-2026 12:30',
+        createdAt: '26-07-2026 12:30',
     },
 
 
@@ -76,15 +50,36 @@ const Profile = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
 
+    const [isEditing, setIsEditing] = useState(false);
+    const toggleEditing = () => setIsEditing((prev) => !prev);
+
+    const [isLeaveModalOpen, setLeaveModalOpen] = useState(false);
+    const [isFacilitiesModalOpen, setFacilitiesModalOpen] = useState(false);
+
+    const toggleLeaveModal = () => setLeaveModalOpen(!isLeaveModalOpen);
+    const toggleFacilitiesModal = () => setFacilitiesModalOpen(!isFacilitiesModalOpen);
+
+    const { data: departments = [] } = useQuery({ queryKey: ['departments'], queryFn: getDepartments });
+    const { data: jobTitles = [] } = useQuery({ queryKey: ['jobTitles'], queryFn: getJobTitles });
+    const { data: { data: leaveData = [] } = {} } = useQuery({
+        queryKey: ['leaveData'],
+        queryFn: () => getLeavesByUser(user?.id || ''),
+    });
+    const { data: { data: itemsRequest = [] } = {} } = useQuery({
+        queryKey: ['itemsRequest'],
+        queryFn: () => getItemsRequestByUser(user?.id || ''),
+    });
+    
+
     const schema = z.object({
-        firstName: z.string().min(2, 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร'),
-        lastName: z.string().min(2, 'นามสกุลต้องมีอย่างน้อย 2 ตัวอักษร'),
-        email: z.string().email('กรุณากรอกอีเมลที่ถูกต้อง'),
-        departmentId: z.string().min(1, 'กรุณาเลือกแผนก'),
-        jobTitleId: z.string().min(1, 'กรุณาเลือกตำแหน่ง'),
-        nickName: z.string().min(2, 'ชื่อเล่นต้องมีอย่างน้อย 2 ตัวอักษร'),
-        birthDate: z.string().min(1, 'กรุณาเลือกวันเกิด'),
-        googleId: z.string().min(1, 'กรุณากรอกรหัส Google'),
+        firstName: z.string().min(2, { message: 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร' }).max(20, { message: 'ชื่อต้องมีไม่เกิน 20 ตัวอักษร' }),
+        lastName: z.string().min(2, { message: 'นามสกุลต้องมีอย่างน้อย 2 ตัวอักษร' }).max(20, { message: 'นามสกุลต้องมีไม่เกิน 20 ตัวอักษร' }),
+        email: z.string().email({ message: 'กรุณากรอกอีเมลที่ถูกต้อง' }),
+        departmentId: z.string().min(1, { message: 'กรุณาเลือกแผนก' }),
+        jobTitleId: z.string().min(1, { message: 'กรุณาเลือกตำแหน่ง' }),
+        nickName: z.string().min(2, { message: 'ชื่อเล่นต้องมีอย่างน้อย 2 ตัวอักษร' }).max(20, { message: 'ชื่อเล่นต้องมีไม่เกิน 20 ตัวอักษร' }),
+        birthDate: z.string().min(1, { message: 'กรุณาเลือกวันเกิด' }),
+        googleId: z.string().min(1, { message: 'กรุณากรอกรหัส Google' }).max(20, { message: 'รหัส Google ต้องมีไม่เกิน 20 ตัวอักษร' }),
         avatar: z.string().optional(),
     });
 
@@ -108,26 +103,6 @@ const Profile = () => {
             avatar: user?.avatarUrl || '',
         },
     });
-
-    const { data: departments = [] } = useQuery({ queryKey: ['departments'], queryFn: getDepartments });
-    const { data: jobTitles = [] } = useQuery({ queryKey: ['jobTitles'], queryFn: getJobTitles });
-
-    const [isEditing, setIsEditing] = useState(false);
-
-    const toggleEditing = () => {
-        setIsEditing((prev) => !prev);
-    };
-
-    const [isLeaveModalOpen, setLeaveModalOpen] = useState(false);
-    const [isFacilitiesModalOpen, setFacilitiesModalOpen] = useState(false);
-
-    const toggleLeaveModal = () => setLeaveModalOpen(!isLeaveModalOpen);
-    const toggleFacilitiesModal = () => setFacilitiesModalOpen(!isFacilitiesModalOpen);
-
-    const formatDateForInput = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toISOString().split('T')[0];
-    };
 
     return (
         <div className="flex flex-col min-h-screen bg-quaternary text-white px-4 md:px-8 py-8 relative">
@@ -193,20 +168,22 @@ const Profile = () => {
                                 </div>
 
                                 {/* ฟอร์ม */}
+
+                                {/* เปลี่ยนแท็ก p เป็น Label */}
                                 <div className="flex flex-col w-full gap-3">
                                     <div className="w-full">
                                         <p className="text-[16px] text-white font-sukhumvit">อีเมล</p>
-                                        <Input {...register('email')} disabled={!isEditing} />
+                                        <Input {...register('email')} className="w-full" disabled={!isEditing} />
                                     </div>
 
                                     <div className="flex flex-col md:flex-row gap-3">
                                         <div className="flex flex-col w-full">
                                             <p className="text-[16px] text-white font-sukhumvit">ชื่อจริง</p>
-                                            <Input {...register('firstName')} disabled={!isEditing} />
+                                            <Input {...register('firstName')} className="w-full" disabled={!isEditing} />
                                         </div>
                                         <div className="flex flex-col w-full">
                                             <p className="text-[16px] text-white font-sukhumvit">นามสกุล</p>
-                                            <Input {...register('lastName')} disabled={!isEditing} />
+                                            <Input {...register('lastName')} className="w-full" disabled={!isEditing} />
                                         </div>
                                     </div>
 
@@ -216,7 +193,7 @@ const Profile = () => {
                                             <Input {...register('nickName')} disabled={!isEditing} />
                                         </div>
                                         <div className="flex flex-col w-full">
-                                            <p className="text-[16px] text-white font-sukhumvit">วันเกิด</p>
+                                            <Label htmlFor="birthDate">วันเกิด</Label>
                                             <DatePicker
                                                 selected={new Date(user.birthDate)} // ค่า default เป็น Date object
                                                 onChange={(date: Date) => setValue('birthDate', date.toString())} // setValue ด้วย Date
@@ -230,7 +207,7 @@ const Profile = () => {
 
                                     <div className="flex flex-col md:flex-row gap-3">
                                         <div className="flex flex-col w-full">
-                                            <p className="text-[16px] text-white font-sukhumvit">แผนก</p>
+                                            <Label htmlFor="departmentId">แผนก</Label>
                                             <Controller
                                                 name="departmentId"
                                                 control={control}
@@ -306,7 +283,7 @@ const Profile = () => {
                                     </div>
                                 </div>
 
-                                {/* เส้นคั่น */}
+                                {/* เส้นคั่น แยกเป็น components*/}
                                 <div className="hidden sm:flex w-px h-[72px] bg-white opacity-30 my-auto" />
 
                                 {/* ลาป่วย */}
@@ -355,15 +332,19 @@ const Profile = () => {
                                             className="flex flex-row border-b border-[#676767] pt-3 pb-1 justify-between"
                                         >
                                             <div className="w-[110px]">
-                                                <p className="font-sukhumvit text-[16px] text-white">{leave.type}</p>
+                                                <p className="font-sukhumvit text-[16px] text-white">{leave.title}</p>
                                             </div>
                                             <div className="w-[178px]">
-                                                <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{leave.reason}</p>
+                                                <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{leave.description}</p>
                                             </div>
                                             <div className="flex flex-row items-center w-[168px]">
-                                                <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{leave.startDate}</p>
+                                                <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">
+                                                    {new Date(leave.startDate).toISOString().split('T')[0]}
+                                                </p>
                                                 <ArrowIcon className="fill-white" />
-                                                <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{leave.endDate}</p>
+                                                <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">
+                                                    {new Date(leave.endDate).toISOString().split('T')[0]}
+                                                </p>
                                             </div>
                                         </div>
                                     ))}
@@ -384,24 +365,22 @@ const Profile = () => {
                                             <ComputerIcon className="w-[15px] h-[15px] fill-[#DCDCDC] group-hover:fill-white transition-colors" />
                                             <p className="font-sukhumvit text-[16px] text-[#DCDCDC] group-hover:text-white transition-colors ml-1">ดูทั้งหมด</p>
                                         </div>
-
                                     </div>
 
-                                    {facilitiesData.map((facility, index) => (
+                                    {itemsRequest.map((item, index) => (
                                         <div
                                             key={index}
                                             className="flex flex-row border-b border-[#676767] pt-3 pb-1 justify-between"
                                         >
                                             <div className="w-[232px]">
-                                                <p className="font-sukhumvit text-[16px] text-white">{facility.name}</p>
+                                                <p className="font-sukhumvit text-[16px] text-white">{item.itemName}</p>
                                             </div>
                                             <div className="w-[68px]">
-                                                <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{facility.quantity}</p>
+                                                <p className="font-sukhumvit-semibold text-[14px] text-white">จำนวน {item.quantity}</p>
                                             </div>
-                                            <div className="flex flex-row items-center w-[120px]">
-                                                <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{facility.timeStamp}</p>
-                                            </div>
-                                            <BackIcon className="w-[24px] h-[24px]" />
+                                            <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">
+                                                {new Date(item.createdAt).toLocaleString('sv-SE', { timeZone: 'Asia/Bangkok' })}
+                                            </p>
                                         </div>
                                     ))}
 
@@ -421,3 +400,4 @@ const Profile = () => {
 };
 
 export default Profile;
+

@@ -17,7 +17,7 @@ const Navbar: React.FC<NavbarProps> = ({ onClick }) => {
     const navigate = useNavigate();
 
     const menuItems = [
-        { label: 'แดชบอร์ด', icon: CalendarIcon, path: '/home' },
+        { label: 'แดชบอร์ด', icon: CalendarIcon, path: '/calendar' },
         { label: 'อุปกรณ์', icon: ComputerIcon, path: '/devices' },
         { label: 'ขอพร', icon: StarIcon, path: '/pray' },
         { label: 'โปรไฟล์', icon: ProfileSmallIcon, path: '/profile' },

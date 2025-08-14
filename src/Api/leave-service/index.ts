@@ -37,13 +37,8 @@ export const getLeaves = async (start?: string, end?: string) => {
   return response.data;
 };
 
-export const getLeavesByUser = async (userId: string, start?: string, end?: string) => {
-  const queryParams = new URLSearchParams();
-
-  if (start) queryParams.append("start", start);
-  if (end) queryParams.append("end", end);
-
-  const response = await apiClient.get(`leaves/user/${userId}?${queryParams.toString()}`);
+export const getLeavesByUser = async (userId: string) => {
+  const response = await apiClient.get(`leaves/user/${userId}`);
 
   return response.data;
 };

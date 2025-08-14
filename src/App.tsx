@@ -8,10 +8,12 @@ import { AuthProvider } from "@/Context/AuthContext";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
 import Profile from "./Pages/Profile";
+import Calendar from "./Pages/Calendar";
 import NotFound from "./Pages/NotFound";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import Landing from "./Pages/Landing";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
+import Device from "./Pages/Device";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,8 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/landing" element={<Landing />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/device" element={<Device />} />
             {/* <Route 
               path="/home" 
               element={
