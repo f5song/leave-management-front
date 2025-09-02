@@ -13,20 +13,25 @@ const getStatusClass = (status: string): string => {
       return "border-[#6FA5F7] text-[#6FA5F7]";
     case "ปฏิเสธ":
       return "border-[#EF4444] text-[#EF4444]";
+    case "มีในสต๊อค":
+      return "border-[#34D399] text-[#34D399]";
     default:
-      return "border-gray-400 text-gray-400";
+      return "border-[#FFD000] text-[#FFD000]";
   }
 };
 
 const StatusBadge: React.FC<Props> = ({ status }) => {
   return (
-    <span
-      className={`flex items-center justify-center text-[14px] bg-[#00000052] w-[65px] h-[26px] rounded-[16px] border ${getStatusClass(
-        status
-      )}`}
-    >
-      {status}
-    </span>
+    <div className="flex items-center justify-center h-[26px]">
+      <span
+        className={`inline-block font-sukhumvit text-[14px] bg-[#00000052] px-2 py-1 max-w-[5vw] rounded-[16px] border ${getStatusClass(
+          status
+        )} truncate`}
+        title={status}
+      >
+        {status}
+      </span>
+    </div>
   );
 };
 

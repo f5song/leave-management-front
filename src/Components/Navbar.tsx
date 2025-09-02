@@ -7,6 +7,8 @@ import {
 } from '@/Shared/Asseet/Icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
+import { useAuth } from '@/Context/AuthContext';
+import { authService } from '@/Api/auth-service';
 
 interface NavbarProps {
     onClick: () => void;
@@ -15,10 +17,21 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ onClick }) => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { user } = useAuth();
+
+    const handleLogout = async () => {
+        try {
+            await authService.logout();
+            console.log("Logout function");
+            navigate("/login");
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
+    };
 
     const menuItems = [
         { label: 'แดชบอร์ด', icon: CalendarIcon, path: '/calendar' },
-        { label: 'อุปกรณ์', icon: ComputerIcon, path: '/devices' },
+        { label: 'อุปกรณ์', icon: ComputerIcon, path: '/device' },
         { label: 'ขอพร', icon: StarIcon, path: '/pray' },
         { label: 'โปรไฟล์', icon: ProfileSmallIcon, path: '/profile' },
     ];
@@ -69,13 +82,13 @@ const Navbar: React.FC<NavbarProps> = ({ onClick }) => {
                 {/* Profile Box */}
                 <div className="flex items-center gap-3 h-[70px] bg-[#FFFFFF14] rounded-[8px] border border-[#FFFFFF14] p-2 shadow-[0_4px_15px_0_rgba(0,0,0,0.2)] min-w-[200px]">
                     <div className="w-[48px] h-[48px] rounded-[4px] bg-[#FFFFFF14] overflow-hidden">
-                        <img src="" alt="profile" className="w-full h-full object-cover" />
+                        <img src={user?.avatarUrl} alt="profile" className="w-full h-full object-cover" />
                     </div>
                     <div className="flex flex-col">
                         <p className="font-sukhumvit text-white text-[14px] font-semibold leading-none pb-3">
-                            Songfolk
+                            {user?.firstName} {user?.lastName}
                         </p>
-                        <p className="font-sukhumvit text-[12px] font-semibold text-[var(--color-font)] leading-none">
+                        <p className="font-sukhumvit text-[12px] font-semibold text-[var(--color-font)] leading-none cursor-pointer hover:text-white" onClick={() => navigate('/profile')}>
                             ดูโปรไฟล์
                         </p>
                     </div>
@@ -84,8 +97,8 @@ const Navbar: React.FC<NavbarProps> = ({ onClick }) => {
 
                     {/* Logout */}
                     <div className="flex flex-col items-center justify-center w-[65px]">
-                        <LogOutIcon className="w-6 h-6 fill-[#676767]" />
-                        <div className="font-sukhumvit text-[14px] font-semibold text-[var(--color-font)]">ออก</div>
+                        <LogOutIcon className="w-6 h-6 fill-[#676767] hover:text-white" />
+                        <div className="font-sukhumvit text-[14px] font-semibold text-[var(--color-font)] hover:text-white cursor-pointer" onClick={handleLogout}>ออก</div>
                     </div>
                 </div>
 

@@ -11,7 +11,7 @@ import StatusBadge from "@/Components/StatusBadge";
 import StatusTab from "@/Components/StatusTab";
 import TableHeadCell from "../Table/TableHeadCell";
 
-type LeaveModalProps = {
+type ItemsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   data: {
@@ -20,16 +20,14 @@ type LeaveModalProps = {
   toggleModal: () => void;
 };
 
-const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, data }) => {
+const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data }) => {
 
-  const leaveData = Array.from({ length: 50 }, (_, i) => ({
+  const itemsData = Array.from({ length: 20 }, (_, i) => ({
     id: i + 1,
-    leaveType: "ลาพักร้อน",
-    reason: `ลาไปทำธุระ ${i + 1}`,
-    numberOfDays: "1 วัน",
-    status: i % 3 === 0 ? "รออนุมัติ" : i % 3 === 1 ? "อนุมัติ" : "ปฏิเสธ",
-    startDate: "2025-07-21",
-    endDate: "2025-07-21",
+    name: "MACBOOK",
+    employeeName: "งูพิษชยา แซวมอล",
+    status: "อนุมัติ",
+    dateTime: "2025-07-21 12:00",
   }));
 
   const statusTabs = [
@@ -44,8 +42,8 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, data }) => {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
   const filteredData = selectedStatus
-    ? leaveData.filter((item) => item.status === selectedStatus)
-    : leaveData;
+    ? itemsData.filter((item) => item.status === selectedStatus)
+    : itemsData;
   const totalPages = Math.ceil(filteredData.length / itemPerPage);
 
   const startIndex = (currentPage - 1) * itemPerPage;
@@ -117,27 +115,23 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, data }) => {
           <Table.Container>
             {/* ทำเป็นทีละ row เหมือน body*/}
             <Table.Head>
-              <TableHeadCell width="w-[120px]">ลาพักร้อน/ลาป่วย/ลากิจ</TableHeadCell>
-              <TableHeadCell width="w-[275px]" style={{ fontWeight: "bold" }}>สาเหตุ</TableHeadCell>
-              <TableHeadCell width="w-[81px]" style={{ fontWeight: "bold" }}>จำนวนวันลา</TableHeadCell>
-              <TableHeadCell width="w-[65px]">สถานะ</TableHeadCell>
-              <TableHeadCell width="w-[120px]" style={{ fontWeight: "bold" }}>วันที่ลา</TableHeadCell>
+                <TableHeadCell width="w-[600px]">อุปกรณ์ที่ขอยืม</TableHeadCell>
+                <TableHeadCell width="w-[300px]">พนักงานที่ยืม</TableHeadCell>
+                <TableHeadCell width="w-[90px]">สถานะ</TableHeadCell>
+                <TableHeadCell width="w-[200px]">วันที่ยืม</TableHeadCell>
             </Table.Head>
 
             <Table.Body>
               {paginatedData.map((item, index) => (
                 <Table.Row key={index}>
-                  <Table.Cell hasTopBorder={index !== 0}>{item.leaveType}</Table.Cell>
-                  <Table.Cell hasTopBorder={index !== 0}>{item.reason}</Table.Cell>
-                  <Table.Cell hasTopBorder={index !== 0}>{item.numberOfDays}</Table.Cell>
+                  <Table.Cell hasTopBorder={index !== 0}>{item.name}</Table.Cell>
+                  <Table.Cell hasTopBorder={index !== 0}>{item.employeeName}</Table.Cell>
                   <Table.Cell hasTopBorder={index !== 0}>
                     <StatusBadge status={item.status} />
                   </Table.Cell>
                   <Table.Cell hasTopBorder={index !== 0}>
                     <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                      <span>{item.startDate}</span>
-                      <ArrowIcon className="fill-white w-[15px] h-[15px]" />
-                      <span>{item.endDate}</span>
+                      <span>{item.dateTime}</span>
                     </span>
                   </Table.Cell>
                 </Table.Row>
@@ -197,4 +191,4 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, data }) => {
   );
 };
 
-export default LeaveModal;
+export default ItemsModal;

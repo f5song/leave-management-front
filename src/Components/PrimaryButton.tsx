@@ -5,6 +5,7 @@ interface PrimaryButtonProps {
     onClick?: () => void;
     type?: "button" | "submit";
     disabled?: boolean;
+    className?: string;
 }
 
 const PrimaryButton: React.FC<PrimaryButtonProps> = ({
@@ -12,6 +13,7 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({
     onClick,
     type = "button",
     disabled = false,
+    className,
 }) => {
     return (
         <button
@@ -27,7 +29,8 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({
                 "active:bg-[#F3A600] active:text-[#191919]",
                 "active:shadow-[4px_6px_15px_0px_#00000085]",
                 "transition duration-200",
-                disabled && "bg-[#414141] text-[var(--color-gray)] cursor-not-allowed"
+                disabled && "bg-[#414141] text-[var(--color-gray)] cursor-not-allowed",
+                className
             )}
         >
             {children}

@@ -9,6 +9,7 @@ import Table from "@/Components/Table/Table";
 import TableHead from "../Table/TableHead";
 import StatusBadge from "../StatusBadge";
 import StatusTab from "../StatusTab";
+import TableHeadCell from "../Table/TableHeadCell";
 
 type FacilitiesModalProps = {
   isOpen: boolean;
@@ -113,33 +114,13 @@ const FacilitiesModal: React.FC<FacilitiesModalProps> = ({ isOpen, onClose, data
 
 
           <Table.Container>
-            <TableHead
-              columns={[
-                {
-                  label: "อุปกรณ์ที่ขอยืม",
-                  width: "w-[380px]",
-                  className: "text-left",
-                },
-                {
-                  label: "จำนวน",
-                  width: "w-[120px]",
-                  className: "text-left",
-                  style: { fontWeight: "bold" },
-                },
-                {
-                  label: "สถานะ",
-                  width: "w-[81px]",
-                  className: "text-left",
-                  style: { fontWeight: "bold" },
-                },
-                {
-                  label: "วันที่ยืม",
-                  width: "w-[120px]",
-                  className: "text-left",
-                  style: { fontWeight: "bold" },
-                },
-              ]}
-            />
+            <TableHead>
+              <TableHeadCell width="w-[120px]">ลาพักร้อน/ลาป่วย/ลากิจ</TableHeadCell>
+              <TableHeadCell width="w-[275px]" style={{ fontWeight: "bold" }}>สาเหตุ</TableHeadCell>
+              <TableHeadCell width="w-[81px]" style={{ fontWeight: "bold" }}>จำนวนวันลา</TableHeadCell>
+              <TableHeadCell width="w-[65px]">สถานะ</TableHeadCell>
+              <TableHeadCell width="w-[120px]" style={{ fontWeight: "bold" }}>วันที่ลา</TableHeadCell>
+            </TableHead>
 
             <Table.Body>
               {paginatedData.map((item, index) => {

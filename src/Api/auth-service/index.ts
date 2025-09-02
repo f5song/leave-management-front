@@ -1,6 +1,7 @@
 import apiClient from '@/Api/apiClient';
 import { IGoogleLoginResponse } from './Interface/google.interface';
 import { ILoginResponse } from './Interface/login.interface';
+import { string } from 'zod';
 // import {ILoginResponse, IGoogleLoginResponse} from './interfaces';
 
 export const authService = {
@@ -23,11 +24,20 @@ export const authService = {
   },
 
   async getCurrentUser() {
-    const { data } = await apiClient.get('/auth/profile');
+    const { data } = await apiClient.get('/auth/me');
     return data;
   },
 
-  logout() {
-    localStorage.removeItem('authToken');
+  async logout() {
+    const { data } = await apiClient.post('/auth/logout');
+    return data;
   },
+
+  // async getAvatar() {
+  //   const response = await apiClient.get("https://media.matchday.co.th/payment_receipt/307318.jpeg", {
+  //     responseType: 'arraybuffer',
+  //   });
+  //   return response.data;
+  // },
+
 };

@@ -1,9 +1,9 @@
 export interface ILeaveInput {
-    title: string;
+    title?: string;
     description?: string;
-    startDate: string;
-    endDate: string;
-    totalDays: number;
-    leaveTypeId: string;
+    startDate?: Date;
+    endDate?: Date;
+    totalDays?: number;
+    leaveTypeId?: string;
   }
   

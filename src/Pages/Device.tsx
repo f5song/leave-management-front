@@ -11,6 +11,9 @@ import LeaveModal from "@/Components/Modals/LeaveModal";
 import FacilitiesModal from "@/Components/Modals/FacilitiesModal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import StatusBadge from "@/Components/StatusBadge";
+import DeviceCard from "@/Components/DeviceCard";
+import ItemsModal from "@/Components/Modals/ItemsModal";
 
 const mockUser = {
   firstName: "สมชาย",
@@ -24,30 +27,27 @@ const mockUser = {
   avatarUrl: "https://via.placeholder.com/160",
 };
 
-const mockDepartments = [
-  { value: "dep1", label: "ฝ่ายการตลาด" },
-  { value: "dep2", label: "ฝ่ายพัฒนา" },
-  { value: "dep3", label: "ฝ่ายทรัพยากรบุคคล" },
+const itemsHistoryData = [
+  { id: 1, title: "MACBOOK Air ชิป M2 สีแดงแรง ฤทธิ์ฟน่ดห่กดร่ยรด่", employee: "งูพิษชยา แซวมอล", dateTime: "28-07-2026 12:30", status: "อนุมัติ", image: "https://via.placeholder.com/160" },
+  { id: 2, title: "MACBOOK Air ชิป M2 สีแดงแรง ฤทธิ์ฟวหกาฟนหากยนฟห", employee: "พัชรดนุย หัวคุย", dateTime: "01-08-2026 12:30", status: "รออนุมัติ", image: "https://via.placeholder.com/160" },
+  { id: 3, title: "MACBOOK Air ชิป M2 สีแดงแรง ฤทธิ์", employee: "จักมันส์ รักแฟนค้าบ", dateTime: "10-08-2026 12:30", status: "ปฏิเสธ", image: "https://via.placeholder.com/160" },
+  { id: 4, title: "MACBOOK Air ชิป M2 สีแดงแรง ฤทธิ์", employee: "จักมันส์ รักแฟนค้าบ", dateTime: "10-08-2026 12:30", status: "ปฏิเสธ", image: "https://via.placeholder.com/160" },
+  { id: 5, title: "MACBOOK Air ชิป M2 สีแดงแรง ฤทธิ์", employee: "จักมันส์ รักแฟนค้าบ", dateTime: "10-08-2026 12:30", status: "ปฏิเสธ", image: "https://via.placeholder.com/160" },
+  { id: 6, title: "MACBOOK Air ชิป M2 สีแดงแรง ฤทธิ์ฟน่ดห่กดร่ยรด่", employee: "งูพิษชยา แซวมอล", dateTime: "28-07-2026 12:30", status: "อนุมัติ", image: "https://via.placeholder.com/160" },
+  { id: 7, title: "MACBOOK Air ชิป M2 สีแดงแรง ฤทธิ์ฟน่ดห่กดร่ยรด่", employee: "งูพิษชยา แซวมอล", dateTime: "28-07-2026 12:30", status: "อนุมัติ", image: "https://via.placeholder.com/160" },
 ];
 
-const mockJobTitles = [
-  { value: "title1", label: "นักพัฒนา Frontend" },
-  { value: "title2", label: "นักพัฒนา Backend" },
-  { value: "title3", label: "นักออกแบบ UX/UI" },
+const itemsStockData = [
+  { id: "MB03052025", title: "MACBOOK Air ชิป M2 สีแดงแรง ฤทธิ์ฟน่ดห่กดร่ยรด่", date: "28-07-2026", status: "มีในสต๊อค", image: "https://via.placeholder.com/160" },
+  { id: "MB03052025", title: "MACBOOK Air ชิป M2 สีแดงแรง ฤทธิ์ฟวหกาฟนหากยนฟห", date: "01-08-2026", status: "มีในสต๊อค", image: "https://via.placeholder.com/160" },
+  { id: "MB03052025", title: "MACBOOK Air ชิป M2 สีแดงแรง ฤทธิ์", date: "10-08-2026", status: "มีในสต๊อค", image: "https://via.placeholder.com/160" },
+  { id: "MB03052025", title: "MACBOOK Air ชิป M2 สีแดงแรง ฤทธิ์", date: "10-08-2026", status: "มีในสต๊อค", image: "https://via.placeholder.com/160" },
+  { id: "MB03052025", title: "MACBOOK Air ชิป M2 สีแดงแรง ฤทธิ์", date: "10-08-2026", status: "มีในสต๊อค", image: "https://via.placeholder.com/160" },
+  { id: "MB03052025", title: "MACBOOK Air ชิป M2 สีแดงแรง ฤทธิ์ฟน่ดห่กดร่ยรด่", date: "28-07-2026", status: "มีในสต๊อค", image: "https://via.placeholder.com/160" },
+  { id: "MB03052025", title: "MACBOOK Air ชิป M2 สีแดงแรง ฤทธิ์ฟน่ดห่กดร่ยรด่", date: "28-07-2026", status: "จักมันส์ รักแฟนค้าบ", image: "https://via.placeholder.com/160" },
+  { id: "MB03052025", title: "MACBOOK Air ชิป M2 สีแดงแรง ฤทธิ์ฟน่ดห่กดร่ยรด่", date: "28-07-2026", status: "จักมันส์ รักแฟนค้าบ", image: "https://via.placeholder.com/160" },
 ];
 
-const mockLeaveData = [
-  { type: "ลากิจ 2 วัน", reason: "ลาไปทำธุระ", startDate: "26-07-2026", endDate: "28-07-2026" },
-  { type: "ลาป่วย 1 วัน", reason: "เป็นไข้", startDate: "01-08-2026", endDate: "01-08-2026" },
-  { type: "ลาพักร้อน 3 วัน", reason: "ไปเที่ยวทะเล", startDate: "10-08-2026", endDate: "12-08-2026" },
-];
-
-const facilitiesData = [
-  { name: "MACKBOOK", quantity: "จำนวน 1", timeStamp: "26-07-2026 12:30" },
-  { name: "Adobe Creative Cloud", quantity: "จำนวน 1", timeStamp: "26-07-2026 12:30" },
-  { name: "Midjourney Image Generator AI", quantity: "จำนวน 1", timeStamp: "26-07-2026 12:30" },
-  { name: "CHAT GPT", quantity: "จำนวน 1", timeStamp: "26-07-2026 12:30" },
-];
 
 const Device = () => {
   const navigate = useNavigate();
@@ -59,6 +59,14 @@ const Device = () => {
   const [isFacilitiesModalOpen, setFacilitiesModalOpen] = useState(false);
   const toggleLeaveModal = () => setLeaveModalOpen((v) => !v);
   const toggleFacilitiesModal = () => setFacilitiesModalOpen((v) => !v);
+  const [filter, setFilter] = useState<"ทั้งหมด" | "มีในสต๊อค" | "ยืมอุปกรณ์">(
+    "ทั้งหมด"
+  );
+
+  const filteredItems =
+    filter === "ทั้งหมด"
+      ? itemsStockData
+      : itemsStockData.filter((d) => d.status === filter);
 
   const [formData, setFormData] = useState({
     email: mockUser.email,
@@ -77,17 +85,11 @@ const Device = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-quaternary text-white px-4 md:px-8 py-8 relative">
-      <LeaveModal
+      <ItemsModal
         isOpen={isLeaveModalOpen}
         onClose={() => setLeaveModalOpen(false)}
-        data={{ title: "ประวัติการลา" }}
-        toggleModal={toggleLeaveModal}
-      />
-      <FacilitiesModal
-        isOpen={isFacilitiesModalOpen}
-        onClose={() => setFacilitiesModalOpen(false)}
         data={{ title: "ประวัติยืมอุปกรณ์" }}
-        toggleModal={toggleFacilitiesModal}
+        toggleModal={toggleLeaveModal}
       />
       <Navbar onClick={() => navigate("/home")} />
       <BackgroundGradient />
@@ -101,14 +103,29 @@ const Device = () => {
           {/* left panel */}
           <div className="flex flex-col w-full rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] shadow-[0_4px_43px_0_rgba(0,0,0,0.32)] z-10">
             <div className="flex flex-col px-5 pt-5">
-              <div className="flex flex-row bg-[#00000052] rounded-[8px] w-full gap-1">
-                <p className="font-sukhumvit-bold text-[20px] bg-[#FFD000] rounded-[4px] text-[#000000] py-1 px-2">ทั้งหมด</p>
-                <p className="font-sukhumvit-bold text-[20px] rounded-[4px] text-[#FFD000] py-1 px-2">มีในสต๊อค</p>
-                <p className="font-sukhumvit-bold text-[20px] rounded-[4px] text-[#FFD000] py-1 px-2">ยืมอุปกรณ์</p>
+              {/* ปุ่ม filter */}
+              <div className="flex flex-row bg-[#00000052] rounded-[8px] w-full gap-1 p-1">
+                {["ทั้งหมด", "มีในสต๊อค", "ยืมอุปกรณ์"].map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setFilter(f as any)}
+                    className={`font-sukhumvit-bold text-[20px] rounded-[4px] py-1 px-2 transition ${filter === f
+                      ? "bg-[#FFD000] text-[#000000]"
+                      : "text-[#FFD000] hover:bg-[#FFD00022]"
+                      }`}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+
+              {/* list card */}
+              <div className="flex flex-row flex-wrap gap-5 my-3">
+                {filteredItems.map((device) => (
+                  <DeviceCard key={device.id} device={device} />
+                ))}
               </div>
             </div>
-
-
           </div>
 
           {/* right */}
@@ -125,25 +142,26 @@ const Device = () => {
                     </div>
                   </div>
 
-                  {mockLeaveData.map((leave, index) => (
-                    <div key={index} className="flex flex-row border-b border-[#676767] pt-3 pb-1 justify-between">
-                      <div className="w-[110px]">
-                        <p className="font-sukhumvit text-[16px] text-white">{leave.type}</p>
+                  {itemsHistoryData.map((item, index) => (
+                    <div key={index} className="flex flex-row border-b border-[#676767] pt-5 pb-1 justify-between">
+                      <img className="w-[92px] h-[52px] rounded-[4px]" src={item.image} alt="" />
+                      <div className="flex flex-col w-[20vw] pl-2 pr-5">
+                        <p className="font-sukhumvit text-[16px] text-white truncate">
+                          {item.title}
+                        </p>
+                        <div className="flex flex-row justify-between">
+                          <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{item.employee}</p>
+                          <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{item.dateTime}</p>
+                        </div>
                       </div>
-                      <div className="w-[178px]">
-                        <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{leave.reason}</p>
-                      </div>
-                      <div className="flex flex-row items-center w-[168px]">
-                        <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{leave.startDate}</p>
-                        <ArrowIcon className="fill-white" />
-                        <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{leave.endDate}</p>
-                      </div>
+                      <StatusBadge status={item.status} />
+
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-            
+
           </div>
           {/* end right */}
         </div>

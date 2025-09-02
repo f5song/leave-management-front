@@ -112,7 +112,7 @@ const Register = () => {
     Object.entries(data).forEach(([key, value]) => {
       form.append(key, value.toString());
     });
-    form.append('roleId', 'employee');
+    form.append('role', 'employee');
     form.append('avatar', avatar);
 
     registerMutation.mutate(form);

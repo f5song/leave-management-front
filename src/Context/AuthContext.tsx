@@ -3,16 +3,17 @@ import { authService } from '@/Api/auth-service';
 
 interface User {
   id: string;
+  googleId: string;
   firstName: string;
   lastName: string;
-  email: string;
-  googleId: string;
-  role: string;
-  departmentId: string;
-  jobTitleId: string;
   nickName: string;
-  birthDate: string;
   avatarUrl: string;
+  birthDate: string;
+  jobTitleId: string;
+  departmentId: string;
+  email: string;
+  role: string;
+  
 }
 
 interface AuthContextType {

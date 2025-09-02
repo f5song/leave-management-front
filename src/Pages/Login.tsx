@@ -13,6 +13,8 @@ import { IHoliday } from '@/Api/holidays-service/interfaces/holidays.interface';
 import { expandHolidayDates } from '@/Api/holidays-service/utils/expandHolidayDates';
 import { getBirthdays } from '@/Api/users-service';
 
+
+
 const monthNames = [
   'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
   'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
@@ -72,6 +74,9 @@ const Login = () => {
     },
     onError: (error) => console.log('error google login ', error),
   });
+
+
+  // const { data: avatar } = useQuery({ queryKey: ['avatar'], queryFn: authService.getAvatar });
 
   return (
     <div className="relative min-h-screen flex flex-col lg:flex-row">

@@ -12,7 +12,7 @@ import { getDepartments } from "@/Api/departments-service";
 import { getJobTitles } from "@/Api/job-title-service";
 import { ArrowIcon, BackIcon, CalendarIcon, ComputerIcon, EditIcon } from "@/Shared/Asseet/Icons";
 import PrimaryButton from "@/Components/PrimaryButton";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LeaveModal from "@/Components/Modals/LeaveModal";
 import FacilitiesModal from "@/Components/Modals/FacilitiesModal";
 import { useAuth } from "@/Context/AuthContext";
@@ -20,35 +20,14 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { getLeavesByUser } from "@/Api/leave-service";
 import { getItemsRequestByUser } from "@/Api/items-requests";
+import { updateUser } from "@/Api/users-service";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const itemData = [
-    {
-        name: 'MACKBOOK',
-        quantity: 'จำนวน 1',
-        createdAt: '26-07-2026 12:30',
-    },
-    {
-        name: 'Adobe Creative Cloud',
-        quantity: 'จำนวน 1',
-        createdAt: '26-07-2026 12:30',
-    },
-    {
-        name: 'Midjourney Image Generator AI',
-        quantity: 'จำนวน 1',
-        createdAt: '26-07-2026 12:30',
-    },
-    {
-        name: 'CHAT GPT',
-        quantity: 'จำนวน 1',
-        createdAt: '26-07-2026 12:30',
-    },
-
-
-];
 
 const Profile = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    console.log("user:", user);
 
     const [isEditing, setIsEditing] = useState(false);
     const toggleEditing = () => setIsEditing((prev) => !prev);
@@ -58,6 +37,9 @@ const Profile = () => {
 
     const toggleLeaveModal = () => setLeaveModalOpen(!isLeaveModalOpen);
     const toggleFacilitiesModal = () => setFacilitiesModalOpen(!isFacilitiesModalOpen);
+
+    const queryClient = useQueryClient();
+
 
     const { data: departments = [] } = useQuery({ queryKey: ['departments'], queryFn: getDepartments });
     const { data: jobTitles = [] } = useQuery({ queryKey: ['jobTitles'], queryFn: getJobTitles });
@@ -69,7 +51,20 @@ const Profile = () => {
         queryKey: ['itemsRequest'],
         queryFn: () => getItemsRequestByUser(user?.id || ''),
     });
-    
+    const mutation = useMutation({
+        mutationFn: (data: ProfileData) => updateUser(user?.id!, data),
+        onSuccess: () => {
+            console.log('อัปเดตข้อมูลสำเร็จ');
+            queryClient.invalidateQueries({ queryKey: ['user', user?.id] });
+            alert('อัปเดตข้อมูลสำเร็จ');
+        },
+        onError: (err: any) => {
+            console.log(err);
+            alert(`อัปเดตไม่สำเร็จ: ${err.message}`);
+        },
+    });
+    console.log('user role',user.role)
+    console.log('user',user)
 
     const schema = z.object({
         firstName: z.string().min(2, { message: 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร' }).max(20, { message: 'ชื่อต้องมีไม่เกิน 20 ตัวอักษร' }),
@@ -79,8 +74,8 @@ const Profile = () => {
         jobTitleId: z.string().min(1, { message: 'กรุณาเลือกตำแหน่ง' }),
         nickName: z.string().min(2, { message: 'ชื่อเล่นต้องมีอย่างน้อย 2 ตัวอักษร' }).max(20, { message: 'ชื่อเล่นต้องมีไม่เกิน 20 ตัวอักษร' }),
         birthDate: z.string().min(1, { message: 'กรุณาเลือกวันเกิด' }),
-        googleId: z.string().min(1, { message: 'กรุณากรอกรหัส Google' }).max(20, { message: 'รหัส Google ต้องมีไม่เกิน 20 ตัวอักษร' }),
         avatar: z.string().optional(),
+        role: z.string(),
     });
 
     type ProfileData = z.infer<typeof schema>;
@@ -89,6 +84,8 @@ const Profile = () => {
         control,
         register,
         setValue,
+        handleSubmit,
+        reset
     } = useForm<ProfileData>({
         resolver: zodResolver(schema),
         defaultValues: {
@@ -99,10 +96,38 @@ const Profile = () => {
             jobTitleId: user?.jobTitleId || '',
             nickName: user?.nickName || '',
             birthDate: user?.birthDate || '',
-            googleId: user?.googleId || '',
             avatar: user?.avatarUrl || '',
+            role: 'employee',
         },
     });
+
+    useEffect(() => {
+        if (user) {
+            reset({
+                firstName: user.firstName || '',
+                lastName: user.lastName || '',
+                email: user.email || '',
+                departmentId: user.departmentId || '',
+                jobTitleId: user.jobTitleId || '',
+                nickName: user.nickName || '',
+                birthDate: user.birthDate || '',
+                avatar: user.avatarUrl || '',
+                role: 'employee',
+            });
+        }
+    }, [user, reset]);
+
+    const onSubmit = (data: ProfileData) => {
+        console.log("onsubmit:data", data); // ดูว่าได้ค่าจากฟอร์มหรือยัง
+        mutation.mutate(data);
+    };
+
+
+    if (!user) {
+        return <div>Loading...</div>;
+    }
+
+
 
     return (
         <div className="flex flex-col min-h-screen bg-quaternary text-white px-4 md:px-8 py-8 relative">
@@ -168,105 +193,111 @@ const Profile = () => {
                                 </div>
 
                                 {/* ฟอร์ม */}
+                                <form className="flex flex-col w-full gap-3" onSubmit={handleSubmit(onSubmit, (errors) => {
+                                    console.log("form errors:", errors);
+                                })}
+                                >
+                                    {/* เปลี่ยนแท็ก p เป็น Label */}
+                                    <div className="flex flex-col w-full gap-3">
+                                        <div className="w-full">
+                                            <p className="text-[16px] text-white font-sukhumvit">อีเมล</p>
+                                            <Input {...register('email')} className="w-full" disabled={!isEditing} />
+                                        </div>
 
-                                {/* เปลี่ยนแท็ก p เป็น Label */}
-                                <div className="flex flex-col w-full gap-3">
-                                    <div className="w-full">
-                                        <p className="text-[16px] text-white font-sukhumvit">อีเมล</p>
-                                        <Input {...register('email')} className="w-full" disabled={!isEditing} />
+                                        <div className="flex flex-col md:flex-row gap-3">
+                                            <div className="flex flex-col w-full">
+                                                <p className="text-[16px] text-white font-sukhumvit">ชื่อจริง</p>
+                                                <Input {...register('firstName')} className="w-full" disabled={!isEditing} />
+                                            </div>
+                                            <div className="flex flex-col w-full">
+                                                <p className="text-[16px] text-white font-sukhumvit">นามสกุล</p>
+                                                <Input {...register('lastName')} className="w-full" disabled={!isEditing} />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col md:flex-row gap-3">
+                                            <div className="flex flex-col w-full">
+                                                <p className="text-[16px] text-white font-sukhumvit">ชื่อเล่น</p>
+                                                <Input {...register('nickName')} disabled={!isEditing} />
+                                            </div>
+                                            <div className="flex flex-col w-full">
+                                                <Label htmlFor="birthDate">วันเกิด</Label>
+                                                <DatePicker
+                                                    selected={new Date(user.birthDate)} // ค่า default เป็น Date object
+                                                    onChange={(date: Date) => setValue('birthDate', date.toString())} // setValue ด้วย Date
+                                                    dateFormat="dd/MM/yyyy"
+                                                    className=" w-full h-[49px] p-[12px] rounded-[4px] backdrop-blur-[8px] transition duration-200 bg-[#00000052] text-[var(--color-font)] placeholder-[var(--color-font)] border border-transparent hover:border-[#FFD000] hover:text-[#FFD000] hover:placeholder-[#FFD000] active:border-[#FFFFFF] active:text-[#FFFFFF] active:outline-none disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[#1A1A1A]"
+                                                    disabled={!isEditing}
+                                                />
+
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col md:flex-row gap-3">
+                                            <div className="flex flex-col w-full">
+                                                <Label htmlFor="departmentId">แผนก</Label>
+                                                <Controller
+                                                    name="departmentId"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <SelectField
+                                                            className="text-white"
+                                                            label="แผนก"
+                                                            name="departmentId"
+                                                            options={(departments?.data || []).map((d: any) => ({
+                                                                value: d.id,
+                                                                label: d.name,
+                                                            }))}
+                                                            value={field.value}
+                                                            onChange={field.onChange}
+                                                            disabled={!isEditing}
+                                                            placeholder="เลือกแผนก"
+                                                            required
+                                                        />
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div className="flex flex-col w-full">
+                                                <p className="text-[16px] text-white font-sukhumvit">ตำแหน่ง</p>
+                                                <Controller
+                                                    name="jobTitleId"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <SelectField
+                                                            className="text-white"
+                                                            label="ตำแหน่ง"
+                                                            name="jobTitleId"
+                                                            options={(jobTitles?.data || []).map((d: any) => ({
+                                                                value: d.id,
+                                                                label: d.name,
+                                                            }))}
+                                                            value={field.value}
+                                                            onChange={field.onChange}
+                                                            disabled={!isEditing}
+                                                            placeholder="เลือกตำแหน่ง"
+                                                            required
+                                                        />
+                                                    )}
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
+                                    {/* ปุ่มบันทึก */}
+                                    <div className="flex justify-end px-5 pb-5 mt-4">
+                                        <PrimaryButton
+                                            type="submit"
+                                        >
+                                            {mutation.isPending ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                                        </PrimaryButton>
 
-                                    <div className="flex flex-col md:flex-row gap-3">
-                                        <div className="flex flex-col w-full">
-                                            <p className="text-[16px] text-white font-sukhumvit">ชื่อจริง</p>
-                                            <Input {...register('firstName')} className="w-full" disabled={!isEditing} />
-                                        </div>
-                                        <div className="flex flex-col w-full">
-                                            <p className="text-[16px] text-white font-sukhumvit">นามสกุล</p>
-                                            <Input {...register('lastName')} className="w-full" disabled={!isEditing} />
-                                        </div>
                                     </div>
-
-                                    <div className="flex flex-col md:flex-row gap-3">
-                                        <div className="flex flex-col w-full">
-                                            <p className="text-[16px] text-white font-sukhumvit">ชื่อเล่น</p>
-                                            <Input {...register('nickName')} disabled={!isEditing} />
-                                        </div>
-                                        <div className="flex flex-col w-full">
-                                            <Label htmlFor="birthDate">วันเกิด</Label>
-                                            <DatePicker
-                                                selected={new Date(user.birthDate)} // ค่า default เป็น Date object
-                                                onChange={(date: Date) => setValue('birthDate', date.toString())} // setValue ด้วย Date
-                                                dateFormat="dd/MM/yyyy"
-                                                className=" w-full h-[49px] p-[12px] rounded-[4px] backdrop-blur-[8px] transition duration-200 bg-[#00000052] text-[var(--color-font)] placeholder-[var(--color-font)] border border-transparent hover:border-[#FFD000] hover:text-[#FFD000] hover:placeholder-[#FFD000] active:border-[#FFFFFF] active:text-[#FFFFFF] active:outline-none disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[#1A1A1A]"
-                                                disabled={!isEditing}
-                                            />
-
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-col md:flex-row gap-3">
-                                        <div className="flex flex-col w-full">
-                                            <Label htmlFor="departmentId">แผนก</Label>
-                                            <Controller
-                                                name="departmentId"
-                                                control={control}
-                                                render={({ field }) => (
-                                                    <SelectField
-                                                        className="text-white"
-                                                        label="แผนก"
-                                                        name="departmentId"
-                                                        options={(departments?.data || []).map((d: any) => ({
-                                                            value: d.id,
-                                                            label: d.name,
-                                                        }))}
-                                                        value={field.value}
-                                                        onChange={field.onChange}
-                                                        disabled={!isEditing}
-                                                        placeholder="เลือกแผนก"
-                                                        required
-                                                    />
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div className="flex flex-col w-full">
-                                            <p className="text-[16px] text-white font-sukhumvit">ตำแหน่ง</p>
-                                            <Controller
-                                                name="jobTitleId"
-                                                control={control}
-                                                render={({ field }) => (
-                                                    <SelectField
-                                                        className="text-white"
-                                                        label="ตำแหน่ง"
-                                                        name="jobTitleId"
-                                                        options={(jobTitles?.data || []).map((d: any) => ({
-                                                            value: d.id,
-                                                            label: d.name,
-                                                        }))}
-                                                        value={field.value}
-                                                        onChange={field.onChange}
-                                                        disabled={!isEditing}
-                                                        placeholder="เลือกตำแหน่ง"
-                                                        required
-                                                    />
-                                                )}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
 
-                        <div className="w-full h-full">
-
-                        </div>
-
-                        {/* ปุ่มบันทึก */}
-                        <div className="flex justify-end px-5 pb-5 mt-4">
-                            <PrimaryButton disabled={!isEditing}>บันทึก</PrimaryButton>
-                        </div>
                     </div>
+
 
 
                     {/* right */}
@@ -395,7 +426,7 @@ const Profile = () => {
             </div>
 
 
-        </div>
+        </div >
     );
 };
 

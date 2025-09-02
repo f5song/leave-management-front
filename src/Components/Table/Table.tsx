@@ -33,6 +33,7 @@ import Head from "./TableHead";
 import Body from "./TableBody";
 import Container from "./Container";
 import Cell from "./TableCell";
+import HeadCell from "./TableHead";
 
 const Table = {
   Row,
@@ -40,6 +41,7 @@ const Table = {
   Body,
   Container,
   Cell,
+  HeadCell,
 } as const;
 
 export default Table;

@@ -2,20 +2,6 @@ import apiClient from "../apiClient";
 import { ILeaveInput } from "./Interface/leave.interface";
 
 
-export const leaveService = {
- 
-  getRecentLeaves: async () => {
-    const response = await apiClient.get('leaves/recent');
-    return response.data;
-  },
-
-  requestLeave: async (leaveData: ILeaveInput) => {
-    const response = await apiClient.post('leaves', leaveData);
-    return response.data;
-  }
-};
-
-
 export const createLeave = async (userId: string, data: ILeaveInput) => {
   try {
     const response = await apiClient.post(`leaves/${userId}`, data);
@@ -34,7 +20,7 @@ export const getLeaves = async (start?: string, end?: string) => {
 
   const response = await apiClient.get(`leaves?${queryParams.toString()}`);
 
-  return response.data;
+  return response.data.data;
 };
 
 export const getLeavesByUser = async (userId: string) => {

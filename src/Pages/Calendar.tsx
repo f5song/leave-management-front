@@ -8,12 +8,16 @@ import { ArrowIcon, BackIcon, CalendarIcon, ComputerIcon, EditIcon } from "@/Sha
 import PrimaryButton from "@/Components/PrimaryButton";
 import { useState } from "react";
 import LeaveModal from "@/Components/Modals/LeaveModal";
-import FacilitiesModal from "@/Components/Modals/FacilitiesModal";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import DividerLine from "@/Components/HorizontalDivider";
 import HorizontalDivider from "@/Components/HorizontalDivider";
+import LeaveRequestModal from "@/Components/Modals/LeaveRequestModal";
+import { useAuth } from "@/Context/AuthContext";
+import { IHoliday } from "@/Api/holidays-service/interfaces/holidays.interface";
+import { useQuery } from "@tanstack/react-query";
+import { getHolidays } from "@/Api/holidays-service";
+import { getLeaves, getLeavesByUser } from "@/Api/leave-service";
 
 const mockUser = {
   firstName: "สมชาย",
@@ -27,9 +31,9 @@ const mockUser = {
   avatarUrl: "https://via.placeholder.com/160",
 };
 
-const holidays =[
+const holidays = [
   {
-    id:1,
+    id: 1,
     title: 'วันหยุด: วันเฉลิมพระชนมพรรษา สมเด็จพระนางเจ้าสุทิดา พัชรสุธาพิมลลักษณ พระบรมราชินี',
     startDate: '2025-07-27',
     endDate: '2025-07-28',
@@ -39,7 +43,7 @@ const holidays =[
   }
 ]
 
-const leaves = [
+const leavesmock = [
   {
     id: 3,
     employee: 'สุดารัตน์ สวยมาก',
@@ -150,6 +154,7 @@ const dayNames = ['อาทิตย์', 'จันทร์', 'อังค�
 
 
 const Calendar = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -161,22 +166,79 @@ const Calendar = () => {
   const toggleFacilitiesModal = () => setFacilitiesModalOpen((v) => !v);
 
   const [formData, setFormData] = useState({
-    email: mockUser.email,
-    firstName: mockUser.firstName,
-    lastName: mockUser.lastName,
-    departmentId: mockUser.departmentId,
-    jobTitleId: mockUser.jobTitleId,
-    nickName: mockUser.nickName,
-    birthDate: new Date(mockUser.birthDate),
-    googleId: mockUser.googleId,
-    avatar: mockUser.avatarUrl,
+    googleId: user?.googleId,
+    firstName: user?.firstName,
+    lastName: user?.lastName,
+    nickName: user?.nickName,
+    avatarUrl: user?.avatarUrl,
+    birthDate: user?.birthDate,
+    jobTitleId: user?.jobTitleId,
+    departmentId: user?.departmentId,
+    email: user?.email,
+    role: user?.role,
   });
+  console.log('user', user);
+
+  //query
+  //leaves calendar VV1
+  // const { data: leaves = [] } = useQuery({
+  //   queryKey: ['leaves', user.role], // key ต่างกันตาม role
+  //   queryFn: () => {
+  //     if (user.role === 'admin') {
+  //       return getLeaves();
+  //     } else {
+  //       return getLeaves().then((data) =>
+  //         data.filter((h) => h.status !== 'PENDING')
+  //       );
+  //     }
+  //   },
+  //   enabled: !!user, // รอ user load ก่อน
+  // });
+
+  //leaves calendar VV2
+  const { data: leaves = [] } = useQuery({
+    queryKey: ['leaves', user.role],
+    queryFn: async () => {
+      if (!user) return [];
+
+      const allLeaves = await getLeaves(); // get all leave
+      if (user.role === 'admin') {
+        return allLeaves; // admin เอาทั้งหมด
+      } else {
+        // employee
+        const othersLeaves = allLeaves.filter(
+          (l) => l.status !== 'PENDING' && l.userId !== user.id
+        );
+
+        const myLeaves = allLeaves.filter((l) => l.userId === user.id);
+
+        // รวม array และกรองซ้ำตาม id
+        const combined = [...othersLeaves, ...myLeaves];
+        const uniqueLeaves = Array.from(
+          new Map(combined.map((l) => [l.id, l])).values()
+        );
+
+        return uniqueLeaves;
+      }
+    },
+    enabled: !!user,
+  });
+
+  //holidays calendar
+  const { data: holidays = [] } = useQuery({
+    queryKey: ['holidays'],
+    queryFn: getHolidays,
+  });
+  console.log('role', user.role);
+  console.log('leaves', leaves);
+  console.log('holidays', holidays);
+
 
   const onChange = (key: keyof typeof formData, value: any) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
 
-  const events = [...leaves, ...holidays];
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 7, 1));
+  // const events = [...leaves, ...holidays];
+  const [currentDate, setCurrentDate] = useState(new Date());
 
 
   const getDaysInMonth = (date: Date) => {
@@ -201,29 +263,54 @@ const Calendar = () => {
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
 
-  const navigateMonth = (direction) => {
+  const navigateMonth = (direction: number) => {
     const newDate = new Date(currentDate);
     newDate.setMonth(currentDate.getMonth() + direction);
     setCurrentDate(newDate);
   };
 
-  const getEventsForDay = (day: Date) => {
-    return events.filter((event) => {
+  // const getEventsForDay = (day: Date) => {
+  //   return events.filter((event) => {
+  //     const start = new Date(event.startDate);
+  //     const end = new Date(event.endDate);
+  //     return day >= start && day <= end;
+  //   });
+  // };
+
+  const getHolidaysForDay = (day: Date) => {
+    return holidays.filter((event) => {
       const start = new Date(event.startDate);
       const end = new Date(event.endDate);
       return day >= start && day <= end;
     });
   };
-  
-  
+
+  const getLeavesForDay = (day: Date) => {
+    return leaves.filter((event) => {
+      const start = new Date(event.startDate);
+      const end = new Date(event.endDate);
+      return day >= start && day <= end;
+    });
+  };
+
+  const [isLeaveRequestModalOpen, setLeaveRequestModalOpen] = useState(false);
+  const toggleLeaveRequestModal = () => setLeaveRequestModalOpen((v) => !v);
+
+
 
   return (
     <div className="flex flex-col min-h-screen bg-quaternary text-white px-4 md:px-8 py-8 relative">
       <LeaveModal
         isOpen={isLeaveModalOpen}
         onClose={() => setLeaveModalOpen(false)}
-        data={{ title: "แจ้งลางาน" }}
+        data={{ title: "ประวัติการลา" }}
         toggleModal={toggleLeaveModal}
+      />
+      <LeaveRequestModal
+        isOpen={isLeaveRequestModalOpen}
+        onClose={() => setLeaveRequestModalOpen(false)}
+        data={{ title: "แจ้งลางาน" }}
+        toggleModal={toggleLeaveRequestModal}
       />
       <Navbar onClick={() => navigate("/home")} />
       <BackgroundGradient />
@@ -256,7 +343,7 @@ const Calendar = () => {
 
                 {/* right */}
                 <div className="flex items-center space-x-4">
-                  <span className="font-sukhumvit text-[20px]">{monthNames[currentMonth + 1]}</span>
+                  <span className="font-sukhumvit text-[20px]">{monthNames[currentMonth + 2]}</span>
                   <button
                     onClick={() => navigateMonth(1)}
                     className="p-2 hover:bg-gray-700 rounded transition-colors"
@@ -279,11 +366,14 @@ const Calendar = () => {
                 {/* Calendar Days */}
                 {days.map((day, index) => {
                   const isCurrentMonth = day.getMonth() === currentMonth;
-                  const dayLeaves = getEventsForDay(day);
+                  const dayLeaves = getLeavesForDay(day);
+                  const dayHolidays = getHolidaysForDay(day);
+
 
                   return (
                     <div
                       key={index}
+                      onClick={() => toggleLeaveRequestModal()}
                       className={`relative min-h-[80px] p-2 ${isCurrentMonth
                         ? 'bg-gray-800/30 hover:bg-gray-700/50'
                         : 'bg-gray-900/30 text-gray-600'
@@ -294,17 +384,18 @@ const Calendar = () => {
                       </div>
 
                       {/* Leave Events */}
-                      {dayLeaves.slice(0, 2).map((leave) => (
+                      {dayLeaves.slice(0, 2).map((leaves) => (
                         <div
-                          key={leave.id}
+                          key={leaves.id}
                           className={`border-[1px] font-sukhumvit-semibold text-[14px] p-1 rounded mb-1 truncate`}
                           style={{
-                            borderColor: leave.color,
-                            color: leave.color,
-                            backgroundColor: leave.backgroundColor,
+                            borderColor: leaves.userInfo?.color,
+                            color: leaves.userInfo?.color,
+                            backgroundColor: "#FFFFFF14",
                           }}
+
                         >
-                          {leave.title}
+                          {leaves.title}
                         </div>
                       ))}
 
@@ -315,11 +406,33 @@ const Calendar = () => {
                         </div>
                       )}
 
+                      {/* Holiday Events */}
+                      {dayHolidays.slice(0, 2).map((holiday) => (
+                        <div
+                          key={holiday.id}
+                          className={`border-[1px] font-sukhumvit-semibold text-[14px] p-1 rounded mb-1 truncate`}
+                          style={{
+                            borderColor: "#6FA5F7",
+                            color: "#6FA5F7",
+                            backgroundColor: "#6FA5F752",
+                          }}
+                        >
+                          {holiday.title}
+                        </div>
+                      ))}
+
+                      {/* แสดง "และอีก X คน" ถ้าเกิน 2 */}
+                      {dayHolidays.length > 2 && (
+                        <div className="font-sukhumvit text-xs text-white mt-1">
+                          และอีก {dayHolidays.length - 2} คน
+                        </div>
+                      )}
+
                     </div>
-                    
+
                   );
                 })}
-                
+
               </div>
             </div>
           </div>
