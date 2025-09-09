@@ -12,17 +12,6 @@ export const createLeave = async (userId: string, data: ILeaveInput) => {
   }
 };
 
-export const getLeaves = async (start?: string, end?: string) => {
-  const queryParams = new URLSearchParams();
-
-  if (start) queryParams.append("start", start);
-  if (end) queryParams.append("end", end);
-
-  const response = await apiClient.get(`leaves?${queryParams.toString()}`);
-
-  return response.data.data;
-};
-
 export const getLeavesByUser = async (userId: string) => {
   const response = await apiClient.get(`leaves/user/${userId}`);
 
@@ -30,7 +19,7 @@ export const getLeavesByUser = async (userId: string) => {
 };
 
 export const updateLeaveStatus = async (
-leaveId: string, newStatus: "APPROVED" | "REJECTED") => {
+  leaveId: string, newStatus: "APPROVED" | "REJECTED") => {
   const response = await apiClient.patch(`leaves/${leaveId}/status`, {
     status: newStatus
   });
@@ -38,11 +27,34 @@ leaveId: string, newStatus: "APPROVED" | "REJECTED") => {
   return response.data;
 };
 
-export const getPaginatedLeaves = async (page: number, limit: number) => {
-  const response = await apiClient.get(`leaves/${page}/${limit}`);
+export const getLeaves = async (
+  page?: number,
+  limit?: number,
+  userId?: string,
+  status?: string
+) => {
+  const params = new URLSearchParams();
 
-  return response.data;
+  params.append("page", page?.toString() || "1");
+  params.append("limit", limit?.toString() || "9");
+
+  if (userId) params.append("userId", userId);
+  if (status) params.append("status", status);
+
+  const response = await apiClient.get(`/leaves?${params.toString()}`);
+  return response.data.data;
 };
+
+export const getAllLeaves = async () => {
+  const response = await apiClient.get(`/leaves`);
+  return response.data.data;
+};
+
+export const getLeaveType = async () => {
+  const response = await apiClient.get(`/leave-types`);
+  return response.data.data;
+};
+
 
 export type { ILeaveInput };
 

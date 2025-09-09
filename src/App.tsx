@@ -11,42 +11,34 @@ import Profile from "./Pages/Profile";
 import Calendar from "./Pages/Calendar";
 import NotFound from "./Pages/NotFound";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import Landing from "./Pages/Landing";
+// import Landing from "./Pages/Landing";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import Device from "./Pages/Device";
+import PrivateRoute from "./Components/PrivateRoute";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <TooltipProvider> {/* <TooltipProvider> */}
+      <TooltipProvider>
         <Toaster />
-        {/* <Sonner /> */}
         <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/landing" element={<Landing />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/device" element={<Device />} />
-            {/* <Route 
-              path="/home" 
-              element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              } 
-            /> */}
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/login" element={<Login />} />
+              <Route element={<PrivateRoute />}>
+                <Route path="/register" element={<Register />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/device" element={<Device />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </TooltipProvider>
     </GoogleOAuthProvider>
   </QueryClientProvider>
 );

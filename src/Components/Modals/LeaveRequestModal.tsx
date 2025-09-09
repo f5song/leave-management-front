@@ -39,13 +39,11 @@ const TextArea = ({
 type LeaveRequestModalProps = {
   isOpen: boolean
   onClose: () => void
-  data: {
-    title: string
-  }
+  title: string
   toggleModal: () => void
 }
 
-const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, data, toggleModal }) => {
+const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, title, toggleModal }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const leaveTypes = [
@@ -101,7 +99,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, 
       <div className="relative bg-[#2a2a2a] rounded-[8px] p-8 w-[900px] max-w-[90vw] flex flex-col text-white">
         {/* Header */}
         <div className="flex flex-row justify-between pb-6">
-          <p className="font-sukhumvit-bold text-[20px] text-white">แจ้งลางาน</p>
+          <p className="font-sukhumvit-bold text-[20px] text-white">{title}</p>
           <div className="flex flex-row items-center cursor-pointer group hover:text-white" onClick={onClose}>
             <CloseIcon className="w-[15px] h-[15px] fill-[#DCDCDC] group-hover:fill-white transition-colors" />
           </div>

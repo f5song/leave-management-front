@@ -17,130 +17,8 @@ import { useAuth } from "@/Context/AuthContext";
 import { IHoliday } from "@/Api/holidays-service/interfaces/holidays.interface";
 import { useQuery } from "@tanstack/react-query";
 import { getHolidays } from "@/Api/holidays-service";
-import { getLeaves, getLeavesByUser } from "@/Api/leave-service";
-
-const mockUser = {
-  firstName: "สมชาย",
-  lastName: "ใจดี",
-  email: "somchai@example.com",
-  departmentId: "dep1",
-  jobTitleId: "title1",
-  nickName: "ชาย",
-  birthDate: "1995-08-10",
-  googleId: "somchai.google",
-  avatarUrl: "https://via.placeholder.com/160",
-};
-
-const holidays = [
-  {
-    id: 1,
-    title: 'วันหยุด: วันเฉลิมพระชนมพรรษา สมเด็จพระนางเจ้าสุทิดา พัชรสุธาพิมลลักษณ พระบรมราชินี',
-    startDate: '2025-07-27',
-    endDate: '2025-07-28',
-    totalDays: 2,
-    color: '#6FA5F7',
-    backgroundColor: '#6FA5F752'
-  }
-]
-
-const leavesmock = [
-  {
-    id: 3,
-    employee: 'สุดารัตน์ สวยมาก',
-    type: 'ลาป่วย',
-    totalDays: 3,
-    title: 'เดินทางไปกรุงเทพ',
-    description: 'ลาป่วยเนื่องจากมีอาการไม่สบายและต้องเดินทางไปพบแพทย์ที่กรุงเทพฯ',
-    startDate: '2025-07-28',
-    endDate: '2025-07-30',
-    color: '#00FFBB',
-    backgroundColor: '#FFFFFF14',
-  },
-  {
-    id: 3,
-    employee: 'สุดารัตน์ สวยมาก',
-    type: 'ลาป่วย',
-    totalDays: 3,
-    title: 'เดินทางไปกรุงเทพ',
-    description: 'ลาป่วยเนื่องจากมีอาการไม่สบายและต้องเดินทางไปพบแพทย์ที่กรุงเทพฯ',
-    startDate: '2025-07-28',
-    endDate: '2025-07-30',
-    color: '#00FFBB',
-    backgroundColor: '#FFFFFF14',
-  },
-  {
-    id: 3,
-    employee: 'สุดารัตน์ สวยมาก',
-    type: 'ลาป่วย',
-    totalDays: 3,
-    title: 'เดินทางไปกรุงเทพ',
-    description: 'ลาป่วยเนื่องจากมีอาการไม่สบายและต้องเดินทางไปพบแพทย์ที่กรุงเทพฯ',
-    startDate: '2025-07-28',
-    endDate: '2025-07-30',
-    color: '#00FFBB',
-    backgroundColor: '#FFFFFF14',
-  },
-  {
-    id: 4,
-    employee: 'ปกรณ์ ตั้งใจทำงาน',
-    type: 'ลาพักร้อน',
-    totalDays: 2,
-    title: 'เดินทางไปกรุงเทพ',
-    description: 'พักร้อนเพื่อไปท่องเที่ยวและทำธุระที่กรุงเทพฯ',
-    startDate: '2025-07-28',
-    endDate: '2025-07-29',
-    color: '#00FFBB',
-    backgroundColor: '#FFFFFF14',
-  },
-  {
-    id: 5,
-    employee: 'วิภา ใจงาม',
-    type: 'ลาพักร้อน',
-    totalDays: 1,
-    title: 'วันหยุดประจำปี',
-    description: 'วันหยุดพักผ่อนประจำปี',
-    startDate: '2025-07-29',
-    endDate: '2025-07-29',
-    color: '#FFD700',
-    backgroundColor: '#FFFFFF14',
-  },
-  {
-    id: 6,
-    employee: 'อนันต์ สายชิล',
-    type: 'ลาพักร้อน',
-    totalDays: 2,
-    title: 'พักร้อนยาววววววววววววววว',
-    description: 'พักร้อนเดินทางไปพักผ่อนต่างจังหวัด',
-    startDate: '2025-07-30',
-    endDate: '2025-07-31',
-    color: '#FFD700',
-    backgroundColor: '#FFFFFF14',
-  },
-  {
-    id: 7,
-    employee: 'พิมพ์ชนก สายบุญ',
-    type: 'ลาพักร้อน',
-    totalDays: 3,
-    title: 'วันหยุดพิเศษ',
-    description: 'หยุดพิเศษสำหรับงานครอบครัว',
-    startDate: '2025-08-03',
-    endDate: '2025-08-05',
-    color: '#F2FF00',
-    backgroundColor: '#FFFFFF14',
-  },
-  {
-    id: 8,
-    employee: 'ณัฐพล อ่านหนังสือเก่ง',
-    type: 'ลาพักร้อน',
-    totalDays: 2,
-    title: 'วันลงชื่อหนังสือร่วมมมมมมมมมมมมมม',
-    description: 'เดินทางเพื่อเข้าร่วมงานลงชื่อหนังสือ',
-    startDate: '2025-08-04',
-    endDate: '2025-08-05',
-    color: '#6FA5F7',
-    backgroundColor: '#FFFFFF14',
-  },
-];
+import { getLeavesByUser, getLeaves, getAllLeaves } from "@/Api/leave-service";
+import { getUserLeaves } from "@/Api/users-service";
 
 
 const monthNames = [
@@ -151,10 +29,8 @@ const monthNames = [
 const dayNames = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
 
 
-
-
 const Calendar = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -177,7 +53,6 @@ const Calendar = () => {
     email: user?.email,
     role: user?.role,
   });
-  console.log('user', user);
 
   //query
   //leaves calendar VV1
@@ -197,41 +72,44 @@ const Calendar = () => {
 
   //leaves calendar VV2
   const { data: leaves = [] } = useQuery({
-    queryKey: ['leaves', user.role],
+    queryKey: ['leaves', user?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || isLoading) return [];
 
-      const allLeaves = await getLeaves(); // get all leave
+      const allLeavesResponse = await getLeaves();
+      const allLeaves = allLeavesResponse.data;
+
       if (user.role === 'admin') {
-        return allLeaves; // admin เอาทั้งหมด
+        return allLeaves;
       } else {
-        // employee
+        const myLeaves = allLeaves.filter((l) => l.userId === user?.id);
         const othersLeaves = allLeaves.filter(
-          (l) => l.status !== 'PENDING' && l.userId !== user.id
+          (l) => l.userId !== user?.id && l.status === 'APPROVED'
         );
+        const combined = [...myLeaves, ...othersLeaves];
 
-        const myLeaves = allLeaves.filter((l) => l.userId === user.id);
-
-        // รวม array และกรองซ้ำตาม id
-        const combined = [...othersLeaves, ...myLeaves];
         const uniqueLeaves = Array.from(
-          new Map(combined.map((l) => [l.id, l])).values()
+          new Map(combined.map(l => [l.id, l])).values()
         );
-
         return uniqueLeaves;
       }
     },
-    enabled: !!user,
+    enabled: !!user && !isLoading,
   });
+
+
 
   //holidays calendar
   const { data: holidays = [] } = useQuery({
     queryKey: ['holidays'],
     queryFn: getHolidays,
   });
-  console.log('role', user.role);
-  console.log('leaves', leaves);
-  console.log('holidays', holidays);
+
+  const { data: leaveBalance = [] } = useQuery({
+    queryKey: ['leaveBalance'],
+    queryFn: () => getUserLeaves(user?.id || ''),
+  });
+
 
 
   const onChange = (key: keyof typeof formData, value: any) =>
@@ -269,14 +147,6 @@ const Calendar = () => {
     setCurrentDate(newDate);
   };
 
-  // const getEventsForDay = (day: Date) => {
-  //   return events.filter((event) => {
-  //     const start = new Date(event.startDate);
-  //     const end = new Date(event.endDate);
-  //     return day >= start && day <= end;
-  //   });
-  // };
-
   const getHolidaysForDay = (day: Date) => {
     return holidays.filter((event) => {
       const start = new Date(event.startDate);
@@ -296,20 +166,18 @@ const Calendar = () => {
   const [isLeaveRequestModalOpen, setLeaveRequestModalOpen] = useState(false);
   const toggleLeaveRequestModal = () => setLeaveRequestModalOpen((v) => !v);
 
-
-
   return (
     <div className="flex flex-col min-h-screen bg-quaternary text-white px-4 md:px-8 py-8 relative">
       <LeaveModal
         isOpen={isLeaveModalOpen}
         onClose={() => setLeaveModalOpen(false)}
-        data={{ title: "ประวัติการลา" }}
+        title="ประวัติการลา"
         toggleModal={toggleLeaveModal}
       />
       <LeaveRequestModal
         isOpen={isLeaveRequestModalOpen}
         onClose={() => setLeaveRequestModalOpen(false)}
-        data={{ title: "แจ้งลางาน" }}
+        title="แจ้งลางาน"
         toggleModal={toggleLeaveRequestModal}
       />
       <Navbar onClick={() => navigate("/home")} />
@@ -444,33 +312,28 @@ const Calendar = () => {
           <div className="flex flex-col">
             {/* leaves count */}
             <div className="w-full rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] shadow-[0_4px_43px_0_rgba(0,0,0,0.32)] z-10 px-5 py-5">
-              <div className="flex flex-wrap sm:flex-nowrap justify-between gap-x-6 gap-y-4 w-full">
-                <div className="flex flex-col min-w-[120px] max-w-[144px] flex-1">
-                  <p className="font-sukhumvit text-[20px] font-bold">ลาพักร้อน</p>
-                  <div className="flex justify-end space-x-1">
-                    <p className="text-[32px] font-sukhumvit font-bold text-primary">0</p>
+              <div className="flex flex-row">
+                {leaveBalance.map((lt, idx) => (
+                  <div key={lt.id} className="flex items-center">
+                    {/* Item column */}
+                    <div className="flex flex-col min-w-[120px] max-w-[144px] flex-1">
+                      <p className="font-sukhumvit text-[20px] font-bold">{lt.name}</p>
+                      <div className="flex justify-end space-x-1">
+                        <p className="text-[32px] font-sukhumvit font-bold text-primary">
+                          {lt.used_days}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Divider ยกเว้น item สุดท้าย */}
+                    {idx !== leaveBalance.length - 1 && (
+                      <div className="w-px h-[72px] bg-white opacity-30 mx-6" />
+                    )}
                   </div>
-                </div>
-
-                <div className="hidden sm:flex w-px h-[72px] bg-white opacity-30 my-auto" />
-
-                <div className="flex flex-col min-w-[120px] max-w-[144px] flex-1">
-                  <p className="font-sukhumvit text-[20px] font-bold">ลาป่วย</p>
-                  <div className="flex justify-end space-x-1">
-                    <p className="text-[32px] font-sukhumvit font-bold text-primary">5</p>
-                  </div>
-                </div>
-
-                <div className="hidden sm:flex w-px h-[72px] bg-white opacity-30 my-auto" />
-
-                <div className="flex flex-col min-w-[120px] max-w-[144px] flex-1">
-                  <p className="font-sukhumvit text-[20px] font-bold">ลากิจ</p>
-                  <div className="flex justify-end space-x-1">
-                    <p className="text-[32px] font-sukhumvit font-bold text-primary">3</p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
+
 
             {/* leaves history */}
             <div className="flex flex-col pt-5">
@@ -492,9 +355,9 @@ const Calendar = () => {
                       </div>
                       <div className="fle flex-col">
                         <div className="flex flex-row items-center w-[168px]">
-                          <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{leave.startDate}</p>
+                          <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{new Date(leave.startDate).toISOString().split('T')[0]}</p>
                           <ArrowIcon className="fill-white" />
-                          <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{leave.endDate}</p>
+                          <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{new Date(leave.endDate).toISOString().split('T')[0]}</p>
                         </div>
                         <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{leave.employee}</p>
                       </div>

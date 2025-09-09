@@ -18,10 +18,11 @@ import FacilitiesModal from "@/Components/Modals/FacilitiesModal";
 import { useAuth } from "@/Context/AuthContext";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { getLeavesByUser } from "@/Api/leave-service";
-import { getItemsRequestByUser } from "@/Api/items-requests";
-import { updateUser } from "@/Api/users-service";
+import { getLeavesByUser, getLeaveType } from "@/Api/leave-service";
+import { getItemsRequest } from "@/Api/items-requests-service";
+import { getUserLeaves, updateUser } from "@/Api/users-service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import ItemsModal from "@/Components/Modals/ItemsModal";
 
 
 const Profile = () => {
@@ -33,24 +34,40 @@ const Profile = () => {
     const toggleEditing = () => setIsEditing((prev) => !prev);
 
     const [isLeaveModalOpen, setLeaveModalOpen] = useState(false);
-    const [isFacilitiesModalOpen, setFacilitiesModalOpen] = useState(false);
+    const [isItemsModalOpen, setItemsModalOpen] = useState(false);
 
     const toggleLeaveModal = () => setLeaveModalOpen(!isLeaveModalOpen);
-    const toggleFacilitiesModal = () => setFacilitiesModalOpen(!isFacilitiesModalOpen);
+    const toggleItemsModal = () => setItemsModalOpen(!isItemsModalOpen);
 
     const queryClient = useQueryClient();
 
 
-    const { data: departments = [] } = useQuery({ queryKey: ['departments'], queryFn: getDepartments });
-    const { data: jobTitles = [] } = useQuery({ queryKey: ['jobTitles'], queryFn: getJobTitles });
+    const { data: departments = [] } = useQuery({
+        queryKey: ['departments'],
+        queryFn: getDepartments
+    });
+
+    const { data: jobTitles = [] } = useQuery({
+        queryKey: ['jobTitles'],
+        queryFn: getJobTitles
+    });
+
     const { data: { data: leaveData = [] } = {} } = useQuery({
         queryKey: ['leaveData'],
         queryFn: () => getLeavesByUser(user?.id || ''),
     });
+
     const { data: { data: itemsRequest = [] } = {} } = useQuery({
         queryKey: ['itemsRequest'],
-        queryFn: () => getItemsRequestByUser(user?.id || ''),
+        queryFn: () => getItemsRequest(undefined, undefined, user?.id || ''),
     });
+
+    const { data: leaveBalance = [] } = useQuery({
+        queryKey: ['leaveBalance'],
+        queryFn: () => getUserLeaves(user?.id || ''),
+    });
+
+    console.log("itemsRequest profile", itemsRequest);
     const mutation = useMutation({
         mutationFn: (data: ProfileData) => updateUser(user?.id!, data),
         onSuccess: () => {
@@ -63,8 +80,6 @@ const Profile = () => {
             alert(`อัปเดตไม่สำเร็จ: ${err.message}`);
         },
     });
-    console.log('user role',user.role)
-    console.log('user',user)
 
     const schema = z.object({
         firstName: z.string().min(2, { message: 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร' }).max(20, { message: 'ชื่อต้องมีไม่เกิน 20 ตัวอักษร' }),
@@ -123,9 +138,20 @@ const Profile = () => {
     };
 
 
-    if (!user) {
-        return <div>Loading...</div>;
-    }
+    // if (!user)
+    //     (
+    //         console.log("user is not found on profile"),
+    //         console.log("user role", user?.role),
+    //         console.log("user", user),
+    //         <div>กำลังโหลด...</div>
+    //     )
+    // else
+    //     (
+    //         console.log("user is found on profile"),
+    //         console.log("user role", user?.role),
+    //         console.log("user", user),
+    //         <div>กำลังโหลด...</div>
+    //     );
 
 
 
@@ -134,15 +160,14 @@ const Profile = () => {
             <LeaveModal
                 isOpen={isLeaveModalOpen}
                 onClose={() => setLeaveModalOpen(false)}
-                data={{ title: 'ประวัติการลา' }}
+                title="ประวัติการลา"
                 toggleModal={toggleLeaveModal}
-
             />
-            <FacilitiesModal
-                isOpen={isFacilitiesModalOpen}
-                onClose={() => setFacilitiesModalOpen(false)}
-                data={{ title: 'ประวัติยืมอุปกรณ์' }}
-                toggleModal={toggleFacilitiesModal}
+            <ItemsModal
+                isOpen={isItemsModalOpen}
+                onClose={() => setItemsModalOpen(false)}
+                data={{ title: "ประวัติยืมอุปกรณ์" }}
+                toggleModal={toggleItemsModal}
             />
             <Navbar onClick={() => navigate('/home')} />
             <BackgroundGradient />
@@ -223,8 +248,8 @@ const Profile = () => {
                                             <div className="flex flex-col w-full">
                                                 <Label htmlFor="birthDate">วันเกิด</Label>
                                                 <DatePicker
-                                                    selected={new Date(user.birthDate)} // ค่า default เป็น Date object
-                                                    onChange={(date: Date) => setValue('birthDate', date.toString())} // setValue ด้วย Date
+                                                    selected={user?.birthDate ? new Date(user.birthDate) : null}
+                                                    onChange={(date: Date) => setValue('birthDate', date?.toString() || '')}
                                                     dateFormat="dd/MM/yyyy"
                                                     className=" w-full h-[49px] p-[12px] rounded-[4px] backdrop-blur-[8px] transition duration-200 bg-[#00000052] text-[var(--color-font)] placeholder-[var(--color-font)] border border-transparent hover:border-[#FFD000] hover:text-[#FFD000] hover:placeholder-[#FFD000] active:border-[#FFFFFF] active:text-[#FFFFFF] active:outline-none disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[#1A1A1A]"
                                                     disabled={!isEditing}
@@ -304,42 +329,34 @@ const Profile = () => {
                     <div className="flex flex-col">
                         {/* leaves count */}
                         <div className="w-full rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] shadow-[0_4px_43px_0_rgba(0,0,0,0.32)] z-10 px-5 py-5">
-                            <div className="flex flex-wrap sm:flex-nowrap justify-between gap-x-6 gap-y-4 w-full">
-                                {/* ลาพักร้อน */}
-                                <div className="flex flex-col min-w-[120px] max-w-[144px] flex-1">
-                                    <p className="font-sukhumvit text-[20px] font-bold">ลาพักร้อน</p>
-                                    <div className="flex justify-end space-x-1">
-                                        <p className="text-[32px] font-sukhumvit font-bold text-primary">0</p>
-                                        <p className="text-[32px] font-sukhumvit font-bold text-primary">/5</p>
+                            <div className="flex flex-row gap-x-6">
+                                {leaveBalance.map((lt, idx) => (
+                                    <div key={lt.id} className="flex items-center">
+                                        {/* Item column */}
+                                        <div className="flex flex-col min-w-[120px] max-w-[144px]">
+                                            <p className="font-sukhumvit text-[20px] font-bold">{lt.name}</p>
+                                            <div className="flex justify-end space-x-1">
+                                                <p
+                                                    className={`text-[32px] font-sukhumvit font-bold ${lt.used_days > lt.max_days ? "text-red-500" : "text-primary"
+                                                        }`}
+                                                >
+                                                    {lt.used_days}
+                                                </p>
+                                                <p className="text-[32px] font-sukhumvit font-bold text-primary">
+                                                    /{lt.max_days}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Divider ยกเว้น item สุดท้าย */}
+                                        {idx !== leaveBalance.length - 1 && (
+                                            <div className="w-px h-[72px] bg-white opacity-30 mx-3" />
+                                        )}
                                     </div>
-                                </div>
+                                ))}
 
-                                {/* เส้นคั่น แยกเป็น components*/}
-                                <div className="hidden sm:flex w-px h-[72px] bg-white opacity-30 my-auto" />
-
-                                {/* ลาป่วย */}
-                                <div className="flex flex-col min-w-[120px] max-w-[144px] flex-1">
-                                    <p className="font-sukhumvit text-[20px] font-bold">ลาป่วย</p>
-                                    <div className="flex justify-end space-x-1">
-                                        <p className="text-[32px] font-sukhumvit font-bold text-[#ED363F]">6</p>
-                                        <p className="text-[32px] font-sukhumvit font-bold text-primary">/5</p>
-                                    </div>
-                                </div>
-
-                                {/* เส้นคั่น */}
-                                <div className="hidden sm:flex w-px h-[72px] bg-white opacity-30 my-auto" />
-
-                                {/* ลากิจ */}
-                                <div className="flex flex-col min-w-[120px] max-w-[144px] flex-1">
-                                    <p className="font-sukhumvit text-[20px] font-bold">ลากิจ</p>
-                                    <div className="flex justify-end space-x-1">
-                                        <p className="text-[32px] font-sukhumvit font-bold text-primary">3</p>
-                                        <p className="text-[32px] font-sukhumvit font-bold text-primary">/5</p>
-                                    </div>
-                                </div>
                             </div>
                         </div>
-
                         {/* leaves history */}
                         <div className="flex flex-col pt-5">
                             <div className="flex flex-row w-full max-w-6xl rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] shadow-[0_4px_43px_0_rgba(0,0,0,0.32)] z-10">
@@ -392,19 +409,19 @@ const Profile = () => {
                                         <p className="font-sukhumvit text-[20px] font-bold ">
                                             ประวัติยืมอุปกรณ์
                                         </p>
-                                        <div className="flex flex-row items-center cursor-pointer group hover:text-white" onClick={toggleFacilitiesModal}>
+                                        <div className="flex flex-row items-center cursor-pointer group hover:text-white" onClick={toggleItemsModal}>
                                             <ComputerIcon className="w-[15px] h-[15px] fill-[#DCDCDC] group-hover:fill-white transition-colors" />
                                             <p className="font-sukhumvit text-[16px] text-[#DCDCDC] group-hover:text-white transition-colors ml-1">ดูทั้งหมด</p>
                                         </div>
                                     </div>
 
-                                    {itemsRequest.map((item, index) => (
+                                    {itemsRequest?.map((item, index) => (
                                         <div
                                             key={index}
                                             className="flex flex-row border-b border-[#676767] pt-3 pb-1 justify-between"
                                         >
                                             <div className="w-[232px]">
-                                                <p className="font-sukhumvit text-[16px] text-white">{item.itemName}</p>
+                                                <p className="font-sukhumvit text-[16px] text-white">{item.item.name}</p>
                                             </div>
                                             <div className="w-[68px]">
                                                 <p className="font-sukhumvit-semibold text-[14px] text-white">จำนวน {item.quantity}</p>

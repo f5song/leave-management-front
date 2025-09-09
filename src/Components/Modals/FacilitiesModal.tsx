@@ -14,13 +14,11 @@ import TableHeadCell from "../Table/TableHeadCell";
 type FacilitiesModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  data: {
     title: string;
-  };
   toggleModal: () => void;
 };
 
-const FacilitiesModal: React.FC<FacilitiesModalProps> = ({ isOpen, onClose, data, toggleModal }) => {
+const FacilitiesModal: React.FC<FacilitiesModalProps> = ({ isOpen, onClose, title, toggleModal }) => {
 
   const facilitiesData = Array.from({ length: 50 }, (_, i) => ({
     id: i + 1,
@@ -82,7 +80,7 @@ const FacilitiesModal: React.FC<FacilitiesModalProps> = ({ isOpen, onClose, data
       <div className="relative bg-[var(--color-bg)] rounded-[8px] p-9 w-[75vw] max-w-[75vw] h-[85vh] max-h-[85vh] flex flex-col">
         {/* Header */}
         <div className="flex flex-row justify-between">
-          <p className="font-sukhumvit text-[20px] font-bold">{data.title}</p>
+          <p className="font-sukhumvit text-[20px] font-bold">{title}</p>
           <div
             className="flex flex-row items-center cursor-pointer group hover:text-white"
             onClick={onClose}

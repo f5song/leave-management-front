@@ -12,8 +12,8 @@ interface User {
   jobTitleId: string;
   departmentId: string;
   email: string;
-  role: string;
-  
+  role: string; // backend ส่ง role
+  permissions: string[];
 }
 
 interface AuthContextType {
@@ -32,9 +32,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const userData = await authService.getCurrentUser(); // เรียกจาก cookie ที่แนบอัตโนมัติ
+        const userData = await authService.getCurrentUser();
         if (userData && userData.id) {
-          setUser(userData);
+          setUser(userData); // ใช้ role ที่ backend ส่งมา
+          console.log('user form auth', userData);
         } else {
           setUser(null);
         }
@@ -64,10 +65,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     </AuthContext.Provider>
   );
 };
-  
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

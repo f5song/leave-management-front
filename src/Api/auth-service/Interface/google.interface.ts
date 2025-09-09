@@ -13,6 +13,7 @@ export interface IGoogleLoginResponse {
       jobTitleId: string;
       nickName: string;
       birthDate: string;
+      permissions: string[];
     };
     access_token: string;
     isNewUser: boolean;

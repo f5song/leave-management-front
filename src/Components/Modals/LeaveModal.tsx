@@ -6,66 +6,57 @@ import {
   CloseIcon,
 } from "@/Shared/Asseet/Icons";
 import Table from "@/Components/Table/Table";
-import TableHead from "@/Components/Table/TableHead";
 import StatusBadge from "@/Components/StatusBadge";
 import StatusTab from "@/Components/StatusTab";
 import TableHeadCell from "../Table/TableHeadCell";
+import { useAuth } from "@/Context/AuthContext";
+import { getLeaves } from "@/Api/leave-service";
+import { useQuery } from "@tanstack/react-query";
 
 type LeaveModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  data: {
-    title: string;
-  };
+  title: string;
   toggleModal: () => void;
 };
 
-const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, data }) => {
-
-  const leaveData = Array.from({ length: 50 }, (_, i) => ({
-    id: i + 1,
-    leaveType: "ลาพักร้อน",
-    reason: `ลาไปทำธุระ ${i + 1}`,
-    numberOfDays: "1 วัน",
-    status: i % 3 === 0 ? "รออนุมัติ" : i % 3 === 1 ? "อนุมัติ" : "ปฏิเสธ",
-    startDate: "2025-07-21",
-    endDate: "2025-07-21",
-  }));
+const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title }) => {
+  const { user } = useAuth();
 
   const statusTabs = [
-    { label: "อนุมัติ", value: "อนุมัติ", color: "#34D399" },
-    { label: "รออนุมัติ", value: "รออนุมัติ", color: "#6FA5F7" },
-    { label: "ปฏิเสธ", value: "ปฏิเสธ", color: "#EF4444" },
+    { label: "อนุมัติ", value: "APPROVED", color: "#34D399" },
+    { label: "รออนุมัติ", value: "PENDING", color: "#6FA5F7" },
+    { label: "ปฏิเสธ", value: "REJECTED", color: "#EF4444" },
   ];
 
-
-  const itemPerPage = 9;
+  const [itemPerPage, setItemPerPage] = useState(9);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const limit = 9;
 
-  const filteredData = selectedStatus
-    ? leaveData.filter((item) => item.status === selectedStatus)
-    : leaveData;
-  const totalPages = Math.ceil(filteredData.length / itemPerPage);
+  // เรียก API พร้อม pagination
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["leaves", page, user?.id, user?.role, selectedStatus],
+    queryFn: () =>
+      getLeaves(
+        page,
+        limit,
+        user?.role === "employee" ? user?.id : undefined,
+        selectedStatus ?? undefined
+      ),
+    enabled: !!user,
+  });
 
-  const startIndex = (currentPage - 1) * itemPerPage;
-  const endIndex = startIndex + itemPerPage;
-  const paginatedData = filteredData.slice(startIndex, endIndex);
 
-  const pageLimit = 5;
-  const startPage = Math.max(
-    1,
-    Math.min(
-      currentPage - Math.floor(pageLimit / 2),
-      totalPages - pageLimit + 1
-    )
-  );
-  const endPage = Math.min(totalPages, startPage + pageLimit - 1);
+  if (!isOpen) return null;
+  if (isLoading) return <div>กำลังโหลด...</div>;
+  if (isError) return <div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div>;
 
-  const visiblePages = Array.from(
-    { length: endPage - startPage + 1 },
-    (_, i) => startPage + i
-  );
+  const leaves = data?.data || [];
+  const pagination = data?.pagination || {};
+
+  console.log(leaves);
 
   const handleTabClick = (status: string) => {
     if (selectedStatus === status) {
@@ -73,17 +64,23 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, data }) => {
     } else {
       setSelectedStatus(status);
     }
-    setCurrentPage(1);
+    setPage(1);
   };
+  const totalPages = leaves?.pagination?.totalPages || 1;
+  const startPage = Math.max(
+    1,
+    Math.min(currentPage - Math.floor(itemPerPage / 2), totalPages - itemPerPage + 1)
+  );
+  const endPage = Math.min(totalPages, startPage + itemPerPage - 1);
 
-  if (!isOpen) return null;
+  const visiblePages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
 
   return (
     <div className="bg-black bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center">
       <div className="relative bg-[var(--color-bg)] rounded-[8px] p-9 w-[75vw] max-w-[75vw] h-[85vh] max-h-[85vh] flex flex-col">
         {/* Header */}
         <div className="flex flex-row justify-between">
-          <p className="font-sukhumvit text-[20px] font-bold">{data.title}</p>
+          <p className="font-sukhumvit text-[20px] font-bold">{title}</p>
           <div
             className="flex flex-row items-center cursor-pointer group hover:text-white"
             onClick={onClose}
@@ -99,56 +96,57 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, data }) => {
               key={tab.value}
               tab={tab}
               selected={selectedStatus === tab.value}
-              onClick={handleTabClick}
+              onClick={() => handleTabClick(tab.value)}
             />
           ))}
         </div>
 
-        {/* <div className="overflow-x-auto rounded-[4px]">
-          <table className="w-full table-fixed border-separate border-spacing-0">
-            <TableHead columns={columns} />
-            <TableBody data={paginatedData} getStatusClass={getStatusClass} />
-          </table>
-        </div> */}
-
-        <div className="overflow-x-auto rounded-[4px]">
-
-
+        {/* Table */}
+        <div className="overflow-x-auto rounded-[4px] flex-1">
           <Table.Container>
-            {/* ทำเป็นทีละ row เหมือน body*/}
             <Table.Head>
-              <TableHeadCell width="w-[120px]">ลาพักร้อน/ลาป่วย/ลากิจ</TableHeadCell>
-              <TableHeadCell width="w-[275px]" style={{ fontWeight: "bold" }}>สาเหตุ</TableHeadCell>
-              <TableHeadCell width="w-[81px]" style={{ fontWeight: "bold" }}>จำนวนวันลา</TableHeadCell>
+              <TableHeadCell width="w-[120px]">ประเภทการลา</TableHeadCell>
+              <TableHeadCell width="w-[275px]" style={{ fontWeight: "bold" }}>
+                สาเหตุ
+              </TableHeadCell>
+              <TableHeadCell width="w-[81px]" style={{ fontWeight: "bold" }}>
+                จำนวนวันลา
+              </TableHeadCell>
               <TableHeadCell width="w-[65px]">สถานะ</TableHeadCell>
-              <TableHeadCell width="w-[120px]" style={{ fontWeight: "bold" }}>วันที่ลา</TableHeadCell>
+              <TableHeadCell width="w-[120px]" style={{ fontWeight: "bold" }}>
+                วันที่ลา
+              </TableHeadCell>
             </Table.Head>
 
             <Table.Body>
-              {paginatedData.map((item, index) => (
-                <Table.Row key={index}>
-                  <Table.Cell hasTopBorder={index !== 0}>{item.leaveType}</Table.Cell>
-                  <Table.Cell hasTopBorder={index !== 0}>{item.reason}</Table.Cell>
-                  <Table.Cell hasTopBorder={index !== 0}>{item.numberOfDays}</Table.Cell>
+              {leaves.map((item: any, index: number) => (
+                <Table.Row key={item.id || index}>
                   <Table.Cell hasTopBorder={index !== 0}>
-                    <StatusBadge status={item.status} />
+                    {item.leaveType?.name || "-"}
+                  </Table.Cell>
+                  <Table.Cell hasTopBorder={index !== 0}>
+                    {item.description}
+                  </Table.Cell>
+                  <Table.Cell hasTopBorder={index !== 0}>
+                    {item.totalDays}
+                  </Table.Cell>
+                  <Table.Cell hasTopBorder={index !== 0}>
+                    <StatusBadge status={statusTabs.find((s) => s.value === item.status)?.label || "-"} />
                   </Table.Cell>
                   <Table.Cell hasTopBorder={index !== 0}>
                     <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                      <span>{item.startDate}</span>
+                      <span>{item.startDate.split('T')[0]}</span>
                       <ArrowIcon className="fill-white w-[15px] h-[15px]" />
-                      <span>{item.endDate}</span>
+                      <span>{item.endDate.split('T')[0]}</span>
                     </span>
                   </Table.Cell>
                 </Table.Row>
               ))}
             </Table.Body>
-
-
           </Table.Container>
-
         </div>
 
+        {/* Footer + Pagination */}
         {/* Footer */}
         <div className="absolute bottom-0 left-0 right-0 flex justify-between px-9 pb-9">
           {/* Pagination */}

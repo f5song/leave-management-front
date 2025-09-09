@@ -10,6 +10,9 @@ import TableHead from "@/Components/Table/TableHead";
 import StatusBadge from "@/Components/StatusBadge";
 import StatusTab from "@/Components/StatusTab";
 import TableHeadCell from "../Table/TableHeadCell";
+import { useQuery } from "@tanstack/react-query";
+import { getItemsRequest } from "@/Api/items-requests-service";
+import { useAuth } from "@/Context/AuthContext";
 
 type ItemsModalProps = {
   isOpen: boolean;
@@ -22,48 +25,20 @@ type ItemsModalProps = {
 
 const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data }) => {
 
-  const itemsData = Array.from({ length: 20 }, (_, i) => ({
-    id: i + 1,
-    name: "MACBOOK",
-    employeeName: "งูพิษชยา แซวมอล",
-    status: "อนุมัติ",
-    dateTime: "2025-07-21 12:00",
-  }));
+  const { user, isLoading } = useAuth();
 
   const statusTabs = [
-    { label: "อนุมัติ", value: "อนุมัติ", color: "#34D399" },
-    { label: "รออนุมัติ", value: "รออนุมัติ", color: "#6FA5F7" },
-    { label: "ปฏิเสธ", value: "ปฏิเสธ", color: "#EF4444" },
+    { label: "อนุมัติ", value: "APPROVED", color: "#34D399" },
+    { label: "รออนุมัติ", value: "PENDING", color: "#6FA5F7" },
+    { label: "ปฏิเสธ", value: "REJECTED", color: "#EF4444" },
   ];
 
 
-  const itemPerPage = 9;
+  const [itemPerPage, setItemPerPage] = useState(9);
   const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(1);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-
-  const filteredData = selectedStatus
-    ? itemsData.filter((item) => item.status === selectedStatus)
-    : itemsData;
-  const totalPages = Math.ceil(filteredData.length / itemPerPage);
-
-  const startIndex = (currentPage - 1) * itemPerPage;
-  const endIndex = startIndex + itemPerPage;
-  const paginatedData = filteredData.slice(startIndex, endIndex);
-
-  const pageLimit = 5;
-  const startPage = Math.max(
-    1,
-    Math.min(
-      currentPage - Math.floor(pageLimit / 2),
-      totalPages - pageLimit + 1
-    )
-  );
-  const endPage = Math.min(totalPages, startPage + pageLimit - 1);
-
-  const visiblePages = Array.from(
-    { length: endPage - startPage + 1 },
-    (_, i) => startPage + i
-  );
+  console.log("selectedStatus", selectedStatus);
 
   const handleTabClick = (status: string) => {
     if (selectedStatus === status) {
@@ -71,8 +46,37 @@ const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data }) => {
     } else {
       setSelectedStatus(status);
     }
-    setCurrentPage(1);
+    setPage(1);
   };
+
+  //query
+  //item request
+  const { data: itemsRequest = { data: [], pagination: { totalItems: 0, totalPages: 1, page: 1, limit: 9 } } } = useQuery({
+    queryKey: ['items-request', user?.role || 'guest', currentPage, selectedStatus],
+    queryFn: async () => {
+      if (!user || isLoading) {
+        return { data: [], pagination: { totalItems: 0, totalPages: 1, page: 1, limit: 9 } };
+      }
+      if (user.role === 'admin') {
+        const response = await getItemsRequest(currentPage, itemPerPage,selectedStatus ?? undefined);
+        return response;
+      } else {
+        const response = await getItemsRequest(currentPage, itemPerPage,user.id,selectedStatus ?? undefined);
+        return response;
+      }
+    },
+    enabled: !!user && !isLoading,
+  });
+
+  console.log("totalPages", itemsRequest?.pagination?.totalPages);
+  const totalPages = itemsRequest?.pagination?.totalPages || 1;
+  const startPage = Math.max(
+    1,
+    Math.min(currentPage - Math.floor(itemPerPage / 2), totalPages - itemPerPage + 1)
+  );
+  const endPage = Math.min(totalPages, startPage + itemPerPage - 1);
+
+  const visiblePages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
 
   if (!isOpen) return null;
 
@@ -97,48 +101,39 @@ const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data }) => {
               key={tab.value}
               tab={tab}
               selected={selectedStatus === tab.value}
-              onClick={handleTabClick}
+              onClick={() => handleTabClick(tab.value)}
             />
           ))}
         </div>
-
-        {/* <div className="overflow-x-auto rounded-[4px]">
-          <table className="w-full table-fixed border-separate border-spacing-0">
-            <TableHead columns={columns} />
-            <TableBody data={paginatedData} getStatusClass={getStatusClass} />
-          </table>
-        </div> */}
-
         <div className="overflow-x-auto rounded-[4px]">
-
-
           <Table.Container>
-            {/* ทำเป็นทีละ row เหมือน body*/}
             <Table.Head>
-                <TableHeadCell width="w-[600px]">อุปกรณ์ที่ขอยืม</TableHeadCell>
-                <TableHeadCell width="w-[300px]">พนักงานที่ยืม</TableHeadCell>
-                <TableHeadCell width="w-[90px]">สถานะ</TableHeadCell>
-                <TableHeadCell width="w-[200px]">วันที่ยืม</TableHeadCell>
+              <TableHeadCell width="w-[600px]">อุปกรณ์ที่ขอยืม</TableHeadCell>
+              <TableHeadCell width="w-[250px]">พนักงานที่ยืม</TableHeadCell>
+              <TableHeadCell width="w-[100px]">สถานะ</TableHeadCell>
+              <TableHeadCell width="w-[200px]">วันที่ยืม</TableHeadCell>
             </Table.Head>
 
             <Table.Body>
-              {paginatedData.map((item, index) => (
-                <Table.Row key={index}>
-                  <Table.Cell hasTopBorder={index !== 0}>{item.name}</Table.Cell>
-                  <Table.Cell hasTopBorder={index !== 0}>{item.employeeName}</Table.Cell>
-                  <Table.Cell hasTopBorder={index !== 0}>
-                    <StatusBadge status={item.status} />
-                  </Table.Cell>
-                  <Table.Cell hasTopBorder={index !== 0}>
-                    <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                      <span>{item.dateTime}</span>
-                    </span>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
+              {itemsRequest?.data?.map((item, index) => {
+                return (
+                  <Table.Row key={index}>
+                    <Table.Cell hasTopBorder={index !== 0}>{item.item.name}</Table.Cell>
+                    <Table.Cell hasTopBorder={index !== 0}>{item.requestedBy.firstName + " " + item.requestedBy.lastName}</Table.Cell>
+                    <Table.Cell hasTopBorder={index !== 0}>
+                      <StatusBadge
+                        status={statusTabs.find(s => s.value === item.status)?.label ?? item.status}
+                      />
+                    </Table.Cell>
+                    <Table.Cell hasTopBorder={index !== 0}>
+                      <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                        <span>{item.createdAt.split('T')[0] + " " + item.createdAt.split('T')[1].split(':')[0] + ":" + item.createdAt.split('T')[1].split(':')[1]}</span>
+                      </span>
+                    </Table.Cell>
+                  </Table.Row>
+                );
+              })}
             </Table.Body>
-
-
           </Table.Container>
 
         </div>
