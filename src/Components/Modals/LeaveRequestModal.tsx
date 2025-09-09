@@ -137,7 +137,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, 
 
           <div className="flex flex-col mb-6">
             <p className="font-sukhumvit text-[16px] text-white mb-3">วันที่ลา*</p>
-            <div className="bg-[#1a1a1a] rounded-[4px] p-4 w-full">
+            <div>
               <DatePicker
                 selected={formData.startDate}
                 onChange={(dates: [Date | null, Date | null]) => {
@@ -154,6 +154,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, 
                 inline
                 locale="th"
                 calendarClassName="custom-calendar-full-width"
+                className="rounded-[4px] p-4 w-full"
               />
 
             </div>

@@ -6,6 +6,7 @@ type Option = {
 };
 
 type SelectFieldProps = {
+  id?: string;
   label: string;
   name: string;
   value: string;
@@ -19,6 +20,7 @@ type SelectFieldProps = {
 
 const SelectField: React.FC<SelectFieldProps> = ({
   className,
+  id,
   label,
   name,
   value,
@@ -31,7 +33,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
   return (
     <div className="flex flex-col gap-2 w-full font-sukhumvit">
       <select
-        id={name}
+        id={id}
         name={name}
         value={value}
         disabled={disabled}

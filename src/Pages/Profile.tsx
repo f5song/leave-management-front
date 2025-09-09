@@ -88,7 +88,7 @@ const Profile = () => {
         departmentId: z.string().min(1, { message: 'กรุณาเลือกแผนก' }),
         jobTitleId: z.string().min(1, { message: 'กรุณาเลือกตำแหน่ง' }),
         nickName: z.string().min(2, { message: 'ชื่อเล่นต้องมีอย่างน้อย 2 ตัวอักษร' }).max(20, { message: 'ชื่อเล่นต้องมีไม่เกิน 20 ตัวอักษร' }),
-        birthDate: z.string().min(1, { message: 'กรุณาเลือกวันเกิด' }),
+        birthDate: z.date().optional(),
         avatar: z.string().optional(),
         role: z.string(),
     });
@@ -110,7 +110,7 @@ const Profile = () => {
             departmentId: user?.departmentId || '',
             jobTitleId: user?.jobTitleId || '',
             nickName: user?.nickName || '',
-            birthDate: user?.birthDate || '',
+            birthDate: user?.birthDate ? new Date(user.birthDate) : null,
             avatar: user?.avatarUrl || '',
             role: 'employee',
         },
@@ -125,7 +125,7 @@ const Profile = () => {
                 departmentId: user.departmentId || '',
                 jobTitleId: user.jobTitleId || '',
                 nickName: user.nickName || '',
-                birthDate: user.birthDate || '',
+                birthDate: user.birthDate ? new Date(user.birthDate) : null,
                 avatar: user.avatarUrl || '',
                 role: 'employee',
             });
@@ -225,36 +225,43 @@ const Profile = () => {
                                     {/* เปลี่ยนแท็ก p เป็น Label */}
                                     <div className="flex flex-col w-full gap-3">
                                         <div className="w-full">
-                                            <p className="text-[16px] text-white font-sukhumvit">อีเมล</p>
-                                            <Input {...register('email')} className="w-full" disabled={!isEditing} />
+                                            <Label htmlFor="email">อีเมล</Label>
+                                            <Input id="email" {...register('email')} className="w-full" disabled={!isEditing} />
                                         </div>
 
                                         <div className="flex flex-col md:flex-row gap-3">
                                             <div className="flex flex-col w-full">
-                                                <p className="text-[16px] text-white font-sukhumvit">ชื่อจริง</p>
-                                                <Input {...register('firstName')} className="w-full" disabled={!isEditing} />
+                                                <Label htmlFor="firstName">ชื่อจริง</Label>
+                                                <Input id="firstName" {...register('firstName')} className="w-full" disabled={!isEditing} />
                                             </div>
                                             <div className="flex flex-col w-full">
-                                                <p className="text-[16px] text-white font-sukhumvit">นามสกุล</p>
-                                                <Input {...register('lastName')} className="w-full" disabled={!isEditing} />
+                                                <Label htmlFor="lastName">นามสกุล</Label>
+                                                <Input id="lastName" {...register('lastName')} className="w-full" disabled={!isEditing} />
                                             </div>
                                         </div>
 
                                         <div className="flex flex-col md:flex-row gap-3">
                                             <div className="flex flex-col w-full">
-                                                <p className="text-[16px] text-white font-sukhumvit">ชื่อเล่น</p>
-                                                <Input {...register('nickName')} disabled={!isEditing} />
+                                                <Label htmlFor="nickName">ชื่อเล่น</Label>
+                                                <Input id="nickName" {...register('nickName')} disabled={!isEditing} />
                                             </div>
                                             <div className="flex flex-col w-full">
                                                 <Label htmlFor="birthDate">วันเกิด</Label>
-                                                <DatePicker
-                                                    selected={user?.birthDate ? new Date(user.birthDate) : null}
-                                                    onChange={(date: Date) => setValue('birthDate', date?.toString() || '')}
-                                                    dateFormat="dd/MM/yyyy"
-                                                    className=" w-full h-[49px] p-[12px] rounded-[4px] backdrop-blur-[8px] transition duration-200 bg-[#00000052] text-[var(--color-font)] placeholder-[var(--color-font)] border border-transparent hover:border-[#FFD000] hover:text-[#FFD000] hover:placeholder-[#FFD000] active:border-[#FFFFFF] active:text-[#FFFFFF] active:outline-none disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[#1A1A1A]"
-                                                    disabled={!isEditing}
+                                                <Controller
+                                                    control={control}
+                                                    name="birthDate"
+                                                    render={({ field }) => (
+                                                        <DatePicker
+                                                            id="birthDate"
+                                                            selected={field.value}           // Date | null
+                                                            onChange={(date: Date | null) => field.onChange(date)}
+                                                            dateFormat="dd/MM/yyyy"
+                                                            className="w-full h-[49px] p-[12px] rounded-[4px] backdrop-blur-[8px] transition duration-200 bg-[#00000052] text-[var(--color-font)] placeholder-[var(--color-font)] border border-transparent hover:border-[#FFD000] hover:text-[#FFD000] hover:placeholder-[#FFD000] active:border-[#FFFFFF] active:text-[#FFFFFF] active:outline-none disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[#1A1A1A]"
+                                                            disabled={!isEditing}
+                                                            locale="th"
+                                                        />
+                                                    )}
                                                 />
-
                                             </div>
                                         </div>
 
@@ -266,9 +273,10 @@ const Profile = () => {
                                                     control={control}
                                                     render={({ field }) => (
                                                         <SelectField
-                                                            className="text-white"
-                                                            label="แผนก"
+                                                            id="departmentId"
                                                             name="departmentId"
+                                                            className="text-[16px] text-[var(--color-font)] font-sukhumvit"
+                                                            label="แผนก"
                                                             options={(departments?.data || []).map((d: any) => ({
                                                                 value: d.id,
                                                                 label: d.name,
@@ -284,15 +292,16 @@ const Profile = () => {
                                             </div>
 
                                             <div className="flex flex-col w-full">
-                                                <p className="text-[16px] text-white font-sukhumvit">ตำแหน่ง</p>
+                                                <Label htmlFor="jobTitleId">ตำแหน่ง</Label>
                                                 <Controller
                                                     name="jobTitleId"
                                                     control={control}
                                                     render={({ field }) => (
                                                         <SelectField
-                                                            className="text-white"
-                                                            label="ตำแหน่ง"
+                                                            id="jobTitleId"
                                                             name="jobTitleId"
+                                                            className="text-[16px] text-[var(--color-font)] font-sukhumvit"
+                                                            label="ตำแหน่ง"
                                                             options={(jobTitles?.data || []).map((d: any) => ({
                                                                 value: d.id,
                                                                 label: d.name,

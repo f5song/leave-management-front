@@ -8,7 +8,7 @@ interface User {
   lastName: string;
   nickName: string;
   avatarUrl: string;
-  birthDate: string;
+  birthDate: Date;
   jobTitleId: string;
   departmentId: string;
   email: string;
