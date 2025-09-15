@@ -97,6 +97,12 @@ const Calendar = () => {
     enabled: !!user && !isLoading,
   });
 
+  const { data: leaveUserData = [] } = useQuery({
+    queryKey: ['leavesByUser', user?.id],
+    queryFn: () => getLeavesByUser(user?.id || ''),
+    enabled: !!user && !isLoading,
+  });
+
 
 
   //holidays calendar
@@ -347,7 +353,7 @@ const Calendar = () => {
                     </div>
                   </div>
 
-                  {leaves.map((leave, index) => (
+                  {leaveUserData?.data?.map((leave, index) => (
                     <div key={index} className="flex flex-row border-b border-[#676767] pt-3 pb-1 justify-between">
                       <div className="w-[110px]">
                         <p className="font-sukhumvit text-[16px] text-white">{leave.type}</p>
@@ -359,7 +365,8 @@ const Calendar = () => {
                           <ArrowIcon className="fill-white" />
                           <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{new Date(leave.endDate).toISOString().split('T')[0]}</p>
                         </div>
-                        <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{leave.employee}</p>
+                        {/* ตั้งค่าให้ถ้าเป็น admin เห็นชื่อคนลา ถ้าเป็น employee ให้ไม่ต้องเห็น */}
+                        <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{leave.firstName + ' ' + leave.lastName}</p>
                       </div>
                     </div>
                   ))}

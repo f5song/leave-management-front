@@ -12,6 +12,7 @@ import { groupHolidaysByMonth } from '@/Api/holidays-service/utils/groupHolidays
 import { IHoliday } from '@/Api/holidays-service/interfaces/holidays.interface';
 import { expandHolidayDates } from '@/Api/holidays-service/utils/expandHolidayDates';
 import { getBirthdays } from '@/Api/users-service';
+import { toast } from '@/Components/UseToast';
 
 
 
@@ -60,8 +61,12 @@ const Login = () => {
         navigate('/profile');
       }
     },
-    onError: (error) => {
-      console.log('error google login ', error);
+    onError: () => {
+      toast({
+        title: 'อัปเดตข้อมูลไม่สำเร็จ',
+        description: 'อัปเดตข้อมูลไม่สำเร็จ',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -72,7 +77,13 @@ const Login = () => {
     onSuccess: async (codeResponse) => {
       await googleLoginMutation.mutateAsync(codeResponse.code);
     },
-    onError: (error) => console.log('error google login ', error),
+    onError: (error) => {
+      toast({
+        title: 'อัปเดตข้อมูลไม่สำเร็จ',
+        description: 'อัปเดตข้อมูลไม่สำเร็จ',
+        variant: 'destructive',
+      }); 
+    },
   });
 
 

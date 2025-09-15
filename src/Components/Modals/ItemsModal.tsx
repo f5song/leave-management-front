@@ -38,7 +38,6 @@ const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [page, setPage] = useState(1);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  console.log("selectedStatus", selectedStatus);
 
   const handleTabClick = (status: string) => {
     if (selectedStatus === status) {
@@ -68,7 +67,6 @@ const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data }) => {
     enabled: !!user && !isLoading,
   });
 
-  console.log("totalPages", itemsRequest?.pagination?.totalPages);
   const totalPages = itemsRequest?.pagination?.totalPages || 1;
   const startPage = Math.max(
     1,

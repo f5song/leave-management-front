@@ -22,10 +22,8 @@ const Navbar: React.FC<NavbarProps> = ({ onClick }) => {
     const handleLogout = async () => {
         try {
             await authService.logout();
-            console.log("Logout function");
             navigate("/login");
         } catch (error) {
-            console.error("Logout failed:", error);
         }
     };
 

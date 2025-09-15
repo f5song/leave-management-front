@@ -35,12 +35,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userData = await authService.getCurrentUser();
         if (userData && userData.id) {
           setUser(userData); // ใช้ role ที่ backend ส่งมา
-          console.log('user form auth', userData);
         } else {
           setUser(null);
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
         setUser(null);
       } finally {
         setIsLoading(false);

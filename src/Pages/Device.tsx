@@ -74,7 +74,6 @@ const Device = () => {
     },
     enabled: !!user && !isLoading,
   });
-  console.log("itemsRequest", itemsRequest);
 
 
   const filteredItems =

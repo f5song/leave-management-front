@@ -7,7 +7,6 @@ export const createLeave = async (userId: string, data: ILeaveInput) => {
     const response = await apiClient.post(`leaves/${userId}`, data);
     return response.data;
   } catch (error) {
-    console.error('Failed to create leave:', error);
     throw new Error('Failed to create leave');
   }
 };

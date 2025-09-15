@@ -156,7 +156,6 @@ const Register = () => {
 
                 <div className="relative w-full lg:w-[325px] h-[372px] rounded-[4px] overflow-hidden group">
 
-                  {/* ถ้ายังไม่มีรูป ให้แสดง default UI แบบ icon */}
                   {!(formData.avatar) ? (
                     <div className="flex flex-col items-center justify-center w-full h-full bg-[#00000052] gap-[10px] rounded-[4px]">
                       <ProfileIcon className="w-[130px] h-[130px] object-contain" />

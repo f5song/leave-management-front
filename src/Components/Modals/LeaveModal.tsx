@@ -54,9 +54,7 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title }) => {
   if (isError) return <div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div>;
 
   const leaves = data?.data || [];
-  const pagination = data?.pagination || {};
 
-  console.log(leaves);
 
   const handleTabClick = (status: string) => {
     if (selectedStatus === status) {

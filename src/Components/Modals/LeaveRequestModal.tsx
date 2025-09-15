@@ -83,12 +83,15 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, 
       });
     },
     onError: (err: any) => {
-      console.log(err);
+      toast({
+        title: 'อัปเดตข้อมูลไม่สำเร็จ',
+        description: 'อัปเดตข้อมูลไม่สำเร็จ',
+        variant: 'destructive',
+      });
     },
   });
 
   const onSubmit = (data: LeaveRequestData) => {
-    console.log("onsubmit:data", data);
     mutation.mutate(data);
   };
 

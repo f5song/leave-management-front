@@ -12,7 +12,7 @@ export interface IGoogleLoginResponse {
       departmentId: string;
       jobTitleId: string;
       nickName: string;
-      birthDate: string;
+      birthDate: Date;
       permissions: string[];
     };
     access_token: string;
