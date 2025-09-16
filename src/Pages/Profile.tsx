@@ -24,7 +24,7 @@ import {
 import { getJobTitles } from "@/Api/job-title-service";
 import { getLeavesByUser } from "@/Api/leave-service";
 import { getItemsRequest } from "@/Api/items-requests-service";
-import { getUserLeaves, updateAvatar, updateUser } from "@/Api/users-service";
+import { getUserLeavesBalance, updateAvatar, updateUser } from "@/Api/users-service";
 
 import { ArrowIcon, CalendarIcon, ComputerIcon, EditIcon } from "@/Shared/Asseet/Icons";
 
@@ -42,28 +42,49 @@ const Profile = () => {
     const toggleItemsModal = () => setItemsModalOpen(!isItemsModalOpen);
 
     const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
-    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [avatar, setAvatar] = useState<File | null>(null);
 
     // 🔹 Queries
     const { data: departments = [] } = useQuery({ queryKey: ['departments'], queryFn: getDepartments });
     const { data: jobTitles = [] } = useQuery({ queryKey: ['jobTitles'], queryFn: getJobTitles });
-    const { data: { data: leaveData = [] } = {} } = useQuery({ queryKey: ['leaveData'], queryFn: () => getLeavesByUser(user?.id || '') });
-    const { data: { data: itemsRequest = [] } = {} } = useQuery({ queryKey: ['itemsRequest'], queryFn: () => getItemsRequest(undefined, undefined, user?.id || '') });
-    const { data: leaveBalance = [] } = useQuery({ queryKey: ['leaveBalance'], queryFn: () => getUserLeaves(user?.id || '') });
+    const { data: leaveData = [] } = useQuery({ queryKey: ['leaveData'], queryFn: () => getLeavesByUser(user?.id || '') });
+    const { data: itemsRequest = [] } = useQuery({ queryKey: ['itemsRequest'], queryFn: () => getItemsRequest(undefined, undefined, user?.id || '') });
+    const { data: leaveBalance = [] } = useQuery({ queryKey: ['leaveBalance'], queryFn: () => getUserLeavesBalance(user?.id || '') });
 
     // 🔹 Validation schema
     const schema = z.object({
-        firstName: z.string().min(2, { message: 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร' }).max(20, { message: 'ชื่อต้องมีไม่เกิน 20 ตัวอักษร' }),
-        lastName: z.string().min(2, { message: 'นามสกุลต้องมีอย่างน้อย 2 ตัวอักษร' }).max(20, { message: 'นามสกุลต้องมีไม่เกิน 20 ตัวอักษร' }),
-        email: z.string().email({ message: 'กรุณากรอกอีเมลที่ถูกต้อง' }),
-        departmentId: z.string().min(1, { message: 'กรุณาเลือกแผนก' }),
-        jobTitleId: z.string().min(1, { message: 'กรุณาเลือกตำแหน่ง' }),
-        nickName: z.string().min(2, { message: 'ชื่อเล่นต้องมีอย่างน้อย 2 ตัวอักษร' }).max(20, { message: 'ชื่อเล่นต้องมีไม่เกิน 20 ตัวอักษร' }),
+        firstName: z
+            .string()
+            .trim()
+            .min(1, 'กรุณากรอกชื่อจริง')
+            .regex(/^[ก-๙a-zA-Z\s]+$/, 'ชื่อจริงต้องเป็นตัวอักษรเท่านั้น'),
+        lastName: z
+            .string()
+            .trim()
+            .min(1, 'กรุณากรอกนามสกุล')
+            .regex(/^[ก-๙a-zA-Z\s]+$/, 'นามสกุลต้องเป็นตัวอักษรเท่านั้น'),
+        email: z.string().email('รูปแบบอีเมลไม่ถูกต้อง'),
+        departmentId: z.string().trim().min(1, 'เลือกแผนก'),
+        jobTitleId: z.string().trim().min(1, 'เลือกตำแหน่ง'),
+        nickName: z
+            .string()
+            .trim()
+            .min(1, 'กรอกชื่อเล่น')
+            .regex(/^[ก-๙a-zA-Z\s]+$/, 'ชื่อเล่นต้องเป็นตัวอักษรเท่านั้น'),
         birthDate: z.date().optional(),
+        googleId: z.string().trim().min(1, 'ไม่มี Google ID'),
+        avatar: z.any().optional(),
     });
+
     type ProfileData = z.infer<typeof schema>;
 
-    const { control, register, handleSubmit, reset } = useForm<ProfileData>({
+    const { 
+        control, 
+        register, 
+        handleSubmit, 
+        reset,
+        formState: { errors },
+    } = useForm<ProfileData>({
         resolver: zodResolver(schema),
         defaultValues: {
             firstName: user?.firstName || '',
@@ -93,17 +114,10 @@ const Profile = () => {
     // 🔹 Mutations
 
     const userMutation = useMutation({
-        mutationFn: async (data: ProfileData) => {
-            let avatarUrl = user?.avatarUrl;
-            if (avatarFile) {
-                const res = await updateAvatar(user?.id || '', avatarFile);
-                avatarUrl = res.avatarUrl;
-            }
-            return updateUser(user?.id || '', { ...data, avatarUrl });
-        },
+        mutationFn: (form: FormData) => updateUser(user?.id || '', form),
         onSuccess: () => {
             alert('บันทึกข้อมูลสำเร็จ');
-            setAvatarFile(null);
+            setAvatar(null);
             queryClient.invalidateQueries({ queryKey: ['user', user?.id] });
         },
         onError: (err: any) => alert(`เกิดข้อผิดพลาด: ${err.message}`),
@@ -114,31 +128,29 @@ const Profile = () => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        setAvatarFile(file); // เก็บไฟล์ไว้
-        setPreviewAvatar(URL.createObjectURL(file)); // แค่โชว์ preview
+        setAvatar(file);
+        setPreviewAvatar(URL.createObjectURL(file));
     };
-
-
-
 
     const onSubmit = async (data: ProfileData) => {
         try {
-            // ถ้ามี avatarFile ให้ upload ก่อน
-            let avatarUrl = user?.avatarUrl;
-            if (avatarFile) {
-                const res = await updateAvatar(user?.id || '', avatarFile);
-                avatarUrl = res.avatarUrl;
-            }
-
-            // ส่งข้อมูล user พร้อม avatarUrl
-            await updateUser(user?.id || '', { ...data, avatarUrl });
+            const form = new FormData();
+            Object.entries(data).forEach(([key, value]) => {
+                if (value !== undefined && key !== "avatar") {
+                    form.append(key, value.toString());
+                }
+            });
+            form.append("avatarUrl", avatar);
+            userMutation.mutate(form);
 
             alert('บันทึกข้อมูลสำเร็จ');
-            setAvatarFile(null);
+            setAvatar(null);
         } catch (err: any) {
             alert(`เกิดข้อผิดพลาด: ${err.message}`);
         }
     };
+
+    console.log("leaveData", leaveData);
 
 
     return (
@@ -342,7 +354,7 @@ const Profile = () => {
                                             <p className="font-sukhumvit text-[16px] text-[#DCDCDC] group-hover:text-white transition-colors ml-1">ดูทั้งหมด</p>
                                         </div>
                                     </div>
-                                    {itemsRequest.map((item, index) => (
+                                    {itemsRequest?.data?.map((item, index) => (
                                         <div key={index} className="flex flex-row border-b border-[#676767] pt-3 pb-1 justify-between">
                                             <div className="w-[232px]"><p className="font-sukhumvit text-[16px] text-white">{item.item.name}</p></div>
                                             <div className="w-[68px]"><p className="font-sukhumvit-semibold text-[14px] text-white">จำนวน {item.quantity}</p></div>

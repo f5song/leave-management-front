@@ -17,5 +17,6 @@ import { ReactComponent as CloseIcon } from './close.svg';
 import { ReactComponent as BinIcon } from './bin.svg';
 import { ReactComponent as ArrowLeftIcon } from './arrow_left.svg';
 import { ReactComponent as ArrowRightIcon } from './arrow_right.svg';
+import { ReactComponent as IxEmoteSadFilledIcon } from './ix_emote-sad-filled.svg';
 
-export { FunchLogo, ProfileIcon, CalendarIcon, GoogleIcon, FunchIcon, CakeIcon, StarIcon, DangerIcon, ComputerIcon, ProfileSmallIcon, LogOutIcon, ArrowIcon, BackIcon, EditIcon, CloseIcon, BinIcon, ArrowLeftIcon, ArrowRightIcon };
+export { FunchLogo, ProfileIcon, CalendarIcon, GoogleIcon, FunchIcon, CakeIcon, StarIcon, DangerIcon, ComputerIcon, ProfileSmallIcon, LogOutIcon, ArrowIcon, BackIcon, EditIcon, CloseIcon, BinIcon, ArrowLeftIcon, ArrowRightIcon, IxEmoteSadFilledIcon };

@@ -14,7 +14,7 @@ export const createLeave = async (userId: string, data: ILeaveInput) => {
 export const getLeavesByUser = async (userId: string) => {
   const response = await apiClient.get(`leaves/user/${userId}`);
 
-  return response.data;
+  return response.data.data;
 };
 
 export const updateLeaveStatus = async (

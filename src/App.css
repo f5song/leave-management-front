@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Calendar dark theme styling */
 .react-datepicker {
     background-color: #00000052 !important;
     border: none !important;
@@ -58,9 +57,9 @@
     text-align: center !important;
     line-height: 32px !important;
     font-size: 12px !important;
-    margin: 0 !important;       /* เอาช่องว่างออก */
+    margin: 0 !important;
     border-radius: 0 !important;
-    padding: 0 !important;      /* กัน padding แอบดัน */
+    padding: 0 !important;
     box-sizing: border-box !important;
 }
 
@@ -74,7 +73,6 @@
 .react-datepicker__day--selected {
     background-color: #FFFFFF14 !important;
     border: 1px solid #FFD000 !important;
-    border-right: none !important;
     color: #FFD000 !important;
     border-radius: 4px 0 0 4px !important;
 }
@@ -82,9 +80,9 @@
 /* Single selected day */
 .react-datepicker__day--selected:not(.react-datepicker__day--range-start):not(.react-datepicker__day--range-end) {
     background-color: #FFFFFF14 !important;
-    border: 1px solid #FFD000 !important;  /* ครอบทุกด้าน */
+    border: 1px solid #FFD000 !important;
     color: #FFD000 !important;
-    border-radius: 4px !important;          /* มุมโค้งสวย */
+    border-radius: 4px !important;
 }
 
 /* Range Start */
@@ -107,6 +105,14 @@
     border-left: none !important;
     color: #FFD000 !important;
     border-radius: 0 4px 4px 0 !important;
+}
+
+/* Single day selected (start == end) */
+.react-datepicker__day--range-start.react-datepicker__day--range-end {
+    background-color: #FFFFFF14 !important;
+    border: 1px solid #FFD000 !important;
+    color: #FFD000 !important;
+    border-radius: 4px !important;
 }
 
 /* In Range (กลางช่วง) */

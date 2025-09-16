@@ -53,16 +53,17 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, 
   ];
   const [selected, setSelected] = useState<string>(leaveTypes[0].value);
   const [formData, setFormData] = useState({
-    leaveTypeId: selected,
+    leaveTypeId: leaveTypes[0].value,
     title: "",
     description: "",
     startDate: new Date(),
     endDate: new Date(),
   });
 
+
   const schema = z.object({
     leaveTypeId: z.string(),
-    title: z.string().min(1, "กรุณากรอกหัวข้อการลา"), // ✅ ต้องใส่ ไม่ optional
+    title: z.string().min(1, "กรุณากรอกหัวข้อการลา"),
     description: z.string(),
     startDate: z.date(),
     endDate: z.date(),
@@ -81,6 +82,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, 
         description: 'อัปเดตข้อมูลสำเร็จ',
         variant: 'default',
       });
+      onClose();
     },
     onError: (err: any) => {
       toast({
@@ -111,10 +113,13 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, 
         <div className="flex flex-row items-center bg-[#1a1a1a] rounded-[4px] p-1 mb-6">
           {leaveTypes.map((item, index) => (
             <div
-              key={item.value}
-              onClick={() => setSelected(item.value)}
+            key={item.value}
+            onClick={() => {
+              setSelected(item.value);
+              onChange("leaveTypeId", item.value); 
+            }}
               className={`flex justify-center items-center rounded-[4px] px-8 py-2 cursor-pointer transition-colors flex-1
-                ${selected === item.value
+                ${formData.leaveTypeId === item.value
                   ? index === 0
                     ? "bg-[#00FFBB] text-[var(--color-secondary)]"
                     : index === 1

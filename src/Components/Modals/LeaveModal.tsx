@@ -31,29 +31,28 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title }) => {
 
   const [itemPerPage, setItemPerPage] = useState(9);
   const [currentPage, setCurrentPage] = useState(1);
+
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
+
   const limit = 9;
 
-  // เรียก API พร้อม pagination
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["leaves", page, user?.id, user?.role, selectedStatus],
+  const { data: leaves = { data: [], pagination: { totalItems: 0, totalPages: 1, page: 1, limit: 9 } }, isLoading, isError } = useQuery({
+    queryKey: ["leaves", currentPage, user?.id, user?.role, selectedStatus],
     queryFn: () =>
       getLeaves(
-        page,
+        currentPage,
         limit,
         user?.role === "employee" ? user?.id : undefined,
         selectedStatus ?? undefined
       ),
     enabled: !!user,
   });
+  console.log("leaves", leaves);
 
 
   if (!isOpen) return null;
   if (isLoading) return <div>กำลังโหลด...</div>;
   if (isError) return <div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div>;
-
-  const leaves = data?.data || [];
 
 
   const handleTabClick = (status: string) => {
@@ -62,8 +61,9 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title }) => {
     } else {
       setSelectedStatus(status);
     }
-    setPage(1);
+    setCurrentPage(1);
   };
+
   const totalPages = leaves?.pagination?.totalPages || 1;
   const startPage = Math.max(
     1,
@@ -117,7 +117,7 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title }) => {
             </Table.Head>
 
             <Table.Body>
-              {leaves.map((item: any, index: number) => (
+              {leaves?.data?.map((item: any, index: number) => (
                 <Table.Row key={item.id || index}>
                   <Table.Cell hasTopBorder={index !== 0}>
                     {item.leaveType?.name || "-"}

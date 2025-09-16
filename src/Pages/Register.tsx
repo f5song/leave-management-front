@@ -48,7 +48,7 @@ const Register = () => {
       .regex(/^[ก-๙a-zA-Z\s]+$/, 'ชื่อเล่นต้องเป็นตัวอักษรเท่านั้น'),
     birthDate: z.string().trim().min(1, 'เลือกวันเกิด'),
     googleId: z.string().trim().min(1, 'ไม่มี Google ID'),
-    avatar: z.string().optional(),
+    avatar: z.any().optional(),
   });
 
 
@@ -87,36 +87,35 @@ const Register = () => {
 
 
   const registerMutation = useMutation({
-    mutationFn: createUser,
+    mutationFn: (form: FormData) => createUser(form),
     onSuccess: (res) => {
       const { user } = res;
       login(user);
-      navigate('/home');
-      toast({
-        title: 'สมัครสมาชิกสำเร็จ',
-        description: 'ยินดีต้อนรับสู่ระบบลางาน Funch.tech',
-      });
+      navigate('/calendar');
+      alert('สมัครสมาชิกสำเร็จ');
     },
     onError: (error: any) => {
-      toast({
-        title: 'สมัครสมาชิกไม่สำเร็จ',
-        description: error.message || 'กรุณาตรวจสอบข้อมูลและลองใหม่',
-        variant: 'destructive',
-      });
+      alert(`เกิดข้อผิดพลาด: ${error.message}`);
     },
   });
 
   const onSubmit = (data: RegisterFormData) => {
-
     const form = new FormData();
+
     Object.entries(data).forEach(([key, value]) => {
-      form.append(key, value.toString());
+      if (value !== undefined && key !== "avatar") {
+        form.append(key, value.toString());
+      }
     });
-    form.append('role', 'employee');
-    form.append('avatar', avatar);
+    form.append("avatarUrl", avatar);
+
+    form.append("roleId", "employee");
+
 
     registerMutation.mutate(form);
   };
+
+
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -304,7 +303,7 @@ const Register = () => {
                 <div className="flex items-stretch bg-[#00000052] border border-[#ED363F] rounded-[4px] overflow-hidden h-[48px]">
 
                   <div className="flex items-center justify-center px-3 bg-transparent">
-                    <DangerIcon className="w-[24px] h-[24px]" />
+                    <DangerIcon className="w-[24px] h-[24px] fill-[#ED363F]" />
                   </div>
 
                   {/* เส้นคั่นแนวตั้ง */}

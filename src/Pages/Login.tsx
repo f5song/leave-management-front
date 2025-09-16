@@ -5,7 +5,7 @@ import { useAuth } from '@/Context/AuthContext';
 import { useState } from 'react';
 import { ILoginResponse } from '@/Api/auth-service/Interface/login.interface';
 import { useGoogleLogin } from '@react-oauth/google';
-import { CakeIcon, CalendarIcon, FunchLogo, GoogleIcon } from '@/Shared/Asseet/Icons';
+import { CakeIcon, CalendarIcon, FunchLogo, GoogleIcon, IxEmoteSadFilledIcon } from '@/Shared/Asseet/Icons';
 
 import { getHolidays } from '@/Api/holidays-service';
 import { groupHolidaysByMonth } from '@/Api/holidays-service/utils/groupHolidays';
@@ -82,7 +82,7 @@ const Login = () => {
         title: 'อัปเดตข้อมูลไม่สำเร็จ',
         description: 'อัปเดตข้อมูลไม่สำเร็จ',
         variant: 'destructive',
-      }); 
+      });
     },
   });
 
@@ -128,25 +128,32 @@ const Login = () => {
           {view === 'monthly' ? (
             <>
               <div className="flex flex-wrap gap-3">
-                {filteredHolidays.map((item) => {
-                  const dateObj = new Date(item.startDate);
-                  const dayName = dateObj.toLocaleDateString('th-TH', { weekday: 'long' }).replace(/^วัน/, '');
-                  const dayNumber = dateObj.toLocaleDateString('th-TH', { day: '2-digit' });
-                  return (
-                    <div key={item.id} className="w-[141px] h-[102px] rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] p-3 py-2 shadow-md backdrop-blur-sm">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="font-sukhumvit-bold w-[69px] h-[30px] p-1 rounded-[4px] border border-[#FDC911] text-[#FDC911] text-[16px] font-semibold flex items-center justify-center">
-                          {dayName}
+                {filteredHolidays.length === 0 ? (
+                  <div className="flex flex-row  items-center justify-center w-full h-[102px] bg-[#FFFFFF14] rounded-[8px]">
+                    <IxEmoteSadFilledIcon className="w-[52px] h-[52px] fill-[#FF9B05] mr-2" />
+                    <p className="text-[#FF9B05] text-[24px] font-sukhumvit-bold text-center">เดือนนี้ไม่มีวันหยุด</p>
+                  </div>
+                ) : (
+                  filteredHolidays.map((item) => {
+                    const dateObj = new Date(item.startDate);
+                    const dayName = dateObj.toLocaleDateString('th-TH', { weekday: 'long' }).replace(/^วัน/, '');
+                    const dayNumber = dateObj.toLocaleDateString('th-TH', { day: '2-digit' });
+                    return (
+                      <div key={item.id} className="w-[141px] h-[102px] rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] p-3 py-2 shadow-md backdrop-blur-sm">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="font-sukhumvit-bold w-[69px] h-[30px] p-1 rounded-[4px] border border-[#FDC911] text-[#FDC911] text-[16px] font-semibold flex items-center justify-center">
+                            {dayName}
+                          </div>
+                          <div className="font-sukhumvit-bold text-primary text-[32px] font-bold">
+                            {dayNumber}
+                          </div>
                         </div>
-                        <div className="font-sukhumvit-bold text-primary text-[32px] font-bold">
-                          {dayNumber}
-                        </div>
+                        <div className="h-[1px] bg-white/30 mb-2" />
+                        <p className="font-sukhumvit text-white/70 text-[14px] truncate">{item.title}</p>
                       </div>
-                      <div className="h-[1px] bg-white/30 mb-2" />
-                      <p className="font-sukhumvit text-white/70 text-[14px] truncate">{item.title}</p>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
 
               {/* ตัวอย่างวันเกิด */}

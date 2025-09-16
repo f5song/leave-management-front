@@ -14,7 +14,7 @@ import { useAuth } from "@/Context/AuthContext"
 import { useQuery } from "@tanstack/react-query"
 import { getHolidays } from "@/Api/holidays-service"
 import { getLeavesByUser, getLeaves } from "@/Api/leave-service"
-import { getUserLeaves } from "@/Api/users-service"
+import { getUserLeavesBalance } from "@/Api/users-service"
 
 const monthNames = [
   "มกราคม",
@@ -96,7 +96,6 @@ const Calendar = () => {
     },
     enabled: !!user && !isLoading,
   })
-  console.log("leaves", leaves)
 
   const { data: leaveUserData = [] } = useQuery({
     queryKey: ["leavesByUser", user?.id],
@@ -112,10 +111,8 @@ const Calendar = () => {
 
   const { data: leaveBalance = [] } = useQuery({
     queryKey: ["leaveBalance"],
-    queryFn: () => getUserLeaves(user?.id || ""),
+    queryFn: () => getUserLeavesBalance(user?.id || ""),
   })
-
-  const onChange = (key: keyof typeof formData, value: any) => setFormData((prev) => ({ ...prev, [key]: value }))
 
   const [currentDate, setCurrentDate] = useState(new Date())
 
@@ -406,9 +403,8 @@ const Calendar = () => {
                     <div
                       key={index}
                       onClick={() => toggleLeaveRequestModal()}
-                      className={`relative min-h-[100px] p-2 border-r border-b border-[#FFFFFF14] ${
-                        isCurrentMonth ? "bg-gray-800/20 hover:bg-gray-700/30" : "bg-gray-900/20 text-gray-600"
-                      } transition-colors cursor-pointer`}
+                      className={`relative min-h-[100px] p-2 border-r border-b border-[#FFFFFF14] ${isCurrentMonth ? "bg-gray-800/20 hover:bg-gray-700/30" : "bg-gray-900/20 text-gray-600"
+                        } transition-colors cursor-pointer`}
                     >
                       <div className="font-sukhumvit-bold text-right text-sm mb-1">
                         {day.getDate().toString().padStart(2, "0")}
@@ -465,30 +461,62 @@ const Calendar = () => {
                     </div>
                   </div>
 
-                  {leaves?.map((leave, index) => (
-                    <div key={index} className="flex flex-row border-b border-[#676767] pt-3 pb-1 justify-between">
-                      <div className="w-[110px]">
-                        <p className="font-sukhumvit text-[16px] text-white">{leave.type}</p>
-                        <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{leave.title}</p>
-                      </div>
-                      <div className="flex flex-col">
-                        <div className="flex flex-row items-center w-[168px]">
-                          <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">
-                            {new Date(leave.startDate).toISOString().split("T")[0]}
-                          </p>
-                          <ArrowIcon className="fill-white" />
-                          <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">
-                            {new Date(leave.endDate).toISOString().split("T")[0]}
-                          </p>
+                  {user?.role === "employee" &&
+                    leaveUserData?.map((leave, index) => (
+                        <div
+                          key={index}
+                          className="flex flex-row border-b border-[#676767] pt-3 pb-1 justify-between"
+                        >
+                          <div className="w-[110px]">
+                            <p className="font-sukhumvit text-[16px] text-white">{leave.type}</p>
+                            <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">
+                              {leave.title}
+                            </p>
+                          </div>
+                          <div className="flex flex-col">
+                            <div className="flex flex-row items-center w-[168px]">
+                              <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">
+                                {new Date(leave.startDate).toISOString().split("T")[0]}
+                              </p>
+                              <ArrowIcon className="fill-white" />
+                              <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">
+                                {new Date(leave.endDate).toISOString().split("T")[0]}
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                        {user?.role === "admin" && (
+                      ))}
+
+                  {user?.role === "admin" &&
+                    leaves?.map((leave, index) => (
+                        <div
+                          key={index}
+                          className="flex flex-row border-b border-[#676767] pt-3 pb-1 justify-between"
+                        >
+                          <div className="w-[110px]">
+                            <p className="font-sukhumvit text-[16px] text-white">{leave.type}</p>
+                            <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">
+                              {leave.title}
+                            </p>
+                          </div>
+                          <div className="flex flex-col">
+                            <div className="flex flex-row items-center w-[168px]">
+                              <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">
+                                {new Date(leave.startDate).toISOString().split("T")[0]}
+                              </p>
+                              <ArrowIcon className="fill-white" />
+                              <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">
+                                {new Date(leave.endDate).toISOString().split("T")[0]}
+                              </p>
+                            </div>
+                          </div>
                           <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">
                             {leave.userInfo?.firstName + " " + leave.userInfo?.lastName}
                           </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                        </div>
+                      ))}
+
+
                 </div>
               </div>
             </div>

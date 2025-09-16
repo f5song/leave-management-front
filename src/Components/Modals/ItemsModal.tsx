@@ -36,7 +36,6 @@ const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data }) => {
 
   const [itemPerPage, setItemPerPage] = useState(9);
   const [currentPage, setCurrentPage] = useState(1);
-  const [page, setPage] = useState(1);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
   const handleTabClick = (status: string) => {
@@ -45,7 +44,7 @@ const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data }) => {
     } else {
       setSelectedStatus(status);
     }
-    setPage(1);
+    setCurrentPage(1);
   };
 
   //query
