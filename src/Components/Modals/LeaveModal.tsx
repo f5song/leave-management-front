@@ -42,7 +42,7 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title }) => {
       getLeaves(
         currentPage,
         limit,
-        user?.role === "employee" ? user?.id : undefined,
+        user?.id,
         selectedStatus ?? undefined
       ),
     enabled: !!user,

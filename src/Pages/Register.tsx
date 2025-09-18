@@ -100,19 +100,23 @@ const Register = () => {
   });
 
   const onSubmit = (data: RegisterFormData) => {
-    const form = new FormData();
+    try {
+      const form = new FormData();
 
-    Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined && key !== "avatar") {
-        form.append(key, value.toString());
-      }
-    });
-    form.append("avatarUrl", avatar);
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && key !== "avatar") {
+          form.append(key, value.toString());
+        }
+      });
+      form.append("avatarUrl", avatar);
 
-    form.append("roleId", "employee");
+      form.append("roleId", "employee");
 
 
-    registerMutation.mutate(form);
+      registerMutation.mutate(form);
+    } catch (err: any) {
+      alert(`เกิดข้อผิดพลาด: ${err.message}`);
+    }
   };
 
 

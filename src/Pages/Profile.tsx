@@ -94,6 +94,7 @@ const Profile = () => {
             jobTitleId: user?.jobTitleId || '',
             nickName: user?.nickName || '',
             birthDate: user?.birthDate ? new Date(user.birthDate) : null,
+            avatar: user?.avatarUrl || '',
         },
     });
 
@@ -107,6 +108,7 @@ const Profile = () => {
                 jobTitleId: user.jobTitleId || '',
                 nickName: user.nickName || '',
                 birthDate: user.birthDate ? new Date(user.birthDate) : null,
+                avatar: user.avatarUrl || '',
             });
         }
     }, [user, reset]);
