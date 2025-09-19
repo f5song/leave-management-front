@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService } from '@/Api/auth-service';
+import { useQueryClient } from '@tanstack/react-query';
+import { getUserById } from '@/Api/users-service';
 
 interface User {
   id: string;
@@ -21,6 +23,7 @@ interface AuthContextType {
   login: (user: User) => void;
   logout: () => void;
   isLoading: boolean;
+  refreshUser: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,13 +31,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const userData = await authService.getCurrentUser();
         if (userData && userData.id) {
-          setUser(userData); // ใช้ role ที่ backend ส่งมา
+          setUser(userData);
         } else {
           setUser(null);
         }
@@ -57,8 +61,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     authService.logout();
   };
 
+  const refreshUser = async () => {
+    if (user?.id) {
+      try {
+        const updatedUser = await getUserById(user.id);
+        setUser(updatedUser);
+        // อัพเดท cache ด้วย
+        queryClient.setQueryData(["user", user.id], updatedUser);
+        console.log("🔄 รีเฟรช user data สำเร็จ");
+      } catch (error) {
+        console.error("❌ รีเฟรช user data ผิดพลาด:", error);
+      }
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
