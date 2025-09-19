@@ -7,7 +7,7 @@ import { updateUser } from "@/Api/users-service";
 import { ProfileData, profileSchema } from "@/Shared/utils/profileValidation";
 
 export const useProfileForm = () => {
-  const { user, refreshUser } = useAuth(); // เพิ่ม refreshUser
+  const { user, refreshUser } = useAuth();
   const queryClient = useQueryClient();
   const [avatar, setAvatar] = useState<File | null>(null);
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);

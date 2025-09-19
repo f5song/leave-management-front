@@ -1,5 +1,6 @@
 import { ComputerIcon } from "@/Shared/Asseet/Icons";
 import { useProfileData } from "@/Hook/useProfileData";
+import { formatDateTime } from "@/Shared/utils/dateUtils";
 
 type Props = { toggleItemsModal: () => void };
 
@@ -22,7 +23,7 @@ const ItemsHistory = ({ toggleItemsModal }: Props) => {
                         <div key={index} className="flex flex-row border-b border-[#676767] pt-3 pb-1 justify-between">
                             <div className="w-[232px]"><p className="font-sukhumvit text-[16px] text-white">{item.item.name}</p></div>
                             <div className="w-[68px]"><p className="font-sukhumvit-semibold text-[14px] text-white">จำนวน {item.quantity}</p></div>
-                            <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{new Date(item.createdAt).toLocaleString('sv-SE', { timeZone: 'Asia/Bangkok' })}</p>
+                            <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{formatDateTime(item.createdAt)}</p>
                         </div>
                     ))}
                 </div>

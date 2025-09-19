@@ -3,5 +3,5 @@ export const formatDate = (date: string | Date): string => {
 }
 
 export const formatDateTime = (date: string | Date): string => {
-  return new Date(date).toLocaleString("sv-SE", { timeZone: "Asia/Bangkok" })
+  return new Date(date).toLocaleString('sv-SE', { timeZone: 'Asia/Bangkok' })
 }

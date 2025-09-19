@@ -1,5 +1,6 @@
 import { ArrowIcon, CalendarIcon } from "@/Shared/Asseet/Icons";
 import { useProfileData } from "@/Hook/useProfileData";
+import { formatDate } from "@/Shared/utils/dateUtils";
 
 type Props = { toggleLeaveModal: () => void };
 
@@ -19,12 +20,12 @@ const LeaveHistory = ({ toggleLeaveModal }: Props) => {
           </div>
           {leaveData?.map((leave, index) => (
             <div key={index} className="flex flex-row border-b border-[#676767] pt-3 pb-1 justify-between">
-              <div className="w-[110px]"><p className="font-sukhumvit text-[16px] text-white">{leave.title}</p></div>
-              <div className="w-[178px]"><p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{leave.description}</p></div>
+              <div className="w-[120px]"><p className="font-sukhumvit text-[16px] text-white truncate">{leave.title}</p></div>
+              <div className="w-[170px]"><p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)] truncate">{leave.description}</p></div>
               <div className="flex flex-row items-center w-[168px]">
-                <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{new Date(leave.startDate).toISOString().split('T')[0]}</p>
+                <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{formatDate(leave.startDate)}</p>
                 <ArrowIcon className="fill-white" />
-                <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{new Date(leave.endDate).toISOString().split('T')[0]}</p>
+                <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{formatDate(leave.endDate)}</p>
               </div>
             </div>
           ))}
