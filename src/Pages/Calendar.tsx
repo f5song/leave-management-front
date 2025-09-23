@@ -1,42 +1,88 @@
 import BackgroundGradient from "@/Components/BackgroundGradient"
-import CalendarHeader from "@/Components/CalendarHeader"
 import HorizontalDivider from "@/Components/HorizontalDivider"
-import LeaveBalanceCard from "@/Components/LeaveBalanceCard"
-import LeaveHistorySection from "@/Components/LeaveHistorySection"
+import LeaveBalance from "@/Components/LeaveBalance"
+import { LeaveHistorySection } from "@/Components/LeaveHistorySection"
 import LeaveModal from "@/Components/Modals/LeaveModal"
 import LeaveRequestModal from "@/Components/Modals/LeaveRequestModal"
 import Navbar from "@/Components/Navbar"
 import { useAuth } from "@/Context/AuthContext"
 import useCalendarData from "@/Hook/useCalendarData"
-import { getCalendarDays, getEventsForDay, getSpanningEvents, getGroupedSpanningEvents } from "@/Shared/utils/calendar-utils"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
-const DAY_NAMES = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"]
+// FullCalendar imports
+import FullCalendar from "@fullcalendar/react"
+import dayGridPlugin from "@fullcalendar/daygrid"
+import interactionPlugin from "@fullcalendar/interaction"
+import thLocale from "@fullcalendar/core/locales/th"
+
+const MONTH_NAMES = [
+  "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+  "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
+]
 
 const Calendar = () => {
   const { user, isLoading } = useAuth()
   const navigate = useNavigate()
-  const [currentDate, setCurrentDate] = useState(new Date())
   const [isLeaveModalOpen, setLeaveModalOpen] = useState(false)
   const [isLeaveRequestModalOpen, setLeaveRequestModalOpen] = useState(false)
 
-  const { leaves, userLeaves, holidays, leaveBalance } = useCalendarData(user, isLoading)
-  const days = getCalendarDays(currentDate)
+  const calendarRef = useRef<FullCalendar | null>(null)
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [currentPage] = useState(1);
+  const [selectedStatus] = useState<string | null>(null);
+  const pages = 1;
+  const limit = 10;
+
+  const { calendarLeaves, holidays, leaves } = useCalendarData(user, isLoading, pages, limit)
+  console.log("calendarLeaves", calendarLeaves)
 
   const toggleLeaveModal = () => setLeaveModalOpen(v => !v)
   const toggleLeaveRequestModal = () => setLeaveRequestModalOpen(v => !v)
 
-  const navigateMonth = (direction: number) => {
-    const newDate = new Date(currentDate)
-    newDate.setMonth(currentDate.getMonth() + direction)
-    setCurrentDate(newDate)
+  // handle prev/next month
+  const handleNavigate = (direction: number) => {
+    const api = calendarRef.current?.getApi()
+    if (!api) return
+
+    if (direction === -1) api.prev()
+    else if (direction === 1) api.next()
+    else api.today()
+
+    setCurrentDate(api.getDate())
   }
 
-  const spanningLeaves = getSpanningEvents(days, leaves, "leave")
-  const spanningHolidays = getSpanningEvents(days, holidays, "holiday")
-  const allSpanningEvents = [...spanningLeaves, ...spanningHolidays]
-  const { limitedEvents } = getGroupedSpanningEvents(allSpanningEvents)
+  const events = [
+    ...calendarLeaves.map(l => {
+      const endDate = new Date(l.endDate)
+      endDate.setDate(endDate.getDate() + 1) // +1 วัน
+
+      return {
+        id: l.id,
+        title: l.title || "การลา",
+        start: l.startDate,
+        end: endDate.toISOString().split("T")[0], // ใช้ string date แบบ yyyy-mm-dd
+        allDay: true,
+        color: l.status === "PENDING" ? "#6B7280" : l.userInfo?.color || "#F59E0B",
+        textColor: "#fff",
+      }
+    }),
+    ...holidays.map(h => {
+      const endDate = new Date(h.endDate)
+      endDate.setDate(endDate.getDate() + 1)
+
+      return {
+        id: h.id,
+        title: h.title || "วันหยุด",
+        start: h.startDate,
+        end: endDate.toISOString().split("T")[0],
+        allDay: true,
+        color: "#6FA5F7",
+        textColor: "#fff",
+      }
+    }),
+  ]
 
   return (
     <div className="flex flex-col min-h-screen bg-quaternary text-white px-4 md:px-8 py-8 relative">
@@ -44,8 +90,8 @@ const Calendar = () => {
       <LeaveModal
         isOpen={isLeaveModalOpen}
         onClose={() => setLeaveModalOpen(false)}
-        title="ประวัติการลา"
-        toggleModal={toggleLeaveModal}
+        title="การลา"
+        scope="dashboard"
       />
       <LeaveRequestModal
         isOpen={isLeaveRequestModalOpen}
@@ -64,111 +110,67 @@ const Calendar = () => {
 
         <div className="flex flex-col xl:flex-row gap-5">
           {/* Calendar Section */}
-          <div className="flex flex-col w-full rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] shadow-[0_4px_43px_0_rgba(0,0,0,0.32)] z-10">
-            <div className="px-5 pt-5">
-              <CalendarHeader currentDate={currentDate} onNavigate={navigateMonth} />
-              <HorizontalDivider />
+          <div className="flex flex-col w-full rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] shadow-[0_4px_43px_0_rgba(0,0,0,0.32)] z-10 p-3">
 
-              {/* Calendar Grid */}
-              <div className="grid grid-cols-7 gap-0 pb-5 border border-[#FFFFFF14] rounded-[8px] relative">
-                {/* Day Headers */}
-                {DAY_NAMES.map(day => (
-                  <div
-                    key={day}
-                    className="text-center font-sukhumvit text-[14px] p-3 font-semibold text-white border-b border-[#FFFFFF14]"
-                  >
-                    {day}
-                  </div>
-                ))}
+            {/* Calendar Header inline */}
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-4">
+                <button onClick={() => handleNavigate(-1)} className="p-2 hover:bg-gray-700 rounded transition-colors">
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <span className="font-sukhumvit text-[20px]">
+                  {MONTH_NAMES[(currentDate.getMonth() - 1 + 12) % 12]}
+                </span>
+              </div>
 
-                {/* Calendar Days */}
-                {days.map((day, index) => {
-                  const isCurrentMonth = day.getMonth() === currentDate.getMonth()
-                  const dayLeaves = getEventsForDay(day, leaves)
-                  const dayHolidays = getEventsForDay(day, holidays)
+              <div className="flex items-center space-x-4">
+                <h2 className="font-sukhumvit-bold text-[20px]">
+                  {MONTH_NAMES[currentDate.getMonth()]} {currentDate.getFullYear()}
+                </h2>
+              </div>
 
-                  const allEventsForDay = [...dayLeaves, ...dayHolidays]
-                  const hasOverflow = allEventsForDay.length > 2
-                  const overflowCount = allEventsForDay.length - 2
-
-                  return (
-                    <div
-                      key={index}
-                      onClick={toggleLeaveRequestModal}
-                      className={`relative min-h-[100px] p-2 border-r border-b border-[#FFFFFF14] ${
-                        isCurrentMonth
-                          ? "bg-gray-800/20 hover:bg-gray-700/30"
-                          : "bg-gray-900/20 text-gray-600"
-                      } transition-colors cursor-pointer`}
-                    >
-                      <div className="font-sukhumvit-bold text-right text-sm mb-1">
-                        {day.getDate().toString().padStart(2, "0")}
-                      </div>
-
-                      {hasOverflow && (
-                        <div className="absolute bottom-1 left-1 text-xs font-sukhumvit text-white">
-                          และอีก {overflowCount} คน
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-
-                {limitedEvents.map((event, idx) => {
-                  const rowOffset = event.weekRow * 100
-                  const baseTop = 60
-                  const eventHeight = 24
-                  const eventSpacing = 4
-
-                  const eventsInSameRow = limitedEvents.filter(e => e.weekRow === event.weekRow)
-                  const positionInRow = eventsInSameRow.findIndex(e => e.id === event.id)
-
-                  return (
-                    <div
-                      key={`spanning-event-${event.id}-${idx}`}
-                      className="absolute z-20 rounded-md flex items-center px-3 text-xs font-sukhumvit-semibold truncate shadow-sm"
-                      style={{
-                        left: `${(event.startIndex % 7) * (100 / 7) + 0.5}%`,
-                        width: `${event.span * (100 / 7) - 1}%`,
-                        top: `${baseTop + rowOffset + 8 + positionInRow * (eventHeight + eventSpacing)}px`,
-                        height: `${eventHeight}px`,
-                        border: "2px solid",
-                        borderColor:
-                          event.status === "PENDING"
-                            ? "#6B7280"
-                            : event.eventType === "holiday"
-                            ? "#6FA5F7"
-                            : event.userInfo?.color || "#F59E0B",
-                        color:
-                          event.status === "PENDING"
-                            ? "#6B7280"
-                            : event.eventType === "holiday"
-                            ? "#6FA5F7"
-                            : event.userInfo?.color || "#F59E0B",
-                        backgroundColor:
-                          event.status === "PENDING"
-                            ? "#6B728020"
-                            : event.eventType === "holiday"
-                            ? "#6FA5F720"
-                            : (event.userInfo?.color || "#F59E0B") + "20",
-                      }}
-                    >
-                      {event.title}
-                    </div>
-                  )
-                })}
+              <div className="flex items-center space-x-4">
+                <span className="font-sukhumvit text-[20px]">
+                  {MONTH_NAMES[(currentDate.getMonth() + 1) % 12]}
+                </span>
+                <button onClick={() => handleNavigate(1)} className="p-2 hover:bg-gray-700 rounded transition-colors">
+                  <ChevronRight className="w-5 h-5" />
+                </button>
               </div>
             </div>
+
+            <HorizontalDivider />
+
+            <FullCalendar
+              ref={calendarRef}
+              plugins={[dayGridPlugin, interactionPlugin]}
+              initialView="dayGridMonth"
+              locale={thLocale}
+              headerToolbar={false}
+              events={events}
+              height="auto"
+              dayMaxEventRows={3}
+              moreLinkContent={(arg) => {
+                return <span className="text-xs text-white">และอีก {arg.num} คน</span>
+              }}
+              datesSet={(arg) => setCurrentDate(arg.start)}
+              eventClick={() => toggleLeaveRequestModal()}
+              dateClick={() => toggleLeaveRequestModal()}
+              eventContent={(arg) => {
+                return (
+                  <div className="px-2 py-1 text-xs font-sukhumvit truncate">
+                    {arg.event.title}
+                  </div>
+                )
+              }}
+            />
           </div>
 
           {/* Right Panel */}
           <div className="flex flex-col">
-            <LeaveBalanceCard leaveBalance={leaveBalance} />
+            <LeaveBalance />
             <LeaveHistorySection
-              user={user}
-              userLeaves={userLeaves}
-              leaves={leaves}
-              onToggleModal={toggleLeaveModal}
+              leaves={leaves.data || []}
             />
           </div>
         </div>

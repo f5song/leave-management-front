@@ -34,8 +34,8 @@ export const getLeaves = async (
 ) => {
   const params = new URLSearchParams();
 
-  params.append("page", page?.toString() || "1");
-  params.append("limit", limit?.toString() || "9");
+  params.append("page", page?.toString() || "0");
+  params.append("limit", limit?.toString() || "0");
 
   if (userId) params.append("userId", userId);
   if (status) params.append("status", status);

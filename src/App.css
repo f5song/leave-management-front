@@ -69,6 +69,7 @@
     border-radius: 4px !important;
 }
 
+
 /* Selected day */
 .react-datepicker__day--selected {
     background-color: #FFFFFF14 !important;
@@ -147,8 +148,80 @@
     color: white !important;
     border-radius: 4px !important;
 }
+
 .react-datepicker__day--in-selecting-range {
     background-color: rgba(255, 208, 0, 0.1) !important;
     border-radius: 4px !important;
-  }
-  
+}
+
+/* --- FullCalendar Override --- */
+
+.fc {
+    font-family: 'sukhumvit', sans-serif !important;
+    background-color: transparent !important;
+    color: #fff !important;
+}
+
+/* แถวหัววัน จ อ พ ... */
+.fc .fc-col-header-cell.fc-day {
+    background-color: #343434 !important;
+    border: 1px solid #888 !important;
+    border-bottom: 1px solid #888 !important;
+    color: #ccc !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+}
+
+/* วันในกริด */
+.fc .fc-daygrid-day {
+    border: 1px solid #888 !important;
+    background-color: transparent !important;
+}
+
+/* วัน hover */
+.fc .fc-daygrid-day:hover {
+    background-color: #444 !important;
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+/* วันปัจจุบัน */
+.fc .fc-day-today {
+    background-color: #FFFFFF14 !important;
+    color: white !important;
+    border-radius: 4px !important;
+}
+
+/* Event */
+.fc .fc-daygrid-event {
+    margin: 2px 0 !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    padding: 0 !important;
+}
+
+/* +N more link */
+.fc .fc-daygrid-more-link {
+    color: #FFD000 !important;
+    font-size: 10px !important;
+    font-weight: 500 !important;
+}
+
+
+/* ปรับสีเส้นขอบทั้งหมดให้เป็นเทาแทนขาว */
+.fc-theme-standard td,
+.fc-theme-standard th,
+.fc-theme-standard .fc-scrollgrid {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    /* เทาอ่อน */
+}
+
+/* padding ข้างใน cell */
+.fc-daygrid-day-frame {
+    padding: 6px !important;
+}
+
+.fc-popover-header,
+.fc-popover-body {
+    background-color: #343434 !important;
+}

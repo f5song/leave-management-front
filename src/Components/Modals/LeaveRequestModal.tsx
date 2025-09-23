@@ -76,7 +76,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, 
   const mutation = useMutation({
     mutationFn: (data: LeaveRequestData) => createLeave(user?.id!, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['leaves', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['calendarLeaves', user?.id] });
       toast({
         title: 'อัปเดตข้อมูลสำเร็จ',
         description: 'อัปเดตข้อมูลสำเร็จ',

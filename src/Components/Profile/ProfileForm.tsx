@@ -51,7 +51,7 @@ export const ProfileForm = ({ isEditing }: ProfileFormProps) => {
             <div className="flex flex-col">
                 <p className="font-sukhumvit text-[16px]">รูปพนักงาน</p>
                 {/* container ที่มี relative + group */}
-                <div className="relative w-[160px] h-[160px]">
+                <div className="relative">
                     <img
                         className="w-[160px] h-[160px] rounded-[4px] border border-[#000000]"
                         src={previewAvatar || user?.avatarUrl || "/default-avatar.png"}
@@ -95,7 +95,7 @@ export const ProfileForm = ({ isEditing }: ProfileFormProps) => {
                             id="email" 
                             {...register('email')} 
                             className="w-full" 
-                            disabled={!isEditing} 
+                            disabled
                         />
                         {errors.email && (
                             <span className="text-red-500 text-sm">{errors.email.message}</span>

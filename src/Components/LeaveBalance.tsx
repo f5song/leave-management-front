@@ -1,11 +1,13 @@
 import { useProfileData } from "@/Hook/useProfileData";
+import { useAuth } from "@/Context/AuthContext";
 
 const LeaveBalance = () => {
-  const { leaveBalance } = useProfileData()
+  const { user } = useAuth();
+  const { leaveBalance } = useProfileData(undefined, undefined, user?.id);
   return (
     <div className="w-full rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] shadow-[0_4px_43px_0_rgba(0,0,0,0.32)] z-10 px-5 py-5">
       <div className="flex flex-row gap-x-6">
-        {leaveBalance?.map((lt, idx) => (
+        {leaveBalance?.map((lt: any, idx: number) => (
           <div key={lt.id} className="flex items-center">
             <div className="flex flex-col min-w-[120px] max-w-[144px]">
               <p className="font-sukhumvit text-[20px] font-bold">{lt.name}</p>

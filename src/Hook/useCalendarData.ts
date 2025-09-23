@@ -6,9 +6,9 @@ import { getUserLeavesBalance } from "@/Api/users-service"
 import { useAuth } from "@/Context/AuthContext"
 
 // Calendar Hooks
-const useCalendarData = (user, isLoading) => {
-    const leaves = useQuery({
-        queryKey: ["leaves", user?.id],
+const useCalendarData = (user, isLoading, pages, limit) => {
+    const calendarLeaves = useQuery({
+        queryKey: ["calendarLeaves", user?.id],
         queryFn: async () => {
             if (!user || isLoading) return []
             const response = await getLeaves()
@@ -42,11 +42,19 @@ const useCalendarData = (user, isLoading) => {
         enabled: !!user,
     })
 
+    const leaves = useQuery({
+        queryKey: ["leaves", pages, "APPROVED"],
+        queryFn: () => getLeaves(pages, limit, undefined, "APPROVED"),
+        enabled: !isLoading,
+      });
+      
+                                                            
     return {
-        leaves: leaves.data || [],
+        calendarLeaves: calendarLeaves.data || [],
         userLeaves: userLeaves.data || [],
         holidays: holidays.data || [],
         leaveBalance: leaveBalance.data || [],
+        leaves: leaves.data || [],
     }
 }
 

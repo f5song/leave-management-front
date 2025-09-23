@@ -20,7 +20,7 @@ export const profileSchema = z.object({
     .min(1, 'กรอกชื่อเล่น')
     .regex(/^[ก-๙a-zA-Z\s]+$/, 'ชื่อเล่นต้องเป็นตัวอักษรเท่านั้น'),
   birthDate: z.date().optional(),
-  avatar: z.any().optional(),
+  avatarUrl: z.any().optional(),
 })
 
 export type ProfileData = z.infer<typeof profileSchema>
