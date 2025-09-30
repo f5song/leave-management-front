@@ -11,13 +11,12 @@ import { useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
-// FullCalendar imports
+
 import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import interactionPlugin from "@fullcalendar/interaction"
 import thLocale from "@fullcalendar/core/locales/th"
 import { MONTH_NAMES } from "@/Shared/Constants/calendar"
-
 
 
 const Calendar = () => {
@@ -86,7 +85,6 @@ const Calendar = () => {
         isOpen={isLeaveModalOpen}
         onClose={() => setLeaveModalOpen(false)}
         title="การลา"
-        scope="dashboard"
       />
       <LeaveRequestModal
         isOpen={isLeaveRequestModalOpen}

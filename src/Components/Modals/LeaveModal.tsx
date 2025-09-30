@@ -14,19 +14,15 @@ type LeaveModalProps = {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  scope: "dashboard" | "profile";
 };
 
-const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title, scope }) => {
+const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title }) => {
   const { user } = useAuth();
   const limit = 9;
   const { data: leaves, pagination, isLoading, isError, currentPage, setCurrentPage, selectedStatus, handleTabClick } =
     usePaginatedQuery({
       queryKeyBase: "leaves",
-      fetchFn: (page, limit, status) =>
-        scope === "dashboard"
-          ? getLeaves(page, limit, undefined, "APPROVED")
-          : getLeaves(page, limit, user?.id, status),
+      fetchFn: (page, limit, status) => getLeaves(page, limit, user?.id, status),
       limit,
       user,
     });
@@ -88,9 +84,9 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title, scope }
                   </Table.Cell>
                   <Table.Cell hasTopBorder={index !== 0}>
                     <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                      <span>{item.startDate?.split?.("T")?.[0] ?? "-"}</span>
+                      <span>{item.startDate?.formatDate() ?? "-"}</span>
                       <ArrowIcon className="fill-white w-[15px] h-[15px]" />
-                      <span>{item.endDate?.split?.("T")?.[0] ?? "-"}</span>
+                      <span>{item.endDate?.formatDate() ?? "-"}</span>
                     </span>
                   </Table.Cell>
                 </Table.Row>

@@ -3,38 +3,19 @@
 import type React from "react"
 import { useState } from "react"
 import DatePicker from "react-datepicker"
-import { registerLocale } from "react-datepicker"
-import { th } from "date-fns/locale"
+
 import "react-datepicker/dist/react-datepicker.css"
 import "../../App.css"
 import PrimaryButton from "../PrimaryButton"
 import { useMutation } from "@tanstack/react-query"
-import { updateUser } from "@/Api/users-service"
 import { useAuth } from "@/Context/AuthContext"
 import { useQueryClient } from "@tanstack/react-query"
 import { createLeave } from "@/Api/leave-service"
 import { z } from "zod"
 import { toast } from "../UseToast"
-
-registerLocale("th", th)
-
-const CloseIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-  </svg>
-)
-
-const TextArea = ({
-  className,
-  placeholder,
-  value,
-  onChange,
-}: {
-  className?: string
-  placeholder?: string
-  value: string
-  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
-}) => <textarea className={className} placeholder={placeholder} value={value} onChange={onChange} />
+import { leaveTypes } from "@/Shared/Constants/leaveType"
+import { CloseIcon } from "@/Shared/Asseet/Icons"
+import { TextArea } from "../TextArea"
 
 type LeaveRequestModalProps = {
   isOpen: boolean
@@ -46,12 +27,7 @@ type LeaveRequestModalProps = {
 const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, title, toggleModal }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const leaveTypes = [
-    { value: "ANNUAL", label: "ลาพักร้อน" },
-    { value: "SICK", label: "ลาป่วย" },
-    { value: "PERSONAL", label: "ลากิจ" },
-  ];
-  const [selected, setSelected] = useState<string>(leaveTypes[0].value);
+
   const [formData, setFormData] = useState({
     leaveTypeId: leaveTypes[0].value,
     title: "",
@@ -113,11 +89,8 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, 
         <div className="flex flex-row items-center bg-[#1a1a1a] rounded-[4px] p-1 mb-6">
           {leaveTypes.map((item, index) => (
             <div
-            key={item.value}
-            onClick={() => {
-              setSelected(item.value);
-              onChange("leaveTypeId", item.value); 
-            }}
+              key={item.value}
+              onClick={() => onChange("leaveTypeId", item.value)}
               className={`flex justify-center items-center rounded-[4px] px-8 py-2 cursor-pointer transition-colors flex-1
                 ${formData.leaveTypeId === item.value
                   ? index === 0
@@ -172,11 +145,13 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, 
             <p className="font-sukhumvit text-[16px] text-white mb-3">หัวข้อการลา*</p>
             <div className="bg-[#1a1a1a] rounded-[4px]">
               <TextArea
-                placeholder="หัวข้อการลา"
+                placeholder="กรอกหัวข้อการลา"
                 value={formData.title}
                 onChange={(e) => onChange("title", e.target.value)}
-                className="w-full bg-transparent border-none text-white placeholder-gray-500 p-3 resize-none h-12 outline-none font-sukhumvit"
+                rows={1}
+                cols={100}
               />
+
             </div>
             <p className="font-sukhumvit text-[16px] text-white mb-3 mt-3">สาเหตุที่ลา*</p>
             <div className="bg-[#1a1a1a] rounded-[4px]">
@@ -184,7 +159,8 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, 
                 placeholder="กรอกสาเหตุการลา"
                 value={formData.description}
                 onChange={(e) => onChange("description", e.target.value)}
-                className="w-full bg-transparent border-none text-white placeholder-gray-500 p-3 resize-none h-20 outline-none font-sukhumvit"
+                rows={5}
+                cols={100}
               />
             </div>
           </div>
