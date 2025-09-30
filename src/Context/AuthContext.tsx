@@ -10,7 +10,7 @@ interface User {
   lastName: string;
   nickName: string;
   avatarUrl: string;
-  birthDate: Date;
+  birthDate: string;
   jobTitleId: string;
   departmentId: string;
   email: string;

@@ -9,7 +9,7 @@ export const authService = {
     const { data } = await apiClient.post<ILoginResponse>('/auth/login', credentials);
 
     if (data.access_token) {
-      Cookies.set("authToken", data.access_token, { path: "/" }); // path ชัดเจน
+      Cookies.set("authToken", data.access_token, { path: "/" });
     }
 
     return data;
@@ -18,13 +18,13 @@ export const authService = {
   async googleLogin(code: string): Promise<IGoogleLoginResponse> {
     const { data } = await apiClient.post<IGoogleLoginResponse>('/auth/google-login', { code });
     if (data.access_token) {
-      Cookies.set("authToken", data.access_token, { path: "/" }); // path ชัดเจน
+      Cookies.set("authToken", data.access_token, { path: "/" });
     }
     return data;
   },
 
   async getCurrentUser() {
-    const { data } = await apiClient.get('/auth/me');
+    const { data } = await apiClient.get('/auth/me', { withCredentials: true });
     return data;
   },
 

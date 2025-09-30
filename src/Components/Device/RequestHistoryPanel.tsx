@@ -39,7 +39,7 @@ export const DeviceRequestHistory = ({ toggleDeviceModal }: Props) => {
               <div className="w-[120px] flex-shrink-0">
                 <img
                   className="w-[92px] h-[52px] rounded-[4px] object-cover"
-                  src={item.image || "/default-item.png"}
+                  src={item.item?.image || "/default-item.png"}
                   alt={item.item?.name || "Item"}
                   onError={(e) => {
                     e.currentTarget.src = "/default-item.png";

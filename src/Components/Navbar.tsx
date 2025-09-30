@@ -32,6 +32,7 @@ const Navbar: React.FC<NavbarProps> = ({ onClick }) => {
         { label: 'อุปกรณ์', icon: ComputerIcon, path: '/device' },
         { label: 'ขอพร', icon: StarIcon, path: '/pray' },
         { label: 'โปรไฟล์', icon: ProfileSmallIcon, path: '/profile' },
+        { label: 'แอดมิน', icon: ProfileSmallIcon, path: '/admin' },
     ];
 
     return (
@@ -46,7 +47,7 @@ const Navbar: React.FC<NavbarProps> = ({ onClick }) => {
                             key={i}
                             onClick={() => navigate(item.path)}
                             className={clsx(
-                                'group flex flex-col items-center justify-center w-[70px] h-[70px] rounded-[8px] border cursor-pointer px-2 py-2 gap-1 transition-colors shadow-[0_4px_15px_0_rgba(0,0,0,0.2)]',
+                                'group flex flex-col items-center justify-center w-[90px] h-[90px] rounded-[8px] border cursor-pointer px-2 py-2 gap-1 transition-colors shadow-[0_4px_15px_0_rgba(0,0,0,0.2)]',
                                 isActive
                                     ? 'border-yellow-400 bg-[#FFFFFF22]'
                                     : 'border-[#FFFFFF14] bg-[#FFFFFF14] hover:bg-[#FFFFFF22]'

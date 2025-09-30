@@ -1,19 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
-import { Navigate, Outlet } from 'react-router-dom';
-import { authService } from '@/Api/auth-service';
-
-type AuthStatus = {
-  isAuthenticated: boolean;
-};
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "@/Context/AuthContext";
 
 const PrivateRoute = () => {
-  const { data, isLoading, isError } = useQuery<AuthStatus>({
-    queryKey: ['authStatus'],
-    queryFn: () => authService.checkAuth(),
-  });
+  const { user, isLoading } = useAuth();
 
   if (isLoading) return <div>Loading...</div>;
-  if (isError || !data?.isAuthenticated) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/login" replace />;
 
   return <Outlet />;
 };

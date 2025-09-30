@@ -69,6 +69,8 @@ const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data, scope })
         <div className="flex items-center justify-center h-64">กำลังโหลด...</div>
       ) : isError ? (
         <div className="flex items-center justify-center h-64">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>
+      ) : items.length === 0 ? (
+        <div className="flex items-center justify-center h-[50vh] font-sukhumvit">ไม่พบประวัติยืมอุปกรณ์</div>
       ) : (
         <div className="overflow-x-auto rounded-[4px] flex-1">
           <Table.Container>

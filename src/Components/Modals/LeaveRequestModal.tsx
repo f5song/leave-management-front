@@ -175,7 +175,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, 
                 placeholder="หัวข้อการลา"
                 value={formData.title}
                 onChange={(e) => onChange("title", e.target.value)}
-                className="w-full bg-transparent border-none text-white placeholder-gray-500 p-3 resize-none h-10 outline-none font-sukhumvit"
+                className="w-full bg-transparent border-none text-white placeholder-gray-500 p-3 resize-none h-12 outline-none font-sukhumvit"
               />
             </div>
             <p className="font-sukhumvit text-[16px] text-white mb-3 mt-3">สาเหตุที่ลา*</p>

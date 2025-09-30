@@ -17,7 +17,6 @@ type LeaveModalProps = {
   scope: "dashboard" | "profile";
 };
 
-
 const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title, scope }) => {
   const { user } = useAuth();
   const limit = 9;
@@ -66,6 +65,8 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title, scope }
         <div className="flex items-center justify-center h-64">กำลังโหลด...</div>
       ) : isError ? (
         <div className="flex items-center justify-center h-64">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>
+      ) : leaves.length === 0 ? (
+        <div className="flex items-center justify-center h-[50vh] font-sukhumvit">ไม่พบประวัติการลา</div>
       ) : (
         <div className="overflow-x-auto rounded-[4px] flex-1">
           <Table.Container>

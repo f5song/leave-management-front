@@ -19,7 +19,7 @@ const LeaveHistory = ({ toggleLeaveModal }: Props) => {
       icon={<CalendarIcon className="fill-[#DCDCDC] group-hover:fill-white transition-colors" />}
       onViewAll={toggleLeaveModal}
     >
-      {leaveData?.length === 0 ? (
+      {leaveData?.data?.length === 0 ? (
         <div className="flex items-center justify-center h-32">
           <p className="text-[#DCDCDC] font-sukhumvit">ไม่พบประวัติการลา</p>
         </div>

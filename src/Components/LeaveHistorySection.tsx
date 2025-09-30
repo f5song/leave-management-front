@@ -43,7 +43,7 @@ export const LeaveHistorySection = ({ leaves }: LeaveHistorySectionProps) => {
                         </div>
                     ))
                 ) : (
-                    <p className="text-center text-gray-400 py-3">ไม่พบประวัติการลา</p>
+                    <p className="text-center text-gray-400 py-3 font-sukhumvit">ไม่พบประวัติการลา</p>
                 )}
             </HistoryCard>
         </div>

@@ -10,6 +10,8 @@ interface AvatarUploadProps {
   onAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
+
+
 export const AvatarUpload = ({ previewAvatar, isEditing, onAvatarChange }: AvatarUploadProps) => {
   const { user } = useAuth()
 

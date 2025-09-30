@@ -261,7 +261,7 @@ const Register = () => {
                         <SelectField
                           label="แผนก"
                           name="departmentId"
-                          options={(departments?.data || []).map((d: any) => ({
+                          options={(departments || []).map((d: any) => ({
                             value: d.id,
                             label: d.name,
                           }))}
@@ -284,7 +284,7 @@ const Register = () => {
                         <SelectField
                           label="ตำแหน่ง"
                           name="jobTitleId"
-                          options={(jobTitles?.data || []).map((j: any) => ({
+                          options={(jobTitles || []).map((j: any) => ({
                             value: j.id,
                             label: j.name,
                           }))}
@@ -298,7 +298,6 @@ const Register = () => {
                     />
                   </div>
                 </div>
-
               </div>
             </div>
 
