@@ -16,29 +16,24 @@ import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import interactionPlugin from "@fullcalendar/interaction"
 import thLocale from "@fullcalendar/core/locales/th"
+import { MONTH_NAMES } from "@/Shared/Constants/calendar"
 
-const MONTH_NAMES = [
-  "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-  "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
-]
+
 
 const Calendar = () => {
   const { user, isLoading } = useAuth()
   const navigate = useNavigate()
+
   const [isLeaveModalOpen, setLeaveModalOpen] = useState(false)
   const [isLeaveRequestModalOpen, setLeaveRequestModalOpen] = useState(false)
+  const [currentDate, setCurrentDate] = useState(new Date())
 
   const calendarRef = useRef<FullCalendar | null>(null)
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const [currentPage] = useState(1);
-  const [selectedStatus] = useState<string | null>(null);
   const pages = 1;
   const limit = 10;
 
   const { calendarLeaves, holidays, leaves } = useCalendarData(user, isLoading, pages, limit)
-  console.log("calendarLeaves", calendarLeaves)
 
-  const toggleLeaveModal = () => setLeaveModalOpen(v => !v)
   const toggleLeaveRequestModal = () => setLeaveRequestModalOpen(v => !v)
 
   // handle prev/next month
@@ -64,8 +59,8 @@ const Calendar = () => {
         start: l.startDate,
         end: endDate.toISOString().split("T")[0], // ใช้ string date แบบ yyyy-mm-dd
         allDay: true,
-        color: l.status === "PENDING" ? "#6B7280" : l.userInfo?.color || "#F59E0B",
-        textColor: "#fff",
+        color: l.status === "PENDING" ? "var(--color-gray)" : l.userInfo?.color || "var(--color-primary)",
+        textColor: "var(--color-white)",
       }
     }),
     ...holidays.map(h => {
@@ -78,8 +73,8 @@ const Calendar = () => {
         start: h.startDate,
         end: endDate.toISOString().split("T")[0],
         allDay: true,
-        color: "#6FA5F7",
-        textColor: "#fff",
+        color: "var(--color-holiday)",
+        textColor: "var(--color-white)",
       }
     }),
   ]
@@ -104,13 +99,13 @@ const Calendar = () => {
       <BackgroundGradient />
 
       <div className="flex flex-col pt-10">
-        <div className="flex flex-row justify-between border-b border-[#676767] w-full my-6">
+        <div className="flex flex-row justify-between border-b border-[var(--color-gray)] w-full my-6">
           <p className="font-sukhumvit text-[28px] md:text-[36px] font-bold text-center">แดชบอร์ด</p>
         </div>
 
         <div className="flex flex-col xl:flex-row gap-5">
           {/* Calendar Section */}
-          <div className="flex flex-col w-full rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] shadow-[0_4px_43px_0_rgba(0,0,0,0.32)] z-10 p-3">
+          <div className="flex flex-col w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-border)] shadow-[0_4px_43px_0_rgba(0,0,0,0.32)] z-10 p-3">
 
             {/* Calendar Header inline */}
             <div className="flex justify-between items-center">

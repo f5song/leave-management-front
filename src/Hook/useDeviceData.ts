@@ -3,7 +3,6 @@ import { getItemsStock } from "@/Api/items-service";
 import { useQuery } from "@tanstack/react-query";
 
 export const useDeviceData = (user: any, isLoading: boolean, currentPage: number, itemPerPage: number) => {
-    // Items Stock Query
     const itemsStockQuery = useQuery({
         queryKey: ['items-stock', user?.role || 'guest'],
         queryFn: async () => {
@@ -14,7 +13,6 @@ export const useDeviceData = (user: any, isLoading: boolean, currentPage: number
         enabled: !!user && !isLoading,
     });
 
-    // Items Request Query
     const itemsRequestQuery = useQuery({
         queryKey: ['items-request', user?.role || 'guest', currentPage],
         queryFn: async () => {

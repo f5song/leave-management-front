@@ -14,7 +14,7 @@ export interface ILoginResponse {
       departmentId: string;
       jobTitleId: string;
       nickName: string;
-      birthDate: Date;
+      birthDate: string;
       permissions: string[];
     };
   }

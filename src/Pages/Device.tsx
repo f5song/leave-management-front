@@ -18,13 +18,13 @@ const Device = () => {
 
   // State
   const [isDeviceModalOpen, setDeviceModalOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<FilterValue>("ALL");
-
+  
   const itemPerPage = 9;
+  const currentPage = 1;
 
   // Data fetching
-  const { itemsStock, itemsRequest, isLoadingStock, isLoadingRequest } = useDeviceData(
+  const { itemsStock } = useDeviceData(
     user,
     isLoading,
     currentPage,

@@ -63,7 +63,7 @@ const Navbar: React.FC<NavbarProps> = ({ onClick }) => {
                             />
                             <div
                                 className={clsx(
-                                    'font-sukhumvit text-[12px] font-semibold text-center transition-colors',
+                                    'font-sukhumvit text-[14px] font-semibold text-center transition-colors',
                                     isActive
                                         ? 'text-yellow-400'
                                         : 'text-[var(--color-font)] group-hover:text-white'
@@ -79,7 +79,7 @@ const Navbar: React.FC<NavbarProps> = ({ onClick }) => {
             {/* Right: โปรไฟล์และออก */}
             <div className="flex justify-center md:justify-end items-center gap-3 flex-wrap">
                 {/* Profile Box */}
-                <div className="flex items-center gap-3 h-[70px] bg-[#FFFFFF14] rounded-[8px] border border-[#FFFFFF14] p-2 shadow-[0_4px_15px_0_rgba(0,0,0,0.2)] min-w-[200px]">
+                <div className="flex items-center gap-3 h-[90px] bg-[#FFFFFF14] rounded-[8px] border border-[#FFFFFF14] p-2 shadow-[0_4px_15px_0_rgba(0,0,0,0.2)] w-[320px] min-w-[200px]">
                     <div className="w-[48px] h-[48px] rounded-[4px] bg-[#FFFFFF14] overflow-hidden">
                         <img src={user?.avatarUrl} alt="profile" className="w-full h-full object-cover" />
                     </div>

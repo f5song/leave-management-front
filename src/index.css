@@ -14,6 +14,10 @@
     --color-font-gray: #DCDCDC;
     --color-gray: #676767;
     --color-bg: #292929;
+    --color-white: #FFFFFF;
+    --color-black: #000000;
+    --color-holiday: #6FA5F7;
+    --color-border: #FFFFFF14;
   }
 
   @font-face {
