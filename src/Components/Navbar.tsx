@@ -63,7 +63,7 @@ const Navbar: React.FC<NavbarProps> = ({ onClick }) => {
                             />
                             <div
                                 className={clsx(
-                                    'font-sukhumvit text-[14px] font-semibold text-center transition-colors',
+                                    'font-sukhumvit text-[16px] font-semibold text-center transition-colors',
                                     isActive
                                         ? 'text-yellow-400'
                                         : 'text-[var(--color-font)] group-hover:text-white'
@@ -77,30 +77,32 @@ const Navbar: React.FC<NavbarProps> = ({ onClick }) => {
             </div>
 
             {/* Right: โปรไฟล์และออก */}
-            <div className="flex justify-center md:justify-end items-center gap-3 flex-wrap">
-                {/* Profile Box */}
-                <div className="flex items-center gap-3 h-[90px] bg-[#FFFFFF14] rounded-[8px] border border-[#FFFFFF14] p-2 shadow-[0_4px_15px_0_rgba(0,0,0,0.2)] w-[320px] min-w-[200px]">
-                    <div className="w-[48px] h-[48px] rounded-[4px] bg-[#FFFFFF14] overflow-hidden">
-                        <img src={user?.avatarUrl} alt="profile" className="w-full h-full object-cover" />
-                    </div>
-                    <div className="flex flex-col">
-                        <p className="font-sukhumvit text-white text-[14px] font-semibold leading-none pb-3">
-                            {user?.firstName} {user?.lastName}
-                        </p>
-                        <p className="font-sukhumvit text-[12px] font-semibold text-[var(--color-font)] leading-none cursor-pointer hover:text-white" onClick={() => navigate('/profile')}>
-                            ดูโปรไฟล์
-                        </p>
-                    </div>
-                    {/* Divider */}
-                    <div className="w-px h-[80%] bg-[#676767] mx-2 my-auto" />
+            {/* Profile Box */}
+            <div className="flex items-center h-[90px] w-[320px] px-5 gap-3 bg-[#FFFFFF14] rounded-[8px] border border-[#FFFFFF14] shadow-[0_4px_15px_0_rgba(0,0,0,0.2)]">
+                <div className="h-[48px] rounded-[4px] bg-[#FFFFFF14] overflow-hidden">
+                    <img src={user?.avatarUrl} alt="profile" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex flex-col">
+                    <p className="font-sukhumvit text-white text-[16px] font-semibold leading-none pb-3 truncate max-w-[200px]">
+                        {user?.firstName} {user?.lastName}
+                    </p>
+                    <p className="font-sukhumvit text-[14px] font-semibold text-[var(--color-font)] leading-none cursor-pointer hover:text-white" onClick={() => navigate('/profile')}>
+                        ดูโปรไฟล์
+                    </p>
+                </div>
+                {/* Divider */}
+                <div className="w-px h-[80%] bg-[#676767] mx-2 my-auto" />
 
-                    {/* Logout */}
-                    <div className="flex flex-col items-center justify-center w-[65px]">
-                        <LogOutIcon className="w-6 h-6 fill-[#676767] hover:text-white" />
-                        <div className="font-sukhumvit text-[14px] font-semibold text-[var(--color-font)] hover:text-white cursor-pointer" onClick={handleLogout}>ออก</div>
+                {/* Logout */}
+                <div
+                    className="flex flex-col items-center justify-center cursor-pointer group"
+                    onClick={handleLogout}
+                >
+                    <LogOutIcon className="h-6 fill-[#676767] group-hover:fill-white" />
+                    <div className="font-sukhumvit text-[14px] font-semibold text-[var(--color-font)] group-hover:text-white">
+                        ออก
                     </div>
                 </div>
-
 
             </div>
         </div>

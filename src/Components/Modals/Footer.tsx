@@ -12,7 +12,6 @@ const ModalFooter: React.FC<ModalFooterProps> = ({
   children,
   onClose,
   showCloseButton = true,
-  closeButtonText = "ปิด",
   className = ""
 }) => {
   return (
@@ -26,7 +25,6 @@ const ModalFooter: React.FC<ModalFooterProps> = ({
           className="text-[var(--color-primary)] hover:opacity-80 font-bold font-sukhumvit transition-opacity"
           onClick={onClose}
         >
-          {closeButtonText}
         </button>
       )}
     </div>

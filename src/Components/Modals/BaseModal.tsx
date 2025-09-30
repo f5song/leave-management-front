@@ -37,7 +37,7 @@ const BaseModal: React.FC<BaseModalProps> = ({
             className="flex items-center justify-center p-1 hover:bg-white/10 rounded transition-colors group"
             onClick={onClose}
           >
-            <CloseIcon className="w-[15px] h-[15px] fill-[#DCDCDC] group-hover:fill-white transition-colors" />
+            <CloseIcon className="w-[25px] h-[25px] fill-[var(--color-primary)] group-hover:fill-white transition-colors" />
           </button>
         </div>
 

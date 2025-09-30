@@ -19,7 +19,7 @@ const Device = () => {
   // State
   const [isDeviceModalOpen, setDeviceModalOpen] = useState(false);
   const [filter, setFilter] = useState<FilterValue>("ALL");
-  
+
   const itemPerPage = 9;
   const currentPage = 1;
 
@@ -46,15 +46,13 @@ const Device = () => {
         isOpen={isDeviceModalOpen}
         onClose={() => setDeviceModalOpen(false)}
         data={{ title: "ประวัติยืมอุปกรณ์" }}
-        toggleModal={toggleDeviceModal}
-        scope="device"
       />
 
       {/* Navigation */}
       <Navbar onClick={() => navigate("/home")} />
       <BackgroundGradient />
 
-      <div className="flex flex-col pt-10">
+      <div className="flex flex-col pt-5">
         <Header title="อุปกรณ์" />
 
         <div className="flex flex-col xl:flex-row gap-5">

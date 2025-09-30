@@ -9,6 +9,7 @@ import { StatusTabSection } from "./StatusTabSection";
 import { PaginationSection } from "./PaginationSection";
 import { usePaginatedQuery } from "@/Hook/usePaginatedQuery";
 import { getStatusLabel } from "@/Shared/utils/status";
+import { formatDate } from "@/Shared/utils/dateUtils";
 
 type LeaveModalProps = {
   isOpen: boolean;
@@ -22,7 +23,8 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title }) => {
   const { data: leaves, pagination, isLoading, isError, currentPage, setCurrentPage, selectedStatus, handleTabClick } =
     usePaginatedQuery({
       queryKeyBase: "leaves",
-      fetchFn: (page, limit, status) => getLeaves(page, limit, user?.id, status),
+      fetchFn: (page, limit, status) =>
+        getLeaves(page, limit, user?.id, status),
       limit,
       user,
     });
@@ -47,12 +49,6 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title }) => {
             totalPages={Number(pagination.totalPages) || 1}
             onPageChange={(p) => setCurrentPage(p)}
           />
-          <button
-            className="text-[var(--color-primary)] font-bold font-sukhumvit"
-            onClick={onClose}
-          >
-            ปิด
-          </button>
         </div>
       }
     >
@@ -67,26 +63,26 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title }) => {
         <div className="overflow-x-auto rounded-[4px] flex-1">
           <Table.Container>
             <Table.Head>
-              <TableHeadCell width="w-[120px]">ประเภทการลา</TableHeadCell>
-              <TableHeadCell width="w-[275px]">สาเหตุ</TableHeadCell>
-              <TableHeadCell width="w-[81px]">จำนวนวันลา</TableHeadCell>
-              <TableHeadCell width="w-[65px]">สถานะ</TableHeadCell>
-              <TableHeadCell width="w-[120px]">วันที่ลา</TableHeadCell>
+              <TableHeadCell className="w-[120px]">ประเภทการลา</TableHeadCell>
+              <TableHeadCell className="w-[200px]">สาเหตุ</TableHeadCell>
+              <TableHeadCell className="w-[65px]">จำนวนวันลา</TableHeadCell>
+              <TableHeadCell className="pl-9 w-[80px]">สถานะ</TableHeadCell>
+              <TableHeadCell className="w-[120px]">วันที่ลา</TableHeadCell>
             </Table.Head>
             <Table.Body>
               {leaves.map((item: any, index: number) => (
                 <Table.Row key={item.id || index}>
                   <Table.Cell hasTopBorder={index !== 0}>{item.leaveType?.name || "-"}</Table.Cell>
                   <Table.Cell hasTopBorder={index !== 0}>{item.description || "-"}</Table.Cell>
-                  <Table.Cell hasTopBorder={index !== 0}>{item.totalDays ?? "-"}</Table.Cell>
+                  <Table.Cell hasTopBorder={index !== 0}>{item.totalDays ?? "-"} </Table.Cell>
                   <Table.Cell hasTopBorder={index !== 0}>
                     <StatusBadge status={getStatusLabel(item.status)} />
                   </Table.Cell>
                   <Table.Cell hasTopBorder={index !== 0}>
                     <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                      <span>{item.startDate?.formatDate() ?? "-"}</span>
+                      <span>{formatDate(item.startDate) ?? "-"}</span>
                       <ArrowIcon className="fill-white w-[15px] h-[15px]" />
-                      <span>{item.endDate?.formatDate() ?? "-"}</span>
+                      <span>{formatDate(item.endDate) ?? "-"}</span>
                     </span>
                   </Table.Cell>
                 </Table.Row>
@@ -94,6 +90,7 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title }) => {
             </Table.Body>
           </Table.Container>
         </div>
+
       )}
     </BaseModal>
 

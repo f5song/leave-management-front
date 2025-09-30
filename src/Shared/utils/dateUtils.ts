@@ -1,9 +1,15 @@
-export const formatDate = (date: string | Date): string => {
-  return new Date(date).toISOString().split("T")[0]
-}
+export const formatDate = (dateString?: string) => {
+  if (!dateString) return "-";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("th-TH", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
 
 export const formatDateTime = (date: string | Date): string => {
-  return new Date(date).toLocaleString("sv-SE", {
+  return new Date(date).toLocaleString("th-TH", {
     timeZone: "Asia/Bangkok",
     year: "numeric",
     month: "2-digit",

@@ -28,12 +28,12 @@ const Profile = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-quaternary text-white px-4 md:px-8 py-8 relative">
-      <LeaveModal isOpen={isLeaveModalOpen} onClose={() => setLeaveModalOpen(false)} title="ประวัติการลา" scope="profile" />
-      <ItemsModal isOpen={isItemsModalOpen} onClose={() => setItemsModalOpen(false)} data={{ title: "ประวัติยืมอุปกรณ์" }} toggleModal={toggleItemsModal} scope="profile" />
+      <LeaveModal isOpen={isLeaveModalOpen} onClose={() => setLeaveModalOpen(false)} title="ประวัติการลา" />
+      <ItemsModal isOpen={isItemsModalOpen} onClose={() => setItemsModalOpen(false)} data={{ title: "ประวัติยืมอุปกรณ์" }} toggleModal={toggleItemsModal} />
       <Navbar onClick={() => navigate('/home')} />
       <BackgroundGradient />
 
-      <div className="flex flex-col pt-10">
+      <div className="flex flex-col pt-5">
         {/* Header */}
         <Header title="โปรไฟล์" />
 

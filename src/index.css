@@ -18,6 +18,9 @@
     --color-black: #000000;
     --color-holiday: #6FA5F7;
     --color-border: #FFFFFF14;
+    --color-green: #34D399;
+    --color-blue: #6FA5F7;
+    --color-red: #EF4444;
   }
 
   @font-face {

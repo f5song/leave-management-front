@@ -10,8 +10,8 @@ type HistoryCardProps = {
 const HistoryCard = ({ title, icon, onViewAll, children }: HistoryCardProps) => {
   return (
     <div className="flex flex-col">
-      <div className="flex flex-row w-full max-w-6xl rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] shadow-[0_4px_43px_0_rgba(0,0,0,0.32)] z-10">
-        <div className="flex flex-col w-full py-5 px-5 min-w-[500px]">
+      <div className="flex flex-row w-full flex-1 rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] shadow-[0_4px_43px_0_rgba(0,0,0,0.32)] z-10">
+        <div className="flex flex-col w-full py-5 px-5">
           {/* Header */}
           <div className="flex flex-row justify-between items-center">
             <p className="font-sukhumvit text-[20px] font-bold">{title}</p>

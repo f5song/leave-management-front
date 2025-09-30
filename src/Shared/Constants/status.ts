@@ -5,13 +5,9 @@ export const STATUS_FILTERS = [
   { label: "ซ่อมบำรุง", value: "REPAIR" },
 ] as const;
 
-export const STATUS_REQUEST = [
-  { label: "อนุมัติ", value: "APPROVED", color: "#34D399" },
-  { label: "รออนุมัติ", value: "PENDING", color: "#6FA5F7" },
-  { label: "ปฏิเสธ", value: "REJECTED", color: "#EF4444" },
-] as const;
 
 export const STATUS_TABS = [
+  // { label: "ทั้งหมด", value: "ALL" , color: "#676767"},
   { label: "อนุมัติ", value: "APPROVED", color: "#34D399" },
   { label: "รออนุมัติ", value: "PENDING", color: "#6FA5F7" },
   { label: "ปฏิเสธ", value: "REJECTED", color: "#EF4444" },

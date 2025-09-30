@@ -14,11 +14,9 @@ type ItemsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   data: { title: string };
-  toggleModal: () => void;
-  scope: "device" | "profile";
 };
 
-const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data, scope }) => {
+const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data }) => {
   const { user } = useAuth();
 
   const {
@@ -33,9 +31,7 @@ const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data, scope })
   } = usePaginatedQuery({
     queryKeyBase: "items-request",
     fetchFn: async (page, limit, status) => {
-      return scope === "device"
-        ? getItemsRequest(page, limit, undefined, selectedStatus)
-        : getItemsRequest(page, limit, user?.id, status);
+      return getItemsRequest(page, limit, user?.id, status);
     },
     limit: 9,
     user,
@@ -56,12 +52,6 @@ const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data, scope })
             totalPages={Number(pagination.totalPages) || 1}
             onPageChange={setCurrentPage}
           />
-          <button
-            className="text-[var(--color-primary)] font-bold font-sukhumvit"
-            onClick={onClose}
-          >
-            ปิด
-          </button>
         </div>
       }
     >

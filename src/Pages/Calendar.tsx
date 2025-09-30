@@ -96,7 +96,7 @@ const Calendar = () => {
       <Navbar onClick={() => navigate("/home")} />
       <BackgroundGradient />
 
-      <div className="flex flex-col pt-10">
+      <div className="flex flex-col pt-5">
         <div className="flex flex-row justify-between border-b border-[var(--color-gray)] w-full my-6">
           <p className="font-sukhumvit text-[28px] md:text-[36px] font-bold text-center">แดชบอร์ด</p>
         </div>
