@@ -1,4 +1,4 @@
-import { STATUS_TABS } from "@/Shared/Constants/status";
+import { STATUS_FILTERS, STATUS_TABS } from "@/Shared/Constants/status";
 
 /**
  * แปลง status value เป็น label
@@ -7,4 +7,9 @@ import { STATUS_TABS } from "@/Shared/Constants/status";
 export const getStatusLabel = (value?: string) => {
   if (!value) return "-";
   return STATUS_TABS.find((s) => s.value === value)?.label ?? value;
+};
+
+export const getStatusLabelFilter = (value?: string) => {
+  if (!value) return "-";
+  return STATUS_FILTERS.find((s) => s.value === value)?.label ?? value;
 };

@@ -1,36 +1,35 @@
-import { getItemsRequest } from "@/Api/items-requests-service";
 import { getItemsStock } from "@/Api/items-service";
 import { useQuery } from "@tanstack/react-query";
 
-export const useDeviceData = (user: any, isLoading: boolean, currentPage: number, itemPerPage: number) => {
-    const itemsStockQuery = useQuery({
-        queryKey: ['items-stock', user?.role || 'guest'],
-        queryFn: async () => {
-            if (!user || isLoading) return [];
-            const response = await getItemsStock();
-            return response.data;
-        },
-        enabled: !!user && !isLoading,
-    });
+type PaginatedData<T> = {
+    data: T[];
+    pagination: { totalItems: number; totalPages: number; page: number; limit: number };
+};
 
-    const itemsRequestQuery = useQuery({
-        queryKey: ['items-request', user?.role || 'guest', currentPage],
+export const useDeviceData = (
+    user?: any,
+    isLoading?: boolean,
+    currentPage: number = 1,
+    itemsPerPage: number = 9,
+    filter?: string // status filter
+) => {
+    const itemsStockQuery = useQuery({
+        queryKey: ['items-stock', currentPage, itemsPerPage, filter],
         queryFn: async () => {
             if (!user || isLoading) {
-                return { data: [], pagination: { totalItems: 0, totalPages: 1, page: 1, limit: 9 } };
+                return {
+                    data: [],
+                    pagination: { totalItems: 0, totalPages: 1, page: 1, limit: itemsPerPage }
+                };
             }
-
-            const userId = user.role === 'admin' ? undefined : user.id;
-            const response = await getItemsRequest(currentPage, itemPerPage, userId, undefined);
+            const response = await getItemsStock(currentPage, itemsPerPage, filter);
             return response;
         },
         enabled: !!user && !isLoading,
     });
 
     return {
-        itemsStock: itemsStockQuery.data || [],
-        itemsRequest: itemsRequestQuery.data || { data: [], pagination: { totalItems: 0, totalPages: 1, page: 1, limit: 9 } },
+        itemsStock: itemsStockQuery.data || { data: [], pagination: { totalItems: 0, totalPages: 1, page: currentPage, limit: itemsPerPage } },
         isLoadingStock: itemsStockQuery.isLoading,
-        isLoadingRequest: itemsRequestQuery.isLoading,
     };
 };

@@ -1,7 +1,5 @@
 import BackgroundGradient from "@/Components/BackgroundGradient";
 import { DeviceFilters } from "@/Components/Device/DeviceFilters";
-import { DeviceGrid } from "@/Components/Device/DeviceGrid";
-import ItemsModal from "@/Components/Modals/ItemsModal";
 import Navbar from "@/Components/Navbar";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -17,38 +15,21 @@ const Device = () => {
   const navigate = useNavigate();
 
   // State
-  const [isDeviceModalOpen, setDeviceModalOpen] = useState(false);
   const [filter, setFilter] = useState<FilterValue>("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
 
-  const itemPerPage = 9;
-  const currentPage = 1;
-
-  // Data fetching
-  const { itemsStock } = useDeviceData(
+  // Fetch data
+  const { itemsStock, isLoadingStock } = useDeviceData(
     user,
     isLoading,
     currentPage,
-    itemPerPage
+    itemsPerPage,
+    filter !== 'ALL' ? filter : undefined
   );
-
-  // Computed values
-  const filteredItems = filter === "ALL"
-    ? itemsStock
-    : itemsStock.filter((item) => item.status === filter);
-
-  // Event handlers
-  const toggleDeviceModal = () => setDeviceModalOpen(prev => !prev);
 
   return (
     <div className="flex flex-col min-h-screen bg-quaternary text-white px-4 md:px-8 py-8 relative">
-      {/* Modal */}
-      <ItemsModal
-        isOpen={isDeviceModalOpen}
-        onClose={() => setDeviceModalOpen(false)}
-        data={{ title: "ประวัติยืมอุปกรณ์" }}
-      />
-
-      {/* Navigation */}
       <Navbar onClick={() => navigate("/home")} />
       <BackgroundGradient />
 
@@ -56,20 +37,24 @@ const Device = () => {
         <Header title="อุปกรณ์" />
 
         <div className="flex flex-col xl:flex-row gap-5">
-          {/* Left Panel */}
           <ContentCard>
-            <DeviceFilters filter={filter} onFilterChange={setFilter} />
-            <DeviceGrid devices={filteredItems} />
-          </ContentCard>
+            <DeviceFilters
+              filter={filter}
+              onFilterChange={(f) => { setFilter(f); setCurrentPage(1); }}
+            />
 
-          {/* Right Panel */}
-          <DeviceRequestHistory toggleDeviceModal={toggleDeviceModal} />
+            <DeviceRequestHistory
+              itemsStock={itemsStock?.data ?? []}
+              pagination={itemsStock?.pagination ?? { totalPages: 1, totalItems: 0, page: currentPage, limit: itemsPerPage }}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+              isLoading={isLoadingStock}
+            />
+          </ContentCard>
         </div>
       </div>
-
-
     </div>
-
   );
 };
+
 export default Device;

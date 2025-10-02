@@ -1,4 +1,3 @@
-// components/StatusBadge.tsx
 import React from "react";
 
 type Props = {
@@ -22,7 +21,7 @@ const getStatusClass = (status: string): string => {
 
 const StatusBadge: React.FC<Props> = ({ status }) => {
   return (
-    <div className="flex items-center justify-center h-[26px] w-[80px]">
+    <div className="flex items-center justify-center h-[26px] min-w-[100px]">
       <span
         className={`inline-block font-sukhumvit text-[14px] bg-[#00000052] px-2 py-1 rounded-[16px] border ${getStatusClass(
           status

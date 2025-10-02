@@ -1,8 +1,7 @@
 export const STATUS_FILTERS = [
-  { label: "ทั้งหมด", value: "ALL" },
-  { label: "มีในสต๊อค", value: "AVAILABLE" },
-  { label: "ไม่พร้อมใช้งาน", value: "UNAVAILABLE" },
-  { label: "ซ่อมบำรุง", value: "REPAIR" },
+  { label: "ทั้งหมด", value: "ALL", color: "#676767" },
+  { label: "มีในสต๊อค", value: "AVAILABLE", color: "#34D399" },
+  { label: "ไม่พร้อมใช้งาน", value: "UNAVAILABLE", color: "#EF4444" },
 ] as const;
 
 
