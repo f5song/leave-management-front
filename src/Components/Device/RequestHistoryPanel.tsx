@@ -2,6 +2,7 @@ import StatusBadge from "../StatusBadge";
 import { formatDate } from "@/Shared/utils/dateUtils";
 import { PaginationSection } from "../Modals/PaginationSection";
 import { getStatusLabelFilter } from "@/Shared/utils/status";
+import PrimaryButton from "../PrimaryButton";
 
 type DeviceRequestHistoryProps = {
   itemsStock: any[];
@@ -53,12 +54,19 @@ export const DeviceRequestHistory: React.FC<DeviceRequestHistoryProps> = ({
               <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)] truncate">{item.description || "-"}</p>
             </div>
           </div>
-          <div className="flex flex-row items-center w-[168px] justify-end">
+          <div className="flex flex-row items-center justify-end gap-2">
             <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)] mr-2">
               {item.createdAt ? formatDate(item.createdAt) : "-"}
             </p>
             <StatusBadge status={getStatusLabelFilter(item.status)} />
+            <PrimaryButton
+              // onClick={() => handleBorrow(item)}
+              disabled={item.status !== "AVAILABLE"}
+            >
+              กดยืม
+            </PrimaryButton>
           </div>
+
         </div>
       ))}
 
