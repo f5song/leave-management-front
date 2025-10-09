@@ -1,25 +1,20 @@
-type Holiday = {
-    id: string
-    title: string
-    startDate: string
-    endDate: string
-    description: string
-    totalDays: number
-    color: string
+import { IHoliday } from "@/Interfaces/holidays.interface"
+
+interface HolidaysGroupedByMonth {
+    [month: string]: IHoliday[]
 }
 
-type HolidaysGroupedByMonth = Record<string, Holiday[]>
-
-type Props = {
+interface HolidayProps {
     holidaysGroupedByMonth: HolidaysGroupedByMonth
 }
-export const YearlyView = ({ holidaysGroupedByMonth }: Props) => (
+
+export const YearlyView = ({ holidaysGroupedByMonth }: HolidayProps) => (
     <div className="flex flex-row gap-4 flex-wrap">
         {Object.entries(holidaysGroupedByMonth).map(([month, holidaysInMonth]) => (
             <div key={month} className="rounded-[8px] border border-[#FFFFFF14] bg-[#FFFFFF14] p-4 shadow-md backdrop-blur-sm">
                 <h3 className="font-sukhumvit text-white text-[16px] font-bold mb-2">{month}</h3>
                 <ul className="flex flex-wrap gap-6">
-                    {holidaysInMonth.map((holiday: Holiday) => {
+                    {holidaysInMonth.map((holiday: IHoliday) => {
                         const dateObj = new Date(holiday.startDate)
                         const dayName = dateObj.toLocaleDateString('th-TH', { weekday: 'long' }).replace(/^วัน/, '')
                         const dayNumber = dateObj.toLocaleDateString('th-TH', { day: '2-digit' })

@@ -1,6 +1,11 @@
 import DeviceCard from "./DeviceCard";
+import { IDevice } from "@/Interfaces/devices.interface";
 
-export const DeviceGrid = ({ devices }: { devices: any[] }) => {
+interface DeviceGridProps {
+    devices: IDevice[];
+}
+
+export const DeviceGrid = ({ devices }: DeviceGridProps) => {
   if (devices.length === 0) {
     return (
       <div className="flex items-center justify-center h-48 text-gray-400">

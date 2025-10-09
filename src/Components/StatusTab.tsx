@@ -1,19 +1,19 @@
 // components/StatusTab.tsx
 import React from "react";
 
-type TabType = {
+interface TabType {
   label: string;
   value: string;
   color: string;
 };
 
-type Props = {
+interface StatusTabProps {
   tab: TabType;
   selected: boolean;
   onClick: (value: string) => void;
 };
 
-const StatusTab: React.FC<Props> = ({ tab, selected, onClick }) => {
+const StatusTab: React.FC<StatusTabProps> = ({ tab, selected, onClick }) => {
   return (
     <div
       onClick={() => onClick(tab.value)}

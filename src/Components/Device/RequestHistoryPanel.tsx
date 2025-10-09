@@ -3,22 +3,25 @@ import { formatDate } from "@/Shared/utils/dateUtils";
 import { PaginationSection } from "../Modals/PaginationSection";
 import { getStatusLabelFilter } from "@/Shared/utils/status";
 import PrimaryButton from "../PrimaryButton";
+import { IItem } from "@/Interfaces/item.interface";
+import { IPaginatedResponse } from "@/Interfaces/hooks.interface";
 
-type DeviceRequestHistoryProps = {
-  itemsStock: any[];
-  pagination: { totalPages: number; totalItems: number; page: number; limit: number };
+export interface DeviceRequestHistoryProps {
+  itemsStockData: IPaginatedResponse<IItem>; // ใช้ structure ของ paginated data
   currentPage: number;
   onPageChange: (page: number) => void;
   isLoading?: boolean;
-};
+}
 
 export const DeviceRequestHistory: React.FC<DeviceRequestHistoryProps> = ({
-  itemsStock = [],
-  pagination,
+  itemsStockData,
   currentPage,
   onPageChange,
   isLoading = false,
 }) => {
+  const itemsStock = itemsStockData?.data ?? [];
+  const pagination = itemsStockData?.pagination ?? { totalPages: 1, totalItems: 0, page: currentPage, limit: 5 };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -59,24 +62,19 @@ export const DeviceRequestHistory: React.FC<DeviceRequestHistoryProps> = ({
               {item.createdAt ? formatDate(item.createdAt) : "-"}
             </p>
             <StatusBadge status={getStatusLabelFilter(item.status)} />
-            <PrimaryButton
-              // onClick={() => handleBorrow(item)}
-              disabled={item.status !== "AVAILABLE"}
-            >
+            <PrimaryButton disabled={item.status !== "AVAILABLE"}>
               กดยืม
             </PrimaryButton>
           </div>
-
         </div>
       ))}
 
-      {/* Pagination */}
       <div className="flex justify-center mt-4">
         <PaginationSection
           currentPage={currentPage}
           totalPages={pagination.totalPages}
           onPageChange={onPageChange}
-          itemPerPage={5} // จำนวนปุ่มเพจใน bar
+          itemPerPage={pagination.limit} // ใช้ค่า limit จาก pagination จริง
         />
       </div>
     </div>

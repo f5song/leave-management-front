@@ -1,23 +1,7 @@
+import { Device } from "@/Interfaces/devices.interface";
 import StatusBadge from "../StatusBadge";
 import clsx from "clsx";
-
-const statusTabs = [
-  { label: "มีในสต๊อค", value: "AVAILABLE", color: "#34D399" },
-  { label: "ไม่พร้อมใช้งาน", value: "UNAVAILABLE", color: "#6FA5F7" },
-  { label: "ซ่อมบำรุง", value: "REPAIR", color: "#FFD000" },
-  { label: "อนุมัติ", value: "APPROVED", color: "#34D399" },
-  { label: "รออนุมัติ", value: "PENDING", color: "#6FA5F7" },
-  { label: "ปฏิเสธ", value: "REJECTED", color: "#EF4444" },
-];
-
-export interface Device {
-  id: string;
-  name: string;
-  status: string; // ได้จาก backend เช่น AVAILABLE
-  image: string;
-  employee?: string;
-  updatedAt?: string;
-}
+import { STATUS_FILTERS } from "@/Shared/Constants/status";
 
 interface DeviceCardProps {
   className?: string;
@@ -26,8 +10,7 @@ interface DeviceCardProps {
 }
 
 const DeviceCard = ({ className, onClick, device }: DeviceCardProps) => {
-  // หา label ไทยที่ตรงกับ status
-  const matchedStatus = statusTabs.find((s) => s.value === device.status || s.label === device.status);
+  const matchedStatus = STATUS_FILTERS.find((s) => s.value === device.status || s.label === device.status);
 
   return (
     <div className={clsx("flex flex-col w-[14vw] h-[15vw] rounded-[8px] bg-[#00000052]", className)} onClick={onClick}>

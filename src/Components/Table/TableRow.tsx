@@ -1,4 +1,4 @@
-type TableRowProps = {
+interface TableRowProps {
     children: React.ReactNode;
     className?: string;
     hasTopBorder?: boolean;

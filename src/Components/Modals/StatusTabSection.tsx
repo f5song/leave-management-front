@@ -1,11 +1,10 @@
 import StatusTab from "@/Components/StatusTab";
 import { STATUS_TABS } from "@/Shared/Constants/status";
 
-
-type StatusTabSectionProps = {
-  selectedStatus: string | null;
-  onTabClick: (status: string) => void;
-};
+interface StatusTabSectionProps {
+    selectedStatus: string | null;
+    onTabClick: (status: string) => void;
+}
 
 export const StatusTabSection: React.FC<StatusTabSectionProps> = ({ selectedStatus, onTabClick }) => (
   <div className="flex flex-row gap-4 p-5">

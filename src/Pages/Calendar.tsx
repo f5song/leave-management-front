@@ -6,7 +6,7 @@ import LeaveModal from "@/Components/Modals/LeaveModal"
 import LeaveRequestModal from "@/Components/Modals/LeaveRequestModal"
 import Navbar from "@/Components/Navbar"
 import { useAuth } from "@/Context/AuthContext"
-import useCalendarData from "@/Hook/useCalendarData"
+import useCalendarData from "@/Hooks/useCalendarData"
 import { useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { ChevronLeft, ChevronRight } from "lucide-react"
@@ -18,10 +18,12 @@ import interactionPlugin from "@fullcalendar/interaction"
 import thLocale from "@fullcalendar/core/locales/th"
 import { MONTH_NAMES } from "@/Shared/Constants/calendar"
 
+// any
+// return type  ใน hooks
+
 
 const Calendar = () => {
   const { user, isLoading } = useAuth()
-  const navigate = useNavigate()
 
   const [isLeaveModalOpen, setLeaveModalOpen] = useState(false)
   const [isLeaveRequestModalOpen, setLeaveRequestModalOpen] = useState(false)
@@ -34,6 +36,7 @@ const Calendar = () => {
   const { calendarLeaves, holidays, leaves } = useCalendarData(user, isLoading, pages, limit)
 
   const toggleLeaveRequestModal = () => setLeaveRequestModalOpen(v => !v)
+  const toggleLeaveModal = () => setLeaveModalOpen(v => !v)
 
   // handle prev/next month
   const handleNavigate = (direction: number) => {
@@ -85,6 +88,7 @@ const Calendar = () => {
         isOpen={isLeaveModalOpen}
         onClose={() => setLeaveModalOpen(false)}
         title="การลา"
+        toggleModal={toggleLeaveModal}
       />
       <LeaveRequestModal
         isOpen={isLeaveRequestModalOpen}
@@ -93,7 +97,7 @@ const Calendar = () => {
         toggleModal={toggleLeaveRequestModal}
       />
 
-      <Navbar onClick={() => navigate("/home")} />
+      <Navbar />
       <BackgroundGradient />
 
       <div className="flex flex-col pt-5">
@@ -163,7 +167,7 @@ const Calendar = () => {
           <div className="flex flex-col">
             <LeaveBalance />
             <LeaveHistorySection
-              leaves={leaves.data || []}
+              leaves={leaves || []}
             />
           </div>
         </div>

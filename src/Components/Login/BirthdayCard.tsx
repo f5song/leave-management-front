@@ -1,4 +1,10 @@
-export const BirthdayCard = ({ birthday }) => {
+import { IBirthDay } from "@/Interfaces/user.interface";
+
+interface BirthdayCardProps {
+    birthday: IBirthDay;
+}
+
+export const BirthdayCard = ({ birthday }: BirthdayCardProps) => {
     const dateObj = new Date(birthday.birthDate)
     const dayName = dateObj.toLocaleDateString('th-TH', { weekday: 'long' }).replace(/^วัน/, '')
     const dayNumber = dateObj.toLocaleDateString('th-TH', { day: '2-digit' })

@@ -1,4 +1,4 @@
-type TextAreaProps = {
+interface TextAreaProps{
   className?: string
   placeholder?: string
   value: string
@@ -7,7 +7,7 @@ type TextAreaProps = {
   cols?: number
 }
 
-export const TextArea = ({
+export const TextArea: React.FC<TextAreaProps> = ({
   className,
   placeholder,
   value,

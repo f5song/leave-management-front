@@ -1,4 +1,7 @@
-const TableContainer = ({ children }: { children: React.ReactNode }) => {
+interface TableContainerProps {
+    children: React.ReactNode;
+}
+const TableContainer = ({ children }: TableContainerProps) => {
   return (
     <div className="overflow-x-auto w-full">
       <table className="min-w-[1008px] w-full table-fixed border-separate border-spacing-y-3">

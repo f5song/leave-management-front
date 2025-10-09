@@ -1,16 +1,10 @@
-"use client"
-
-import type React from "react"
-
 import { useAuth } from "@/Context/AuthContext"
 
 interface AvatarUploadProps {
-  previewAvatar: string | null
-  isEditing: boolean
-  onAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+    previewAvatar: string | null;
+    isEditing: boolean;
+    onAvatarChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
-
-
 
 export const AvatarUpload = ({ previewAvatar, isEditing, onAvatarChange }: AvatarUploadProps) => {
   const { user } = useAuth()

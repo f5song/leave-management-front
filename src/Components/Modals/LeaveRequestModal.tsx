@@ -12,19 +12,20 @@ import { useAuth } from "@/Context/AuthContext"
 import { useQueryClient } from "@tanstack/react-query"
 import { createLeave } from "@/Api/leave-service"
 import { z } from "zod"
-import { toast } from "../UseToast"
 import { leaveTypes } from "@/Shared/Constants/leaveType"
 import { CloseIcon } from "@/Shared/Asseet/Icons"
 import { TextArea } from "../TextArea"
 
-type LeaveRequestModalProps = {
+
+interface LeaveRequestModalProps {
   isOpen: boolean
   onClose: () => void
   title: string
   toggleModal: () => void
 }
 
-const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, title, toggleModal }) => {
+
+const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, title }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -53,20 +54,16 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose, 
     mutationFn: (data: LeaveRequestData) => createLeave(user?.id!, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['calendarLeaves', user?.id] });
-      toast({
-        title: 'อัปเดตข้อมูลสำเร็จ',
-        description: 'อัปเดตข้อมูลสำเร็จ',
-        variant: 'default',
-      });
       onClose();
     },
-    onError: (err: any) => {
-      toast({
-        title: 'อัปเดตข้อมูลไม่สำเร็จ',
-        description: 'อัปเดตข้อมูลไม่สำเร็จ',
-        variant: 'destructive',
-      });
-    },
+    onError: (err: unknown) => {
+      if (err instanceof Error) {
+        console.log(err.message);
+      } else {
+        console.log("Unexpected error", err);
+      }
+    }
+
   });
 
   const onSubmit = (data: LeaveRequestData) => {

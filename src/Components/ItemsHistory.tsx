@@ -1,10 +1,11 @@
-"use client"
-
 import { ComputerIcon } from "@/Shared/Asseet/Icons"
 import { formatDateTime } from "@/Shared/utils/dateUtils"
 
+import { IItemRequest } from "@/Interfaces/item.interface"
+import { IPaginatedResponse } from "@/Interfaces/hooks.interface"
+
 interface ItemsHistoryProps {
-  itemsRequest: any
+  itemsRequest: IPaginatedResponse<IItemRequest>
   onToggleModal: () => void
 }
 
@@ -22,7 +23,7 @@ export const ItemsHistory = ({ itemsRequest, onToggleModal }: ItemsHistoryProps)
               </p>
             </div>
           </div>
-          {itemsRequest?.data?.map((item, index) => (
+          {itemsRequest?.data?.map((item, index: number) => (
             <div key={index} className="flex flex-row border-b border-[#676767] pt-3 pb-1 justify-between">
               <div className="w-[232px]">
                 <p className="font-sukhumvit text-[16px] text-white">{item.item.name}</p>

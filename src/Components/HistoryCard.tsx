@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 
-type HistoryCardProps = {
+interface HistoryCardProps {
   title: string;                   
   icon?: ReactNode;                
   onViewAll?: () => void;          
   children: ReactNode;             
-};
+}
 
 const HistoryCard = ({ title, icon, onViewAll, children }: HistoryCardProps) => {
   return (

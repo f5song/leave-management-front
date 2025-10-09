@@ -1,11 +1,11 @@
-"use client"
-
 import { CalendarIcon, ArrowIcon } from "@/Shared/Asseet/Icons"
 import { formatDate } from "@/Shared/utils/dateUtils"
+import { ILeave } from "@/Interfaces/leave.interface"
+import { IPaginatedResponse } from "@/Interfaces/hooks.interface"
 
 interface LeaveHistoryProps {
-  leaveData: any[]
-  onToggleModal: () => void
+  leaveData: IPaginatedResponse<ILeave>
+  onToggleModal?: () => void
 }
 
 export const LeaveHistory = ({ leaveData, onToggleModal }: LeaveHistoryProps) => {
@@ -22,8 +22,8 @@ export const LeaveHistory = ({ leaveData, onToggleModal }: LeaveHistoryProps) =>
               </p>
             </div>
           </div>
-          {leaveData.map((leave, index) => (
-            <div key={index} className="flex flex-row border-b border-[#676767] pt-3 pb-1 justify-between">
+          {leaveData?.data?.map((leave) => (
+            <div key={leave.id} className="flex flex-row border-b border-[#676767] pt-3 pb-1 justify-between">
               <div className="w-[110px]">
                 <p className="font-sukhumvit text-[16px] text-white">{leave.title}</p>
               </div>
@@ -32,10 +32,12 @@ export const LeaveHistory = ({ leaveData, onToggleModal }: LeaveHistoryProps) =>
               </div>
               <div className="flex flex-row items-center w-[168px]">
                 <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">
-                  {formatDate(leave.startDate)}
+                  {leave.startDate ? formatDate(leave.startDate) : "-"}
                 </p>
                 <ArrowIcon className="fill-white" />
-                <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">{formatDate(leave.endDate)}</p>
+                <p className="font-sukhumvit text-[14px] text-[var(--color-font-gray)]">
+                  {leave.endDate ? formatDate(leave.endDate) : "-"}
+                </p>
               </div>
             </div>
           ))}

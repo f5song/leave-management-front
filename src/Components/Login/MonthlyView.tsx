@@ -2,8 +2,14 @@ import { EmptyState } from "./EmptyState";
 import { HolidayCard } from "./HolidayCard";
 import { BirthdayCard } from "./BirthdayCard";
 import { CakeIcon } from "@/Shared/Asseet/Icons";
+import { IHoliday } from "@/Interfaces/holidays.interface";
+import { IBirthDay } from "@/Interfaces/user.interface";
 
-export const MonthlyView = ({ filteredHolidays, filteredBirthdays }) => (
+interface MonthlyViewProps {
+    filteredHolidays: IHoliday[];
+    filteredBirthdays: IBirthDay[];
+}
+export const MonthlyView = ({ filteredHolidays, filteredBirthdays }: MonthlyViewProps) => (
   <>
     {/* Holidays Section */}
     <div className="flex flex-wrap gap-3">

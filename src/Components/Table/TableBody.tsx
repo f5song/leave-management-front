@@ -1,9 +1,9 @@
 import React from "react";
 
-type TableBodyProps = {
+interface TableBodyProps {
   children: React.ReactNode;
   className?: string;
-};
+}
 
 const TableBody = ({ 
   children,

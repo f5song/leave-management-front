@@ -1,8 +1,8 @@
-type TableCellProps = {
+interface TableCellProps {
     children: React.ReactNode;
     className?: string;
     hasTopBorder?: boolean;
-  };
+}
   
   const TableCell = ({ 
     children,

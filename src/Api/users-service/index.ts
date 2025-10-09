@@ -25,7 +25,7 @@ export async function updateAvatar(userId: string, file: File) {
 }
 
 // ✅ แก้ไขฟังก์ชัน updateUser ให้รองรับ FormData
-export async function updateUser(userId: string, updateData: FormData | any) {
+export async function updateUser(userId: string, updateData: FormData) {
   console.log("🔗 API Call - updateUser:", userId);
   
   let headers = {};

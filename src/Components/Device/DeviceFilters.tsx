@@ -1,10 +1,12 @@
 import { FilterValue } from "@/Shared/Constants/status";
 import { STATUS_FILTERS } from "@/Shared/Constants/status";
 
-export const DeviceFilters = ({ filter, onFilterChange }: { 
-    filter: FilterValue; 
+interface DeviceFiltersProps {
+    filter: FilterValue;
     onFilterChange: (filter: FilterValue) => void;
-  }) => (
+}
+
+export const DeviceFilters = ({ filter, onFilterChange }: DeviceFiltersProps) => (
     <div className="flex flex-row bg-[#00000052] rounded-[8px] w-[50%] gap-1 p-1 mb-4">
       {STATUS_FILTERS.map((f) => (
         <button

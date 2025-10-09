@@ -1,10 +1,10 @@
 import { EditIcon } from "@/Shared/Asseet/Icons";
 
-type ProfileHeaderProps = {
+interface ProfileHeaderProps {
   isEditing: boolean;
   toggleEditing: () => void;
   title?: string;
-};
+}
 
 const ProfileHeader = ({ isEditing, toggleEditing, title = "ข้อมูลพนักงาน" }: ProfileHeaderProps) => {
   return (

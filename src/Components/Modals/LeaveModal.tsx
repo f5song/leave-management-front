@@ -7,20 +7,22 @@ import { getLeaves } from "@/Api/leave-service";
 import BaseModal from "@/Components/Modals/BaseModal";
 import { StatusTabSection } from "./StatusTabSection";
 import { PaginationSection } from "./PaginationSection";
-import { usePaginatedQuery } from "@/Hook/usePaginatedQuery";
+import { usePaginatedQuery } from "@/Hooks/usePaginatedQuery";
 import { getStatusLabel } from "@/Shared/utils/status";
 import { formatDate } from "@/Shared/utils/dateUtils";
+import { IItemRequest } from "@/Interfaces/item.interface";
 
-type LeaveModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-};
+interface LeaveModalProps {
+    isOpen: boolean
+    onClose: () => void
+    title: string
+    toggleModal: () => void
+}
 
 const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title }) => {
   const { user } = useAuth();
   const limit = 9;
-  const { data: leaves, pagination, isLoading, isError, currentPage, setCurrentPage, selectedStatus, handleTabClick } =
+  const { data: leaves, pagination, isLoading, currentPage, setCurrentPage, selectedStatus, handleTabClick } =
     usePaginatedQuery({
       queryKeyBase: "leaves",
       fetchFn: (page, limit, status) =>
@@ -55,8 +57,6 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title }) => {
       {/* Scrollable Table */}
       {isLoading ? (
         <div className="flex items-center justify-center h-64">กำลังโหลด...</div>
-      ) : isError ? (
-        <div className="flex items-center justify-center h-64">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>
       ) : leaves.length === 0 ? (
         <div className="flex items-center justify-center h-[50vh] font-sukhumvit">ไม่พบประวัติการลา</div>
       ) : (
@@ -70,10 +70,10 @@ const LeaveModal: React.FC<LeaveModalProps> = ({ isOpen, onClose, title }) => {
               <TableHeadCell className="w-[120px]">วันที่ลา</TableHeadCell>
             </Table.Head>
             <Table.Body>
-              {leaves.map((item: any, index: number) => (
-                <Table.Row key={item.id || index}>
+              {leaves.map((leave: IItemRequest, index: number) => (
+                <Table.Row key={leave.id || index}>
                   <Table.Cell hasTopBorder={index !== 0}>{item.leaveType?.name || "-"}</Table.Cell>
-                  <Table.Cell hasTopBorder={index !== 0}>{item.description || "-"}</Table.Cell>
+                  <Table.Cell hasTopBorder={index !== 0}>{item.reason || "-"}</Table.Cell>
                   <Table.Cell hasTopBorder={index !== 0}>{item.totalDays ?? "-"} </Table.Cell>
                   <Table.Cell hasTopBorder={index !== 0}>
                     <StatusBadge status={getStatusLabel(item.status)} />

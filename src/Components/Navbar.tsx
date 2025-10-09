@@ -9,12 +9,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { useAuth } from '@/Context/AuthContext';
 import { authService } from '@/Api/auth-service';
+import { MenuItem } from '@/Interfaces/nav.interface';
 
-interface NavbarProps {
-    onClick: () => void;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ onClick }) => {
+const Navbar = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -27,7 +24,7 @@ const Navbar: React.FC<NavbarProps> = ({ onClick }) => {
         }
     };
 
-    const menuItems = [
+    const menuItems: MenuItem[] = [
         { label: 'แดชบอร์ด', icon: CalendarIcon, path: '/calendar' },
         { label: 'อุปกรณ์', icon: ComputerIcon, path: '/device' },
         { label: 'ขอพร', icon: StarIcon, path: '/pray' },
@@ -39,12 +36,12 @@ const Navbar: React.FC<NavbarProps> = ({ onClick }) => {
         <div className="flex flex-col md:flex-row md:justify-between md:items-center w-full gap-4">
             {/* Left: เมนู */}
             <div className="flex flex-wrap justify-center md:justify-start gap-2 md:gap-4">
-                {menuItems.map((item, i) => {
+                {menuItems.map((item: MenuItem) => {
                     const isActive = location.pathname.startsWith(item.path);
 
                     return (
                         <div
-                            key={i}
+                            key={item.path}
                             onClick={() => navigate(item.path)}
                             className={clsx(
                                 'group flex flex-col items-center justify-center w-[90px] h-[90px] rounded-[8px] border cursor-pointer px-2 py-2 gap-1 transition-colors shadow-[0_4px_15px_0_rgba(0,0,0,0.2)]',

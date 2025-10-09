@@ -4,8 +4,8 @@ import PrimaryButton from "@/Components/PrimaryButton"
 import SelectField from "@/Components/SelectField"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
-import { useProfileForm } from "@/Hook/useProfileForm"
-import { useProfileData } from "@/Hook/useProfileData"
+import { useProfileForm } from "@/Hooks/useProfileForm"
+import { useProfileData } from "@/Hooks/useProfileData"
 import { useAuth } from "@/Context/AuthContext"
 
 type ProfileFormProps = {

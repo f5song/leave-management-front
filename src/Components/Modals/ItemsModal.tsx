@@ -1,4 +1,3 @@
-import { ArrowIcon } from "@/Shared/Asseet/Icons";
 import Table from "@/Components/Table/Table";
 import TableHeadCell from "../Table/TableHeadCell";
 import StatusBadge from "@/Components/StatusBadge";
@@ -7,23 +6,22 @@ import { StatusTabSection } from "./StatusTabSection";
 import { PaginationSection } from "./PaginationSection";
 import { useAuth } from "@/Context/AuthContext";
 import { getItemsRequest } from "@/Api/items-requests-service";
-import { usePaginatedQuery } from "@/Hook/usePaginatedQuery";
+import { usePaginatedQuery } from "@/Hooks/usePaginatedQuery";
 import { getStatusLabel } from "@/Shared/utils/status";
+import { IItem, IItemRequest } from "@/Interfaces/item.interface";
 
-type ItemsModalProps = {
+interface ItemsModalProps {
   isOpen: boolean;
   onClose: () => void;
   data: { title: string };
-};
+}
 
 const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data }) => {
   const { user } = useAuth();
-
   const {
     data: items,
     pagination,
     isLoading,
-    isError,
     currentPage,
     setCurrentPage,
     selectedStatus,
@@ -57,8 +55,6 @@ const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data }) => {
     >
       {isLoading ? (
         <div className="flex items-center justify-center h-64">กำลังโหลด...</div>
-      ) : isError ? (
-        <div className="flex items-center justify-center h-64">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>
       ) : items.length === 0 ? (
         <div className="flex items-center justify-center h-[50vh] font-sukhumvit">ไม่พบประวัติยืมอุปกรณ์</div>
       ) : (
@@ -71,7 +67,7 @@ const ItemsModal: React.FC<ItemsModalProps> = ({ isOpen, onClose, data }) => {
               <TableHeadCell width="w-[200px]">วันที่ยืม</TableHeadCell>
             </Table.Head>
             <Table.Body>
-              {items.map((item: any, index: number) => (
+              {items.map((item: IItemRequest, index: number) => (
                 <Table.Row key={item.id || index}>
                   <Table.Cell hasTopBorder={index !== 0}>{item.item.name}</Table.Cell>
                   <Table.Cell hasTopBorder={index !== 0}>

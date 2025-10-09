@@ -1,4 +1,10 @@
-export const HolidayCard = ({ holiday }) => {
+import { IHoliday } from "@/Interfaces/holidays.interface";
+
+interface HolidayCardProps {
+    holiday: IHoliday;
+}
+
+export const HolidayCard = ({ holiday }: HolidayCardProps) => {
     const dateObj = new Date(holiday.startDate)
     const dayName = dateObj.toLocaleDateString('th-TH', { weekday: 'long' }).replace(/^วัน/, '')
     const dayNumber = dateObj.toLocaleDateString('th-TH', { day: '2-digit' })

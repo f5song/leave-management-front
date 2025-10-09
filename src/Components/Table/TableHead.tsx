@@ -1,10 +1,10 @@
 import React from "react";
 
-type TableHeadProps = {
+interface TableHeadProps {
   children: React.ReactNode;
   className?: string;
   rowHeight?: string;
-};
+}
 
 const TableHead = ({
   children,

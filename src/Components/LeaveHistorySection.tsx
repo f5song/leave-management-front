@@ -1,9 +1,10 @@
-import { ArrowIcon, CalendarIcon } from "@/Shared/Asseet/Icons";
+import { ArrowIcon } from "@/Shared/Asseet/Icons";
 import HistoryCard from "./HistoryCard";
 import { formatDate } from "@/Shared/utils/dateUtils";
+import { ILeave } from "@/Interfaces/leave.interface";
 
 type LeaveHistorySectionProps = {
-    leaves: any[];
+    leaves: ILeave[];
 };
 
 const leaveTypeLabels: Record<string, string> = {
@@ -19,7 +20,7 @@ export const LeaveHistorySection = ({ leaves }: LeaveHistorySectionProps) => {
                 title="แจ้งลางาน"
             >
                 {leaves.length > 0 ? (
-                    leaves.map((leave: any, index: number) => (
+                    leaves.map((leave: ILeave, index: number) => (
                         <div
                             key={index}
                             className="flex flex-row justify-between border-b border-[#676767] pt-3 pb-1 items-center"

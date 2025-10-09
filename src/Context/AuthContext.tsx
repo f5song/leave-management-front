@@ -2,34 +2,17 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { authService } from '@/Api/auth-service';
 import { useQueryClient } from '@tanstack/react-query';
 import { getUserById } from '@/Api/users-service';
+import { IUser } from '@/Interfaces/user.interface';
+import { IAuthContextType } from '@/Interfaces/auth.interface';
 
-interface User {
-  id: string;
-  googleId: string;
-  firstName: string;
-  lastName: string;
-  nickName: string;
-  avatarUrl: string;
-  birthDate: string;
-  jobTitleId: string;
-  departmentId: string;
-  email: string;
-  role: string; // backend ส่ง role
-  permissions: string[];
+interface AuthProviderProps {
+  children: ReactNode;
 }
 
-interface AuthContextType {
-  user: User | null;
-  login: (user: User) => void;
-  logout: () => void;
-  isLoading: boolean;
-  refreshUser: () => void;
-}
+const AuthContext = createContext<IAuthContextType | undefined>(undefined);
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+export const AuthProvider = ({ children }: AuthProviderProps) => {
+  const [user, setUser] = useState<IUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const queryClient = useQueryClient();
 
@@ -52,7 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     fetchUser();
   }, []);
 
-  const login = (userData: User) => {
+  const login = (userData: IUser) => {
     setUser(userData);
   };
 

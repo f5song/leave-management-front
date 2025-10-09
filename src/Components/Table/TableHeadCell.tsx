@@ -1,13 +1,13 @@
 import React from "react";
 
-export type TableHeadCellProps = {
+interface TableHeadCellProps {
   children: React.ReactNode;
   width?: string;
   height?: string;
   className?: string;
   style?: React.CSSProperties;
   align?: "left" | "center" | "right";
-};
+}
 
 const TableHeadCell = ({
   children,

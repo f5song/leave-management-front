@@ -1,10 +1,9 @@
 import BackgroundGradient from "@/Components/BackgroundGradient";
 import { DeviceFilters } from "@/Components/Device/DeviceFilters";
 import Navbar from "@/Components/Navbar";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { FilterValue } from "@/Shared/Constants/status";
-import { useDeviceData } from "@/Hook/useDeviceData";
+import { useDeviceData } from "@/Hooks/useDeviceData";
 import { useAuth } from "@/Context/AuthContext";
 import { DeviceRequestHistory } from "@/Components/Device/RequestHistoryPanel";
 import Header from "@/Components/Header";
@@ -12,7 +11,6 @@ import ContentCard from "@/Components/ContentCard";
 
 const Device = () => {
   const { user, isLoading } = useAuth();
-  const navigate = useNavigate();
 
   // State
   const [filter, setFilter] = useState<FilterValue>("ALL");
@@ -20,17 +18,17 @@ const Device = () => {
   const itemsPerPage = 9;
 
   // Fetch data
-  const { itemsStock, isLoadingStock } = useDeviceData(
+  const { itemsStock, isLoadingStock } = useDeviceData({
     user,
     isLoading,
     currentPage,
     itemsPerPage,
-    filter !== 'ALL' ? filter : undefined
-  );
+    filter: filter !== 'ALL' ? filter : undefined,
+  });
 
   return (
     <div className="flex flex-col min-h-screen bg-quaternary text-white px-4 md:px-8 py-8 relative">
-      <Navbar onClick={() => navigate("/home")} />
+      <Navbar />
       <BackgroundGradient />
 
       <div className="flex flex-col pt-5">
@@ -44,12 +42,12 @@ const Device = () => {
             />
 
             <DeviceRequestHistory
-              itemsStock={itemsStock?.data ?? []}
-              pagination={itemsStock?.pagination ?? { totalPages: 1, totalItems: 0, page: currentPage, limit: itemsPerPage }}
+              itemsStockData={itemsStock}
               currentPage={currentPage}
-              onPageChange={setCurrentPage}
+              onPageChange={(page) => setCurrentPage(page)} // wrap ให้ตรง type
               isLoading={isLoadingStock}
             />
+
           </ContentCard>
         </div>
       </div>

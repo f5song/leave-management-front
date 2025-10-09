@@ -5,12 +5,12 @@ interface BaseModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  children: ReactNode; // scrollable content (table)
-  statusTab?: ReactNode; // tab ข้างบน
-  footer?: ReactNode;  // ปุ่ม, pagination ฯลฯ
+  children: ReactNode; 
+  statusTab?: ReactNode; 
+  footer?: ReactNode;  
   width?: string;
   maxWidth?: string;
-  height?: string; // ความสูง fixed ของ modal
+  height?: string; 
 }
 
 const BaseModal: React.FC<BaseModalProps> = ({
@@ -22,7 +22,7 @@ const BaseModal: React.FC<BaseModalProps> = ({
   footer,
   width = "w-[75vw]",
   maxWidth = "max-w-[75vw]",
-  height = "h-[80vh]", // กำหนดความสูง fixed
+  height = "h-[80vh]",
 }) => {
   if (!isOpen) return null;
 

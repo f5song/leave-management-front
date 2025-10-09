@@ -1,17 +1,9 @@
-import { ReactNode } from "react";
-
 interface ModalFooterProps {
-  children: ReactNode;
-  onClose?: () => void;
-  showCloseButton?: boolean;
-  closeButtonText?: string;
+  children: React.ReactNode;
   className?: string;
 }
-
 const ModalFooter: React.FC<ModalFooterProps> = ({
   children,
-  onClose,
-  showCloseButton = true,
   className = ""
 }) => {
   return (
@@ -19,14 +11,7 @@ const ModalFooter: React.FC<ModalFooterProps> = ({
       <div className="flex items-center">
         {children}
       </div>
-      
-      {showCloseButton && onClose && (
-        <button
-          className="text-[var(--color-primary)] hover:opacity-80 font-bold font-sukhumvit transition-opacity"
-          onClick={onClose}
-        >
-        </button>
-      )}
+
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React from "react";
 
-type Props = {
+interface StatusBadgeProps { 
   status: string;
 };
 
@@ -19,7 +19,7 @@ const getStatusClass = (status: string): string => {
   }
 };
 
-const StatusBadge: React.FC<Props> = ({ status }) => {
+const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   return (
     <div className="flex items-center justify-center h-[26px] min-w-[100px]">
       <span

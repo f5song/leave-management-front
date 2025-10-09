@@ -1,11 +1,11 @@
 import { ArrowLeftIcon, ArrowRightIcon } from "@/Shared/Asseet/Icons";
 
-type PaginationSectionProps = {
+interface PaginationSectionProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
   itemPerPage?: number;
-};
+}
 
 export const PaginationSection: React.FC<PaginationSectionProps> = ({
   currentPage,
@@ -31,9 +31,8 @@ export const PaginationSection: React.FC<PaginationSectionProps> = ({
         <button
           key={page}
           onClick={() => onPageChange(page)}
-          className={`px-3 py-1 rounded-[4px] text-[16px] font-sukhumvit font-semibold ${
-            currentPage === page ? "border border-white text-white" : "text-[var(--color-gray)]"
-          }`}
+          className={`px-3 py-1 rounded-[4px] text-[16px] font-sukhumvit font-semibold ${currentPage === page ? "border border-white text-white" : "text-[var(--color-gray)]"
+            }`}
         >
           {page}
         </button>

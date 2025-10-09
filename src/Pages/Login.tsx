@@ -1,10 +1,9 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/Context/AuthContext"
-import { useLoginData } from "@/Hook/useLoginData"
+import { useLoginData } from "@/Hooks/useLoginData"
 import { useMutation } from "@tanstack/react-query"
 import { authService } from "@/Api/auth-service"
-import { toast } from "@/Components/UseToast"
 import { useGoogleLogin } from "@react-oauth/google"
 import { CalendarIcon, FunchLogo, GoogleIcon } from "@/Shared/Asseet/Icons"
 import { MonthlyView } from "@/Components/Login/MonthlyView"
@@ -29,11 +28,7 @@ const Login = () => {
       }
     },
     onError: () => {
-      toast({
-        title: 'อัปเดตข้อมูลไม่สำเร็จ',
-        description: 'อัปเดตข้อมูลไม่สำเร็จ',
-        variant: 'destructive',
-      })
+      console.log('error');
     },
   })
 
@@ -44,11 +39,7 @@ const Login = () => {
       await googleLoginMutation.mutateAsync(codeResponse.code)
     },
     onError: () => {
-      toast({
-        title: 'อัปเดตข้อมูลไม่สำเร็จ',
-        description: 'อัปเดตข้อมูลไม่สำเร็จ',
-        variant: 'destructive',
-      })
+      console.log('error');
     },
   })
 

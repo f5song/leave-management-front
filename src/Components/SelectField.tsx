@@ -1,11 +1,11 @@
 import React from 'react';
 
-type Option = {
+interface Option  {
   value: string;
   label: string;
 };
 
-type SelectFieldProps = {
+interface SelectFieldProps  {
   id?: string;
   label: string;
   name: string;
@@ -14,18 +14,16 @@ type SelectFieldProps = {
   required?: boolean;
   disabled?: boolean;
   onChange: (value: string) => void;
-  placeholder?: string; // เพิ่มตรงนี้
+  placeholder?: string;
   className?: string;
 };
 
 const SelectField: React.FC<SelectFieldProps> = ({
   className,
   id,
-  label,
   name,
   value,
   options,
-  required = false,
   disabled = false,
   onChange,
   placeholder = 'กรุณาเลือก',

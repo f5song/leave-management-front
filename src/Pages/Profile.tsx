@@ -2,10 +2,6 @@ import BackgroundGradient from "@/Components/BackgroundGradient";
 import Navbar from "@/Components/Navbar";
 import LeaveModal from "@/Components/Modals/LeaveModal";
 import ItemsModal from "@/Components/Modals/ItemsModal";
-
-import { useNavigate } from "react-router-dom";
-
-
 import ProfileHeader from "@/Components/Profile/ProfileHeader";
 import { ProfileForm } from "@/Components/Profile/ProfileForm";
 import LeaveBalance from "@/Components/LeaveBalance";
@@ -16,8 +12,6 @@ import Header from "@/Components/Header";
 import ContentCard from "@/Components/ContentCard";
 
 const Profile = () => {
-  const navigate = useNavigate();
-
   const [isEditing, setIsEditing] = useState(false);
   const toggleEditing = () => setIsEditing(prev => !prev);
 
@@ -28,9 +22,9 @@ const Profile = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-quaternary text-white px-4 md:px-8 py-8 relative">
-      <LeaveModal isOpen={isLeaveModalOpen} onClose={() => setLeaveModalOpen(false)} title="ประวัติการลา" />
-      <ItemsModal isOpen={isItemsModalOpen} onClose={() => setItemsModalOpen(false)} data={{ title: "ประวัติยืมอุปกรณ์" }} toggleModal={toggleItemsModal} />
-      <Navbar onClick={() => navigate('/home')} />
+      <LeaveModal isOpen={isLeaveModalOpen} onClose={() => setLeaveModalOpen(false)} title="ประวัติการลา" toggleModal={toggleLeaveModal} />
+      <ItemsModal isOpen={isItemsModalOpen} onClose={() => setItemsModalOpen(false)} data={{ title: "ประวัติยืมอุปกรณ์" }} />
+      <Navbar/>
       <BackgroundGradient />
 
       <div className="flex flex-col pt-5">
